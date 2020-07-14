@@ -3,4 +3,4 @@ node_modules
 babel.config.js
 tsconfig.json
 yarn.lock
-./src/tests
+src/tests/*
