@@ -1,0 +1,36 @@
+{
+  "name": "json-schema-to-ts",
+  "version": "0.1.0",
+  "description": "Infer typescript types from your JSON schemas!",
+  "main": "index.ts",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.10.4",
+    "@babel/preset-env": "^7.10.4",
+    "@babel/preset-typescript": "^7.10.4",
+    "@types/jest": "^26.0.4",
+    "ajv": "^6.12.3",
+    "babel-jest": "^26.1.0",
+    "jest": "^26.1.0",
+    "typescript": "^3.9.6"
+  },
+  "author": "Thomas Aribart",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ThomasAribart/json-schema-to-ts.git"
+  },
+  "keywords": [
+    "json",
+    "schema",
+    "typescript",
+    "type",
+    "ts"
+  ],
+  "bugs": {
+    "url": "https://github.com/ThomasAribart/json-schema-to-ts/issues"
+  },
+  "homepage": "https://github.com/ThomasAribart/json-schema-to-ts#readme"
+}
