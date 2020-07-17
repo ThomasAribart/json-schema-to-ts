@@ -49,6 +49,26 @@ const dogSchema = {
 type Dog = FromSchema<typeof dogSchema>; // => Will infer the same type as above
 ```
 
+Schemas can even be nested, as long as you don't forget the `as const` statement:
+
+```typescript
+const catSchema = {
+  type: "object",
+  properties: {
+    name: { type: "string" },
+    age: { type: "integer" },
+    favoriteThings: { enum: ["playing", "sleeping", "sleepingMore"] },
+  },
+  required: ["name", "age"],
+} as const;
+
+const petSchema = {
+  anyOf: [dogSchema, catSchema],
+} as const;
+
+type Pet = FromSchema<typeof petSchema>; // => Will work 🙌
+```
+
 **Note**: The `as const` statement is used so that TypeScript takes the schema definition to the word (e.g. _true_ is interpreted as the _true_ constant and not as _boolean_). It is pure TypeScript and has zero impact on the compiled code.
 
 # Docs
@@ -157,25 +177,3 @@ type Enum = FromSchema<typeof enumSchema>; // => "foo" | "bar"
 ```
 
 If used in concurrency with `const`, the `enum` keyword will be omitted.
-
-### Nested schemas
-
-Nested schemas will work fine as long as you don't forget the `as const` statement!
-
-```typescript
-const childSchema = {
-  type: "object",
-  properties: {
-    foo: { type: "string" },
-    bar: { type: "integer" },
-  },
-  required: ["foo", "bar"],
-} as const;
-
-const parentSchema = {
-  type: "array",
-  items: childSchema,
-} as const;
-
-type Parent = FromSchema<typeof parentSchema>; // => Will work 🙌
-```
