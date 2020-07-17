@@ -63,16 +63,8 @@ export type ArraySchema = MakeSchema<{
   additionalItems?: boolean;
 }>;
 
-export type ConstSchema = MakeSchema<{
-  type?:
-    | "null"
-    | "boolean"
-    | "string"
-    | "integer"
-    | "number"
-    | "object"
-    | "array";
-  const: any;
+export type AnyOfSchema = MakeSchema<{
+  anyOf: any[];
 }>;
 
 export type EnumSchema = MakeSchema<{
@@ -87,6 +79,18 @@ export type EnumSchema = MakeSchema<{
   enum: any[];
 }>;
 
+export type ConstSchema = MakeSchema<{
+  type?:
+    | "null"
+    | "boolean"
+    | "string"
+    | "integer"
+    | "number"
+    | "object"
+    | "array";
+  const: any;
+}>;
+
 export type Schema =
   | boolean
   | string
@@ -97,5 +101,6 @@ export type Schema =
   | NumberSchema
   | ObjectSchema
   | ArraySchema
-  | ConstSchema
-  | EnumSchema;
+  | AnyOfSchema
+  | EnumSchema
+  | ConstSchema;

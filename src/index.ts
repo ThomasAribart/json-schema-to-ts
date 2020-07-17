@@ -1,3 +1,4 @@
+import { FromAnyOfSchema } from "./anyOf";
 import { FromEnumSchema } from "./enum";
 import { FromConstSchema } from "./const";
 import { FromObjectSchema } from "./object";
@@ -11,6 +12,7 @@ type FromReadonlySchema<S> = FromWriteableSchema<Writeable<S>>;
 export type FromWriteableSchema<S> = {
   any: any;
   never: never;
+  anyOf: FromAnyOfSchema<S>;
   enum: FromEnumSchema<S>;
   const: FromConstSchema<S>;
   null: null;
@@ -27,6 +29,8 @@ type InferSchemaType<S> = S extends true | string
   ? "any"
   : S extends false
   ? "never"
+  : "anyOf" extends keyof S
+  ? "anyOf"
   : "enum" extends keyof S
   ? "enum"
   : "const" extends keyof S
