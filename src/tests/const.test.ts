@@ -358,7 +358,25 @@ describe("array const", () => {
         ["tomatoes", "cheese"],
       ],
     } as const;
+    // Array extends object so error will not pop up here !
+    // @TODO: Check if it is expected behavior, and change if it's not
 
     expectInstances.allExcept([]).toBeInvalidAgainst(invalidSchema);
+  });
+
+  describe("invalid schema", () => {
+    it("should display TypeError if const and type don't match", () => {
+      const invalidSchema = {
+        type: "object",
+        const: "foo",
+      };
+
+      type Error = FromSchema<typeof invalidSchema>;
+      let assertError: DoesBothExtend<
+        Error,
+        "TypeError: value of const doesn't extend provided type"
+      >;
+      assertError = true;
+    });
   });
 });

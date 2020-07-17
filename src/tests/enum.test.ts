@@ -158,3 +158,40 @@ it("should only validate listed recipes (tuple enum)", () => {
     .allExcept(["arrayTuple1", "arrayTuple2"])
     .toBeInvalidAgainst(recipeEnumSchema);
 });
+
+it("should display an TypeError message if enum is not an array", () => {
+  const badSchema = {
+    enum: { not: "an array" },
+  } as const;
+
+  type Error = FromSchema<typeof badSchema>;
+  let assertError: DoesBothExtend<
+    Error,
+    "TypeError: value of enum should be an array"
+  >;
+  assertError = true;
+});
+
+it("should work on TS enums", () => {
+  enum Food {
+    Pizza = "Pizza",
+    Tacos = "Tacos",
+    Fries = "Fries",
+  }
+
+  const pizzaTacosSchema = {
+    enum: [Food.Pizza, Food.Tacos],
+  } as const;
+
+  type PizzaTacos = FromSchema<typeof pizzaTacosSchema>;
+  let assertPizzaTacos: DoesBothExtend<PizzaTacos, Food.Pizza | Food.Tacos>;
+  assertPizzaTacos = true;
+
+  const foodSchema = {
+    enum: Object.values(Food),
+  };
+
+  type FoodType = FromSchema<typeof foodSchema>;
+  let assertFood: DoesBothExtend<FoodType, Food>;
+  assertFood = true;
+});
