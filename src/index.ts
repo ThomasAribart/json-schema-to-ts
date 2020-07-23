@@ -1,6 +1,7 @@
 import { FromAnyOfSchema } from "./anyOf";
 import { FromEnumSchema } from "./enum";
 import { FromConstSchema } from "./const";
+import { FromMultipleSchema } from "./multiple";
 import { FromObjectSchema } from "./object";
 import { FromArraySchema } from "./array";
 import { Writeable } from "./utils";
@@ -15,14 +16,15 @@ export type FromWriteableSchema<S> = {
   anyOf: FromAnyOfSchema<S>;
   enum: FromEnumSchema<S>;
   const: FromConstSchema<S>;
+  multiple: FromMultipleSchema<S>;
   null: null;
   boolean: boolean;
-  string: string;
   number: number;
+  string: string;
   object: FromObjectSchema<S>;
   array: FromArraySchema<S>;
   structureError: "TypeError: Invalid schema structure";
-  typeError: 'TypeError: type value should be "null", "boolean", "integer", "number", "string", "object" or "array"';
+  typeError: "TypeError: Invalid type value. Did you forget to use the 'as const' directive?";
 }[InferSchemaType<S>];
 
 type InferSchemaType<S> = S extends true | string
@@ -36,7 +38,9 @@ type InferSchemaType<S> = S extends true | string
   : "const" extends keyof S
   ? "const"
   : "type" extends keyof S
-  ? S["type"] extends "null"
+  ? S["type"] extends any[]
+    ? "multiple"
+    : S["type"] extends "null"
     ? "null"
     : S["type"] extends "boolean"
     ? "boolean"
