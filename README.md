@@ -66,7 +66,8 @@ const petSchema = {
   anyOf: [dogSchema, catSchema],
 } as const;
 
-type Pet = FromSchema<typeof petSchema>; // => Will work 🙌
+type Pet = FromSchema<typeof petSchema>;
+// => Will work 🙌
 ```
 
 **Note**: The `as const` statement is used so that TypeScript takes the schema definition to the word (e.g. _true_ is interpreted as the _true_ constant and not as _boolean_). It is pure TypeScript and has zero impact on the compiled code.
@@ -92,7 +93,8 @@ const litteralSchema = {
   type: "null", // "boolean", "string", "integer", "number"
 } as const;
 
-type Litteral = FromSchema<typeof litteralSchema>; // => null, boolean, string or number
+type Litteral = FromSchema<typeof litteralSchema>;
+// => null, boolean, string or number
 ```
 
 ### Objects
@@ -107,7 +109,8 @@ const objectSchema = {
   required: ["foo"],
 } as const;
 
-type Object = FromSchema<typeof objectSchema>; // => { foo: string, bar?: number }
+type Object = FromSchema<typeof objectSchema>;
+// => { foo: string, bar?: number }
 ```
 
 ### Arrays
@@ -118,7 +121,8 @@ const arraySchema = {
   items: { type: "string" },
 } as const;
 
-type Array = FromSchema<typeof arraySchema>; // => string[]
+type Array = FromSchema<typeof arraySchema>;
+// => string[]
 ```
 
 ### Tuples
@@ -129,7 +133,8 @@ const tupleSchema = {
   items: [{ type: "boolean" }, { type: "string" }],
 } as const;
 
-type Tuple = FromSchema<typeof tupleSchema>; // => [] | [boolean] | [boolean, string] | [boolean, string, ...any[]]
+type Tuple = FromSchema<typeof tupleSchema>;
+// => [] | [boolean] | [boolean, string] | [boolean, string, ...any[]]
 ```
 
 `FromSchema` supports the `additionalItems` keyword.
@@ -141,8 +146,37 @@ const tupleSchema = {
   additionalItems: false,
 } as const;
 
-type Tuple = FromSchema<typeof tupleSchema>; // => [] | [boolean] | [boolean, string]
-const tupleInstance: Tuple = [true, "string", 42]; // => Will error ❌
+type Tuple = FromSchema<typeof tupleSchema>;
+// => [] | [boolean] | [boolean, string]
+```
+
+### Multiple Types
+
+```typescript
+const multipleTypesSchema = {
+  type: ["null", "string"],
+} as const;
+
+type Tuple = FromSchema<typeof multipleTypesSchema>;
+// => null | string
+```
+
+Other properties like `required` or `additionalItems` will also work 🙌
+
+```typescript
+const multipleTypesSchema = {
+  type: ["array", "object"],
+  items: [{ type: "string" }],
+  additionalItems: false,
+  properties: {
+    name: { type: "string" },
+    age: { type: "number" },
+  },
+  required: ["name"],
+} as const;
+
+type Tuple = FromSchema<typeof multipleTypesSchema>;
+// => [] | [string] | { name: string, age?: number }
 ```
 
 ### Const
@@ -152,7 +186,8 @@ const fooSchema = {
   const: "foo",
 } as const;
 
-type Foo = FromSchema<typeof fooSchema>; // => "foo"
+type Foo = FromSchema<typeof fooSchema>;
+// => "foo"
 ```
 
 ### Enums
@@ -162,7 +197,8 @@ const enumSchema = {
   enum: [true, 42, { foo: "bar" }],
 } as const;
 
-type Enum = FromSchema<typeof enumSchema>; // => true | 42 | { foo: "bar"}
+type Enum = FromSchema<typeof enumSchema>;
+// => true | 42 | { foo: "bar"}
 ```
 
 `enum` can be used concurrently with `type`.
@@ -173,7 +209,23 @@ const enumSchema = {
   enum: ["foo", "bar", { foo: "bar" }],
 } as const;
 
-type Enum = FromSchema<typeof enumSchema>; // => "foo" | "bar"
+type Enum = FromSchema<typeof enumSchema>;
+// => "foo" | "bar"
 ```
 
-If used in concurrency with `const`, the `enum` keyword will be omitted.
+### AnyOf
+
+```typescript
+const anyOfSchema = {
+  anyOf: [
+    { type: "string" },
+    {
+      type: "array",
+      items: { type: "string" },
+    },
+  ],
+} as const;
+
+type AnyOf = FromSchema<typeof fooSchema>;
+// => string | string[]
+```
