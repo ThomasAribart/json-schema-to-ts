@@ -1,11 +1,11 @@
 import { FromWriteableSchema } from "./index";
 import { ObjectSchema, Schema } from "./schema";
-import { Merge } from "./utils";
+import { MergeRight } from "./utils";
 
 export type FromObjectSchema<S> = S extends ObjectSchema
   ? "properties" extends keyof S
     ? number extends keyof S["required"]
-      ? Merge<
+      ? MergeRight<
           {
             [key in Exclude<
               keyof S["properties"],

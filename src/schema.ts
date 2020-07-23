@@ -1,4 +1,4 @@
-import { Merge } from "./utils";
+import { MergeRight } from "./utils";
 
 type CommonProps = {
   title?: string;
@@ -10,7 +10,7 @@ type CommonProps = {
   examples?: any[];
 };
 
-type MakeSchema<SpecificProps = {}> = Merge<CommonProps, SpecificProps>;
+type MakeSchema<SpecificProps = {}> = MergeRight<CommonProps, SpecificProps>;
 
 export type NullSchema = MakeSchema<{
   type: "null";
