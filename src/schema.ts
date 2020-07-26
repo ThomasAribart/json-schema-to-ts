@@ -25,6 +25,7 @@ export type StringSchema = MakeSchema<{
   maxLength?: number;
   minLength?: number;
   pattern?: string;
+  format?: string;
 }>;
 
 export type IntegerSchema = MakeSchema<{
@@ -49,6 +50,7 @@ export type ObjectSchema = MakeSchema<{
   type: "object";
   properties?: { [propertyName: string]: Schema };
   required?: any[];
+  additionalProperties?: boolean | object;
   dependentRequired?: { [property: string]: string[] };
   maxProperties?: number;
   minProperties?: number;
