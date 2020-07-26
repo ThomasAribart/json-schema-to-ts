@@ -174,7 +174,7 @@ const typedValuesSchema = {
   },
 } as const;
 
-type Object = FromSchema<typeof patternSchema>;
+type Object = FromSchema<typeof typedValuesSchema>;
 // => { [key: string]: boolean }
 
 const patternSchema = {
