@@ -113,6 +113,22 @@ type Object = FromSchema<typeof objectSchema>;
 // => { foo: string, bar?: number }
 ```
 
+`FromSchema` partially supports the use of the `additionalProperties` keyword:
+
+- Contrary to the JSON Schema specification, it is considered `false` by default for clearer typings. Set its value to `true` to signal that additional properties can be used:
+
+```typescript
+const additionalPropertiesSchema = {
+  ...objectSchema,
+  additionalProperties: true,
+} as const;
+
+type Object = FromSchema<typeof additionalPropertiesSchema>;
+// => { [x: string]: any; foo: string; bar?: number }
+```
+
+- The typing of additional properties cannot yet be implemented due to [TypeScript limitations](https://github.com/Microsoft/TypeScript/issues/7599) (long story short: `Exclude<string, "foo"> => string`): It will work but the additional properties will still be typed as `any` to avoid conflicts with base properties.
+
 ### Arrays
 
 ```typescript

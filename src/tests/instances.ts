@@ -43,6 +43,17 @@ export const object5 = {
     { title: "Address", description: "42, bark street" },
   ],
 };
+export const object6 = {
+  number: 13,
+  streetName: "Champs Elysées",
+  streetType: "Avenue" as const,
+};
+export const object7 = {
+  number: 13,
+  streetName: "Champs Elysées",
+  streetType: "Avenue" as const,
+  direction: "NW",
+} as const;
 
 export const arrayString1: ["apples"] = ["apples"];
 export const arrayString2: ["tomatoes"] = ["tomatoes"];

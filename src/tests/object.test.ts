@@ -2,7 +2,6 @@ import Ajv from "ajv";
 
 import { FromSchema } from "../index";
 import { DoesBothExtend } from "../utils";
-import { Schema } from "../schema";
 
 import * as instances from "./instances";
 import { expectInstances } from "./helpers";
@@ -23,15 +22,31 @@ describe("object schema", () => {
     expect(ajv.validate(petInstance, petSchema)).toBe(true);
 
     expectInstances
-      .list(["object1", "object2", "object3", "object4", "object5"])
+      .list([
+        "object1",
+        "object2",
+        "object3",
+        "object4",
+        "object5",
+        "object6",
+        "object7",
+      ])
       .toBeValidAgainst(petSchema);
     expectInstances
-      .allExcept(["object1", "object2", "object3", "object4", "object5"])
+      .allExcept([
+        "object1",
+        "object2",
+        "object3",
+        "object4",
+        "object5",
+        "object6",
+        "object7",
+      ])
       .toBeInvalidAgainst(petSchema);
   });
 
   it("without required", () => {
-    const catSchema: Schema = {
+    const catSchema = {
       type: "object",
       properties: { age: { type: "number" }, name: { type: "string" } },
     } as const;
@@ -52,7 +67,15 @@ describe("object schema", () => {
     expect(ajv.validate(catInstance, catSchema)).toBe(true);
 
     expectInstances
-      .allExcept(["object1", "object2", "object3", "object4", "object5"])
+      .allExcept([
+        "object1",
+        "object2",
+        "object3",
+        "object4",
+        "object5",
+        "object6",
+        "object7",
+      ])
       .toBeInvalidAgainst(catSchema);
   });
 
@@ -110,5 +133,79 @@ describe("object schema", () => {
     expectInstances
       .allExcept(["object3", "object4", "object5"])
       .toBeInvalidAgainst(dogSchema);
+  });
+
+  it("with additional properties", () => {
+    const addressSchema = {
+      type: "object",
+      properties: {
+        number: { type: "number" },
+        streetName: { type: "string" },
+        streetType: { type: "string", enum: ["Street", "Avenue", "Boulevard"] },
+      },
+      required: ["number", "streetName", "streetType"],
+      additionalProperties: true,
+    } as const;
+
+    type Address = FromSchema<typeof addressSchema>;
+
+    let assertAddress: DoesBothExtend<
+      Address,
+      {
+        [x: string]: any;
+        number: number;
+        streetName: string;
+        streetType: "Street" | "Avenue" | "Boulevard";
+      }
+    >;
+    assertAddress = true;
+
+    let addressInstance: Address;
+    addressInstance = instances.object6;
+    expect(ajv.validate(addressSchema, addressInstance)).toBe(true);
+
+    addressInstance.direction = instances.object7.direction;
+    expect(ajv.validate(addressSchema, addressInstance)).toBe(true);
+
+    expectInstances
+      .allExcept(["object6", "object7"])
+      .toBeInvalidAgainst(addressSchema);
+  });
+
+  it("with typed additional properties", () => {
+    const addressSchema = {
+      type: "object",
+      properties: {
+        number: { type: "number" },
+        streetName: { type: "string" },
+        streetType: { type: "string", enum: ["Street", "Avenue", "Boulevard"] },
+      },
+      required: ["number", "streetName", "streetType"],
+      additionalProperties: { type: "string" },
+    } as const;
+
+    type Address = FromSchema<typeof addressSchema>;
+
+    let assertAddress: DoesBothExtend<
+      Address,
+      {
+        [x: string]: any;
+        number: number;
+        streetName: string;
+        streetType: "Street" | "Avenue" | "Boulevard";
+      }
+    >;
+    assertAddress = true;
+
+    let addressInstance: Address;
+    addressInstance = instances.object6;
+    expect(ajv.validate(addressSchema, addressInstance)).toBe(true);
+
+    addressInstance.direction = instances.object7.direction;
+    expect(ajv.validate(addressSchema, addressInstance)).toBe(true);
+
+    expectInstances
+      .allExcept(["object6", "object7"])
+      .toBeInvalidAgainst(addressSchema);
   });
 });
