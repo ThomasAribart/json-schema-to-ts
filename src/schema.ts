@@ -50,10 +50,12 @@ export type ObjectSchema = MakeSchema<{
   type: "object";
   properties?: { [propertyName: string]: Schema };
   required?: any[];
-  additionalProperties?: boolean | object;
-  dependentRequired?: { [property: string]: string[] };
   maxProperties?: number;
   minProperties?: number;
+  additionalProperties?: boolean | Schema;
+  propertyNames?: StringSchema;
+  patternProperties?: { [pattern: string]: Schema };
+  dependencies?: { [property: string]: string[] | object };
 }>;
 
 export type ArraySchema = MakeSchema<{
