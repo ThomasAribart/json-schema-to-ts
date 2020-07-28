@@ -96,24 +96,24 @@ describe("array schema", () => {
   });
 
   describe("tuple array", () => {
-    it("allow additional items", () => {
-      const recipeSchema = {
-        type: "array",
-        items: [
-          { type: "number" },
-          { type: "string" },
-          {
-            type: "object",
-            properties: { description: { type: "string" } },
-            required: ["description"],
-          },
-          {
-            type: "array",
-            items: { type: "string" },
-          },
-        ],
-      } as const;
+    const recipeSchema = {
+      type: "array",
+      items: [
+        { type: "number" },
+        { type: "string" },
+        {
+          type: "object",
+          properties: { description: { type: "string" } },
+          required: ["description"],
+        },
+        {
+          type: "array",
+          items: { type: "string" },
+        },
+      ],
+    } as const;
 
+    it("allow additional items", () => {
       type Recipe = FromSchema<typeof recipeSchema>;
 
       let assertTupleArray: DoesBothExtend<
@@ -151,26 +151,58 @@ describe("array schema", () => {
         .toBeInvalidAgainst(recipeSchema);
     });
 
+    it("allow additional items of given type", () => {
+      const recipeSchema2 = {
+        ...recipeSchema,
+        additionalItems: {
+          type: "boolean",
+        },
+      } as const;
+
+      type Recipe = FromSchema<typeof recipeSchema2>;
+
+      let assertTupleArray: DoesBothExtend<
+        Recipe,
+        | []
+        | [number]
+        | [number, string]
+        | [number, string, { description: string }]
+        | [number, string, { description: string }, string[]]
+        | [number, string, { description: string }, string[], ...boolean[]]
+      >;
+      assertTupleArray = true;
+
+      let recipeInstance: Recipe;
+      recipeInstance = [];
+      expect(ajv.validate(recipeSchema, recipeInstance)).toBe(true);
+
+      recipeInstance = [0];
+      expect(ajv.validate(recipeSchema, recipeInstance)).toBe(true);
+
+      recipeInstance = [0, "pasta"];
+      expect(ajv.validate(recipeSchema, recipeInstance)).toBe(true);
+
+      recipeInstance = instances.arrayTuple1;
+      expect(ajv.validate(recipeSchema, recipeInstance)).toBe(true);
+
+      recipeInstance = instances.arrayTuple2;
+      expect(ajv.validate(recipeSchema, recipeInstance)).toBe(true);
+
+      recipeInstance = instances.arrayTuple3;
+      expect(ajv.validate(recipeSchema, recipeInstance)).toBe(true);
+
+      expectInstances
+        .allExcept(["arrayTuple1", "arrayTuple2", "arrayTuple3"])
+        .toBeInvalidAgainst(recipeSchema);
+    });
+
     it("disallow additional items", () => {
-      const recipeSchema = {
-        type: "array",
-        items: [
-          { type: "number" },
-          { type: "string" },
-          {
-            type: "object",
-            properties: { description: { type: "string" } },
-            required: ["description"],
-          },
-          {
-            type: "array",
-            items: { type: "string" },
-          },
-        ],
+      const recipeSchema3 = {
+        ...recipeSchema,
         additionalItems: false,
       } as const;
 
-      type Recipe = FromSchema<typeof recipeSchema>;
+      type Recipe = FromSchema<typeof recipeSchema3>;
 
       let assertTupleArray: DoesBothExtend<
         Recipe,
@@ -199,7 +231,7 @@ describe("array schema", () => {
       expect(ajv.validate(recipeSchema, recipeInstance)).toBe(true);
 
       expectInstances
-        .allExcept(["arrayTuple1", "arrayTuple2"])
+        .allExcept(["arrayTuple1", "arrayTuple2", "arrayTuple3"])
         .toBeInvalidAgainst(recipeSchema);
     });
   });

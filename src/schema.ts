@@ -61,10 +61,11 @@ export type ObjectSchema = MakeSchema<{
 export type ArraySchema = MakeSchema<{
   type: "array";
   items?: Schema | any[];
+  contains?: Schema;
+  additionalItems?: boolean | Schema;
   maxItems?: number;
   minItems?: number;
   uniqueItems?: boolean;
-  additionalItems?: boolean;
 }>;
 
 export type AnyOfSchema = MakeSchema<{
