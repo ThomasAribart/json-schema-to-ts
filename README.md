@@ -97,43 +97,6 @@ type Litteral = FromSchema<typeof litteralSchema>;
 // => null, boolean, string or number
 ```
 
-### Arrays
-
-```typescript
-const arraySchema = {
-  type: "array",
-  items: { type: "string" },
-} as const;
-
-type Array = FromSchema<typeof arraySchema>;
-// => string[]
-```
-
-### Tuples
-
-```typescript
-const tupleSchema = {
-  type: "array",
-  items: [{ type: "boolean" }, { type: "string" }],
-} as const;
-
-type Tuple = FromSchema<typeof tupleSchema>;
-// => [] | [boolean] | [boolean, string] | [boolean, string, ...any[]]
-```
-
-`FromSchema` supports the `additionalItems` keyword.
-
-```typescript
-const tupleSchema = {
-  type: "array",
-  items: [{ type: "boolean" }, { type: "string" }],
-  additionalItems: false,
-} as const;
-
-type Tuple = FromSchema<typeof tupleSchema>;
-// => [] | [boolean] | [boolean, string]
-```
-
 ### Objects
 
 ```typescript
@@ -190,6 +153,72 @@ type Object = FromSchema<typeof patternSchema>;
 ```
 
 - However, due to [TypeScript limitations](https://github.com/Microsoft/TypeScript/issues/7599), when used in combination with the `properties` keyword, extra properties will always be typed as `any` to avoid conflicts with base properties.
+
+### Arrays
+
+```typescript
+const arraySchema = {
+  type: "array",
+  items: { type: "string" },
+} as const;
+
+type Array = FromSchema<typeof arraySchema>;
+// => string[]
+```
+
+### Tuples
+
+```typescript
+const tupleSchema = {
+  type: "array",
+  items: [{ type: "boolean" }, { type: "string" }],
+} as const;
+
+type Tuple = FromSchema<typeof tupleSchema>;
+// => [] | [boolean] | [boolean, string] | [boolean, string, ...any[]]
+```
+
+`FromSchema` supports the `additionalItems` keyword:
+
+- You can deny additional items:
+
+```typescript
+const tupleSchema = {
+  type: "array",
+  items: [{ type: "boolean" }, { type: "string" }],
+  additionalItems: false,
+} as const;
+
+type Tuple = FromSchema<typeof tupleSchema>;
+// => [] | [boolean] | [boolean, string]
+```
+
+- Or specify a type for additional items:
+
+```typescript
+const tupleSchema = {
+  type: "array",
+  items: [{ type: "boolean" }, { type: "string" }],
+  additionalItems: { type: "number" },
+} as const;
+
+type Tuple = FromSchema<typeof tupleSchema>;
+// => [] | [boolean] | [boolean, string] | [boolean, string, ...number[]]
+```
+
+`FromSchema` also supports the `minItems` and `maxItems` keyword:
+
+```typescript
+const tupleSchema = {
+  type: "array",
+  items: [{ type: "boolean" }, { type: "string" }],
+  minItems: 1,
+  maxItems: 2,
+} as const;
+
+type Tuple = FromSchema<typeof tupleSchema>;
+// => [boolean] | [boolean, string]
+```
 
 ### Multiple Types
 
@@ -269,4 +298,8 @@ const anyOfSchema = {
 
 type AnyOf = FromSchema<typeof fooSchema>;
 // => string | string[]
+```
+
+```
+
 ```

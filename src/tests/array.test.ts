@@ -174,26 +174,26 @@ describe("array schema", () => {
 
       let recipeInstance: Recipe;
       recipeInstance = [];
-      expect(ajv.validate(recipeSchema, recipeInstance)).toBe(true);
+      expect(ajv.validate(recipeSchema2, recipeInstance)).toBe(true);
 
       recipeInstance = [0];
-      expect(ajv.validate(recipeSchema, recipeInstance)).toBe(true);
+      expect(ajv.validate(recipeSchema2, recipeInstance)).toBe(true);
 
       recipeInstance = [0, "pasta"];
-      expect(ajv.validate(recipeSchema, recipeInstance)).toBe(true);
+      expect(ajv.validate(recipeSchema2, recipeInstance)).toBe(true);
 
       recipeInstance = instances.arrayTuple1;
-      expect(ajv.validate(recipeSchema, recipeInstance)).toBe(true);
+      expect(ajv.validate(recipeSchema2, recipeInstance)).toBe(true);
 
       recipeInstance = instances.arrayTuple2;
-      expect(ajv.validate(recipeSchema, recipeInstance)).toBe(true);
+      expect(ajv.validate(recipeSchema2, recipeInstance)).toBe(true);
 
       recipeInstance = instances.arrayTuple3;
-      expect(ajv.validate(recipeSchema, recipeInstance)).toBe(true);
+      expect(ajv.validate(recipeSchema2, recipeInstance)).toBe(true);
 
       expectInstances
         .allExcept(["arrayTuple1", "arrayTuple2", "arrayTuple3"])
-        .toBeInvalidAgainst(recipeSchema);
+        .toBeInvalidAgainst(recipeSchema2);
     });
 
     it("disallow additional items", () => {
@@ -216,23 +216,184 @@ describe("array schema", () => {
 
       let recipeInstance: Recipe;
       recipeInstance = [];
-      expect(ajv.validate(recipeSchema, recipeInstance)).toBe(true);
+      expect(ajv.validate(recipeSchema3, recipeInstance)).toBe(true);
 
       recipeInstance = [0];
-      expect(ajv.validate(recipeSchema, recipeInstance)).toBe(true);
+      expect(ajv.validate(recipeSchema3, recipeInstance)).toBe(true);
 
       recipeInstance = [0, "pasta"];
-      expect(ajv.validate(recipeSchema, recipeInstance)).toBe(true);
+      expect(ajv.validate(recipeSchema3, recipeInstance)).toBe(true);
 
       recipeInstance = instances.arrayTuple1;
-      expect(ajv.validate(recipeSchema, recipeInstance)).toBe(true);
+      expect(ajv.validate(recipeSchema3, recipeInstance)).toBe(true);
 
       recipeInstance = instances.arrayTuple2;
-      expect(ajv.validate(recipeSchema, recipeInstance)).toBe(true);
+      expect(ajv.validate(recipeSchema3, recipeInstance)).toBe(true);
 
       expectInstances
         .allExcept(["arrayTuple1", "arrayTuple2", "arrayTuple3"])
-        .toBeInvalidAgainst(recipeSchema);
+        .toBeInvalidAgainst(recipeSchema3);
+    });
+
+    it("with min items", () => {
+      const recipeSchema4 = {
+        ...recipeSchema,
+        minItems: 2,
+        additionalItems: true,
+      } as const;
+
+      type Recipe = FromSchema<typeof recipeSchema4>;
+
+      let assertTupleArray: DoesBothExtend<
+        Recipe,
+        | [number, string]
+        | [number, string, { description: string }]
+        | [number, string, { description: string }, string[]]
+        | [number, string, { description: string }, string[], ...any[]]
+      >;
+      assertTupleArray = true;
+
+      let recipeInstance: Recipe;
+      recipeInstance = [0, "pasta"];
+      expect(ajv.validate(recipeSchema4, recipeInstance)).toBe(true);
+
+      recipeInstance = instances.arrayTuple1;
+      expect(ajv.validate(recipeSchema4, recipeInstance)).toBe(true);
+
+      recipeInstance = instances.arrayTuple2;
+      expect(ajv.validate(recipeSchema4, recipeInstance)).toBe(true);
+
+      recipeInstance = instances.arrayTuple3;
+      expect(ajv.validate(recipeSchema4, recipeInstance)).toBe(true);
+
+      expectInstances
+        .allExcept(["arrayTuple1", "arrayTuple2", "arrayTuple3"])
+        .toBeInvalidAgainst(recipeSchema4);
+    });
+
+    it("with min items and max items", () => {
+      const recipeSchema5 = {
+        ...recipeSchema,
+        minItems: 2,
+        maxItems: 3,
+        additionalItems: true,
+      } as const;
+
+      type Recipe = FromSchema<typeof recipeSchema5>;
+
+      let assertTupleArray: DoesBothExtend<
+        Recipe,
+        [number, string] | [number, string, { description: string }]
+      >;
+      assertTupleArray = true;
+
+      let recipeInstance: Recipe;
+      recipeInstance = [0, "pasta"];
+      expect(ajv.validate(recipeSchema5, recipeInstance)).toBe(true);
+
+      recipeInstance = instances.arrayTuple1;
+      expect(ajv.validate(recipeSchema5, recipeInstance)).toBe(true);
+
+      expectInstances
+        .allExcept(["arrayTuple1"])
+        .toBeInvalidAgainst(recipeSchema5);
+    });
+
+    it("with min items and additionalItems", () => {
+      const recipeSchema7 = {
+        ...recipeSchema,
+        minItems: 2,
+        maxItems: 5,
+        additionalItems: { type: "boolean" },
+      } as const;
+
+      type Recipe = FromSchema<typeof recipeSchema7>;
+
+      let assertTupleArray: DoesBothExtend<
+        Recipe,
+        | [number, string]
+        | [number, string, { description: string }]
+        | [number, string, { description: string }, string[]]
+        | [number, string, { description: string }, string[], ...boolean[]]
+      >;
+      assertTupleArray = true;
+
+      let recipeInstance: Recipe;
+      recipeInstance = [0, "pasta"];
+      expect(ajv.validate(recipeSchema7, recipeInstance)).toBe(true);
+
+      recipeInstance = instances.arrayTuple1;
+      expect(ajv.validate(recipeSchema7, recipeInstance)).toBe(true);
+
+      recipeInstance = instances.arrayTuple2;
+      expect(ajv.validate(recipeSchema7, recipeInstance)).toBe(true);
+
+      recipeInstance = instances.arrayTuple3;
+      expect(ajv.validate(recipeSchema7, recipeInstance)).toBe(true);
+
+      expectInstances
+        .allExcept(["arrayTuple1", "arrayTuple2", "arrayTuple3"])
+        .toBeInvalidAgainst(recipeSchema7);
+    });
+
+    it("with min items and no additionalItems", () => {
+      const recipeSchema8 = {
+        ...recipeSchema,
+        minItems: 2,
+        maxItems: 5,
+        additionalItems: false,
+      } as const;
+
+      type Recipe = FromSchema<typeof recipeSchema8>;
+
+      let assertTupleArray: DoesBothExtend<
+        Recipe,
+        | [number, string]
+        | [number, string, { description: string }]
+        | [number, string, { description: string }, string[]]
+      >;
+      assertTupleArray = true;
+
+      let recipeInstance: Recipe;
+      recipeInstance = [0, "pasta"];
+      expect(ajv.validate(recipeSchema8, recipeInstance)).toBe(true);
+
+      recipeInstance = instances.arrayTuple1;
+      expect(ajv.validate(recipeSchema8, recipeInstance)).toBe(true);
+
+      recipeInstance = instances.arrayTuple2;
+      expect(ajv.validate(recipeSchema8, recipeInstance)).toBe(true);
+
+      expectInstances
+        .allExcept(["arrayTuple1", "arrayTuple2"])
+        .toBeInvalidAgainst(recipeSchema8);
+    });
+
+    it("with max items", () => {
+      const recipeSchema9 = {
+        ...recipeSchema,
+        maxItems: 2,
+      } as const;
+
+      type Recipe = FromSchema<typeof recipeSchema9>;
+
+      let assertTupleArray: DoesBothExtend<
+        Recipe,
+        [] | [number] | [number, string]
+      >;
+      assertTupleArray = true;
+
+      let recipeInstance: Recipe;
+      recipeInstance = [];
+      expect(ajv.validate(recipeSchema9, recipeInstance)).toBe(true);
+
+      recipeInstance = [0];
+      expect(ajv.validate(recipeSchema9, recipeInstance)).toBe(true);
+
+      recipeInstance = [0, "pasta"];
+      expect(ajv.validate(recipeSchema9, recipeInstance)).toBe(true);
+
+      expectInstances.allExcept([]).toBeInvalidAgainst(recipeSchema9);
     });
   });
 });

@@ -1,3 +1,4 @@
+export { Get } from "./get";
 export { Head } from "./head";
 export { Tail } from "./tail";
 export { Prepend } from "./prepend";
