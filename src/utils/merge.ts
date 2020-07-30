@@ -1,3 +1,12 @@
+/**
+ * Merge two types `A` and `B`:
+ * - Returns `B` if `A` or `B` is not an object
+ * - Recursively merge `A` and `B` properties if both are objects
+ *
+ * Args:
+ * - `A`: Type `A`
+ * - `B`: Type `B`
+ */
 export type MergeRight<A, B> = A extends object
   ? B extends object
     ? {

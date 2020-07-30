@@ -2,6 +2,12 @@ import { FromWriteableSchema } from "./index";
 import { ObjectSchema, Schema } from "./schema";
 import { MergeRight } from "./utils";
 
+/**
+ * Given a JSON schema of `object` type, infers the type of valid instances
+ *
+ * Args:
+ * - `Schema`: JSON schema
+ */
 export type FromObjectSchema<S> = S extends ObjectSchema
   ? "properties" extends keyof S
     ? MergeRight<
@@ -44,6 +50,12 @@ export type FromObjectSchema<S> = S extends ObjectSchema
     : object
   : never;
 
+/**
+ * Given the `additionalProperties` value of an object JSON schema, returns the inferred type
+ *
+ * Args:
+ * - `AdditionalProps`: Value of an object JSON schema `additionalProperties`
+ */
 type AdditionalProps<A> = A extends false
   ? { [key: string]: never }
   : A extends true
@@ -52,12 +64,25 @@ type AdditionalProps<A> = A extends false
   ? { [key: string]: FromWriteableSchema<A> }
   : {};
 
+/**
+ * Given the `patternProperties` value of an object JSON schema, returns the inferred type
+ *
+ * Args:
+ * - `PatternProps`: Value of an object JSON schema `patternProperties`
+ */
 type PatternProps<P> = {
   [key: string]: {
     [key in keyof P]: FromWriteableSchema<P[key]>;
   }[keyof P];
 };
 
+/**
+ * Given the `additionalProperties` and `patternProperties` value of an object JSON schema, returns the inferred type
+ *
+ * Args:
+ * - `AdditionalProps`: Value of an object JSON schema `additionalProperties`
+ * - `PatternProps`: Value of an object JSON schema  `patternProperties`
+ */
 type AdditionalAndPatternProps<A, P> = A extends boolean
   ? PatternProps<P>
   : A extends Schema

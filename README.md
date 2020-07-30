@@ -70,7 +70,7 @@ type Pet = FromSchema<typeof petSchema>;
 // => Will work 🙌
 ```
 
-**Note**: The `as const` statement is used so that TypeScript takes the schema definition to the word (e.g. _true_ is interpreted as the _true_ constant and not as _boolean_). It is pure TypeScript and has zero impact on the compiled code.
+**Note**: The `as const` statement is used so that TypeScript takes the schema definition to the word (e.g. _true_ is interpreted as the _true_ constant and not widened as _boolean_). It is pure TypeScript and has zero impact on the compiled code.
 
 # Docs
 
@@ -298,8 +298,4 @@ const anyOfSchema = {
 
 type AnyOf = FromSchema<typeof fooSchema>;
 // => string | string[]
-```
-
-```
-
 ```

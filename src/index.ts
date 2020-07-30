@@ -1,11 +1,17 @@
 import { FromAnyOfSchema } from "./anyOf";
 import { FromEnumSchema } from "./enum";
 import { FromConstSchema } from "./const";
-import { FromMultipleSchema } from "./multiple";
+import { FromMixedSchema } from "./mixed";
 import { FromObjectSchema } from "./object";
 import { FromArraySchema } from "./array";
 import { Writeable } from "./utils";
 
+/**
+ * Given a JSON schema defined with the `as const` statement, infers the type of valid instances
+ *
+ * Args:
+ * - `Schema`: JSON schema
+ */
 export type FromSchema<S> = FromReadonlySchema<S>;
 
 type FromReadonlySchema<S> = FromWriteableSchema<Writeable<S>>;
@@ -16,7 +22,7 @@ export type FromWriteableSchema<S> = {
   anyOf: FromAnyOfSchema<S>;
   enum: FromEnumSchema<S>;
   const: FromConstSchema<S>;
-  multiple: FromMultipleSchema<S>;
+  mixed: FromMixedSchema<S>;
   null: null;
   boolean: boolean;
   number: number;
@@ -39,7 +45,7 @@ type InferSchemaType<S> = S extends true | string
   ? "const"
   : "type" extends keyof S
   ? S["type"] extends any[]
-    ? "multiple"
+    ? "mixed"
     : S["type"] extends "null"
     ? "null"
     : S["type"] extends "boolean"

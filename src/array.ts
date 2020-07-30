@@ -10,6 +10,12 @@ import {
   ConcatReversed,
 } from "./utils";
 
+/**
+ * Given a JSON schema of `array` type, infers the type of valid instances
+ *
+ * Args:
+ * - `Schema`: JSON schema
+ */
 export type FromArraySchema<S> = "items" extends keyof S
   ? S["items"] extends Schema
     ? FromWriteableSchema<S["items"]>[]
@@ -18,17 +24,31 @@ export type FromArraySchema<S> = "items" extends keyof S
     : "TypeError: Invalid value for items property"
   : any[];
 
-type GetTypesTuple<I, R extends any[] = []> = {
+/**
+ * Given a tuple of JSON schemas, returns the (reversed) tuple of inferred types
+ *
+ * Args:
+ * - `Shemas`: Tuple of JSON schemas
+ * - `Result`: _(optional)_ Accumulated result
+ */
+type GetTypesTuple<S, R extends any[] = []> = {
   stop: R;
-  continue: I extends any[]
-    ? GetTypesTuple<Tail<I>, Prepend<FromWriteableSchema<Head<I>>, R>>
+  continue: S extends any[]
+    ? GetTypesTuple<Tail<S>, Prepend<FromWriteableSchema<Head<S>>, R>>
     : never;
-}[I extends [any, ...any[]] ? "continue" : "stop"];
+}[S extends [any, ...any[]] ? "continue" : "stop"];
 
-type FromTypesTuple<I, S> = I extends any[]
+/**
+ * Apply a JSON schema `additionalItems`, `minItems` & `maxItems` directives to a (reversed) tuple of types
+ *
+ * Args:
+ * - `Types`: Tuple of types
+ * - `Schema`: JSON schema
+ */
+type FromTypesTuple<T, S> = T extends any[]
   ? ApplyAdditionalItems<
       ApplyBoundaries<
-        I,
+        T,
         "minItems" extends keyof S ? S["minItems"] : 0,
         "maxItems" extends keyof S ? S["maxItems"] : undefined
       >,
@@ -36,6 +56,23 @@ type FromTypesTuple<I, S> = I extends any[]
     >
   : never;
 
+/**
+ * Given a tuple, a min and a max integer values, returns the data needed to infer a tuple schema valid instance type
+ *
+ * Args:
+ * - `Tuple`: Tuple of types to recurse on (reversed)
+ * - `Min`: Minimum length of a valid extracted tuple
+ * - `Max`: Maximum length of a valid extracted tuple _(possibly undefined)_
+ * - `Result`: _(optional)_ Union of the extracted tuples of valid length _(possibly_ `never` _)_
+ * - `HasMin`: _(optional)_ True if `Tuple` has had a length equal to `Min` during recursion
+ * - `HasMax`: _(optional)_ True if `Tuple` has had a length equal to `Max` during recursion
+ * - `CompleteTuple`: _(optional)_ Memorized initial value of `Tuple`
+ *
+ * Returns:
+ * - `result` Union of the extracted tuples of valid length _(possibly_ `never` _)_
+ * - `completeTuple` Memorized initial value of `Tuple`
+ * - `hasEncounteredMax`: True if `Tuple` has had a length equal to `Max` during recursion
+ */
 type ApplyBoundaries<
   T extends any[],
   Min,
@@ -52,14 +89,14 @@ type ApplyBoundaries<
       ? R | Reverse<T>
       : Max extends T["length"]
       ? Reverse<T>
-      : AreBoundariesInvalid<Tail<T>, Max> extends true
+      : IsLongerThan<Tail<T>, Max> extends true
       ? never
       : R | Reverse<T>;
     hasEncounteredMax: HasMax extends true
       ? true
       : Max extends T["length"]
       ? true
-      : AreBoundariesInvalid<Tail<T>, Max>;
+      : IsLongerThan<Tail<T>, Max>;
     completeTuple: C;
   };
   continue: ApplyBoundaries<
@@ -77,13 +114,26 @@ type ApplyBoundaries<
   ? "continue"
   : "stop"];
 
-type AreBoundariesInvalid<T extends any[], Max, R = true> = {
-  continue: T["length"] extends Max
-    ? AreBoundariesInvalid<Tail<T>, Max>
-    : false;
-  stop: T["length"] extends Max ? R : false;
+/**
+ * Given a tuple and an integer value, returns true if tuple is longer than the value
+ *
+ * Args:
+ * - `Tuple`: Tuple
+ * - `Number`: Integer value _(possibly undefined)_
+ * - `Result`: _(optional)_ Accumulated result
+ */
+type IsLongerThan<T extends any[], N, R = true> = {
+  continue: T["length"] extends N ? IsLongerThan<Tail<T>, N> : false;
+  stop: T["length"] extends N ? R : false;
 }[T extends [any, ...any[]] ? "continue" : "stop"];
 
+/**
+ * Given the return value of `ApplyBoundaries`, and the `additionalItems` value of a tuple schema, returns the inferred type
+ *
+ * Args:
+ * - `Result`: Return value of `ApplyBoundaries`
+ * - `AdditionalItems`: Accumulated result
+ */
 type ApplyAdditionalItems<R, A> = Get<R, "hasEncounteredMax"> extends true
   ? Get<R, "result">
   : A extends false

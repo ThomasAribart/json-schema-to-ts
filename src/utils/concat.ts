@@ -2,9 +2,16 @@ import { Head } from "./head";
 import { Tail } from "./tail";
 import { Prepend } from "./prepend";
 
-export type ConcatReversed<T, R extends any[]> = {
-  stop: R;
-  continue: T extends any[]
-    ? ConcatReversed<Tail<T>, Prepend<Head<T>, R>>
+/**
+ * Concatenate the reverse of tuple `A` to tuple `B`
+ *
+ * Args:
+ * - `A`: Tuple `A`
+ * - `B`: Tuple `B`
+ */
+export type ConcatReversed<A, B extends any[]> = {
+  stop: B;
+  continue: A extends any[]
+    ? ConcatReversed<Tail<A>, Prepend<Head<A>, B>>
     : never;
-}[T extends [any, ...any[]] ? "continue" : "stop"];
+}[A extends [any, ...any[]] ? "continue" : "stop"];
