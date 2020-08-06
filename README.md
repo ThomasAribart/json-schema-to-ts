@@ -86,6 +86,45 @@ yarn add --dev json-schema-to-ts
 
 ## Use cases
 
+### Const
+
+```typescript
+const fooSchema = {
+  const: "foo",
+} as const;
+
+type Foo = FromSchema<typeof fooSchema>;
+// => "foo"
+```
+
+### Enums
+
+```typescript
+const enumSchema = {
+  enum: [true, 42, { foo: "bar" }],
+} as const;
+
+type Enum = FromSchema<typeof enumSchema>;
+// => true | 42 | { foo: "bar"}
+```
+
+You can also go full circle with typescript `enums`.
+
+```typescript
+enum Food {
+  Pizza = "pizza",
+  Taco = "taco",
+  Fries = "Fries",
+}
+
+const enumSchema = {
+  enum: Object.values(Food),
+} as const;
+
+type Enum = FromSchema<typeof enumSchema>;
+// => Food
+```
+
 ### Litterals
 
 ```typescript
@@ -96,6 +135,19 @@ const litteralSchema = {
 type Litteral = FromSchema<typeof litteralSchema>;
 // => null, boolean, string or number
 ```
+
+You can also specify several types:
+
+```typescript
+const litteralsSchema = {
+  type: ["null", "string"],
+} as const;
+
+type Litterals = FromSchema<typeof litteralsSchema>;
+// => null | string
+```
+
+For `object` and `array` types, properties like `required` or `additionalItems` will also work 🙌
 
 ### Objects
 
@@ -218,69 +270,6 @@ const tupleSchema = {
 
 type Tuple = FromSchema<typeof tupleSchema>;
 // => [boolean] | [boolean, string]
-```
-
-### Multiple Types
-
-```typescript
-const multipleTypesSchema = {
-  type: ["null", "string"],
-} as const;
-
-type Tuple = FromSchema<typeof multipleTypesSchema>;
-// => null | string
-```
-
-Other properties like `required` or `additionalItems` will also work 🙌
-
-```typescript
-const multipleTypesSchema = {
-  type: ["array", "object"],
-  items: [{ type: "string" }],
-  additionalItems: false,
-  properties: {
-    name: { type: "string" },
-    age: { type: "number" },
-  },
-  required: ["name"],
-} as const;
-
-type Tuple = FromSchema<typeof multipleTypesSchema>;
-// => [] | [string] | { name: string, age?: number }
-```
-
-### Const
-
-```typescript
-const fooSchema = {
-  const: "foo",
-} as const;
-
-type Foo = FromSchema<typeof fooSchema>;
-// => "foo"
-```
-
-### Enums
-
-```typescript
-const enumSchema = {
-  enum: [true, 42, { foo: "bar" }],
-} as const;
-
-type Enum = FromSchema<typeof enumSchema>;
-// => true | 42 | { foo: "bar"}
-```
-
-`enum` can be used concurrently with `type`.
-
-```typescript
-const enumSchema = {
-  type: "string",
-  enum: ["foo", "bar", { foo: "bar" }],
-} as const;
-
-type Enum = FromSchema<typeof enumSchema>;
-// => "foo" | "bar"
 ```
 
 ### AnyOf
