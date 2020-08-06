@@ -122,9 +122,9 @@ type ApplyBoundaries<
  * - `Number`: Integer value _(possibly undefined)_
  * - `Result`: _(optional)_ Accumulated result
  */
-type IsLongerThan<T extends any[], N, R = true> = {
-  continue: T["length"] extends N ? IsLongerThan<Tail<T>, N> : false;
-  stop: T["length"] extends N ? R : false;
+type IsLongerThan<T extends any[], N, R = false> = {
+  continue: T["length"] extends N ? true : IsLongerThan<Tail<T>, N>;
+  stop: T["length"] extends N ? true : R;
 }[T extends [any, ...any[]] ? "continue" : "stop"];
 
 /**
