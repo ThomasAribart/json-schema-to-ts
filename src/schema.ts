@@ -1,4 +1,4 @@
-import { MergeRight } from "./utils";
+import { UnsafeMergeRec } from "./utils";
 
 type CommonProps = {
   title?: string;
@@ -10,17 +10,20 @@ type CommonProps = {
   examples?: any[];
 };
 
-type MakeSchema<SpecificProps = {}> = MergeRight<CommonProps, SpecificProps>;
+type MakeSchema<SpecificProps = {}> = UnsafeMergeRec<
+  CommonProps,
+  SpecificProps
+>;
 
-export type NullSchema = MakeSchema<{
+type NullSchema = MakeSchema<{
   type: "null";
 }>;
 
-export type BooleanSchema = MakeSchema<{
+type BooleanSchema = MakeSchema<{
   type: "boolean";
 }>;
 
-export type StringSchema = MakeSchema<{
+type StringSchema = MakeSchema<{
   type: "string";
   maxLength?: number;
   minLength?: number;
@@ -28,7 +31,7 @@ export type StringSchema = MakeSchema<{
   format?: string;
 }>;
 
-export type IntegerSchema = MakeSchema<{
+type IntegerSchema = MakeSchema<{
   type: "integer";
   multipleOf?: number;
   maximum?: number;
@@ -37,7 +40,7 @@ export type IntegerSchema = MakeSchema<{
   exclusiveMinimum?: number;
 }>;
 
-export type NumberSchema = MakeSchema<{
+type NumberSchema = MakeSchema<{
   type: "number";
   multipleOf?: number;
   maximum?: number;
@@ -58,7 +61,7 @@ export type ObjectSchema = MakeSchema<{
   dependencies?: { [property: string]: string[] | object };
 }>;
 
-export type ArraySchema = MakeSchema<{
+type ArraySchema = MakeSchema<{
   type: "array";
   items?: Schema | any[];
   contains?: Schema;
@@ -68,23 +71,11 @@ export type ArraySchema = MakeSchema<{
   uniqueItems?: boolean;
 }>;
 
-export type AnyOfSchema = MakeSchema<{
+type AnyOfSchema = MakeSchema<{
   anyOf: any[];
 }>;
 
-export type EnumSchema = MakeSchema<{
-  type?:
-    | "null"
-    | "boolean"
-    | "string"
-    | "integer"
-    | "number"
-    | "object"
-    | "array";
-  enum: any[];
-}>;
-
-export type ConstSchema = MakeSchema<{
+type ConstSchema = MakeSchema<{
   type?:
     | "null"
     | "boolean"
@@ -94,6 +85,18 @@ export type ConstSchema = MakeSchema<{
     | "object"
     | "array";
   const: any;
+}>;
+
+type EnumSchema = MakeSchema<{
+  type?:
+    | "null"
+    | "boolean"
+    | "string"
+    | "integer"
+    | "number"
+    | "object"
+    | "array";
+  enum: any[];
 }>;
 
 export type Schema =
