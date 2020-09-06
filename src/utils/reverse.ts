@@ -3,13 +3,12 @@ import { Tail } from "./tail";
 import { Prepend } from "./prepend";
 
 /**
- * Reverses a tuple
+ * Reverses a tuple `T`
  *
- * Args:
- * - `Tuple`: Tuple
- * - `Result`: _(optional)_ Reversed tuple
+ * @param T Tuple
+ * @return Tuple
  */
-export type Reverse<T extends any[], R extends any[] = []> = {
+export type Reverse<T, R extends any[] = []> = {
   stop: R;
-  continue: Reverse<Tail<T>, Prepend<Head<T>, R>>;
+  continue: T extends any[] ? Reverse<Tail<T>, Prepend<Head<T>, R>> : never;
 }[T extends [any, ...any[]] ? "continue" : "stop"];

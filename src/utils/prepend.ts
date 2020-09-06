@@ -1,9 +1,9 @@
 /**
  * Inserts an element at the start of a tuple
  *
- * Args:
- * - `Element`: Element to insert
- * - `Tuple`: Tuple
+ * @param E Element (type)
+ * @param T Tuple
+ * @return Tuple
  */
 export type Prepend<E, T extends any[]> = ((
   element: E,

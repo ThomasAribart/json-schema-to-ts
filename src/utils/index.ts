@@ -1,9 +1,12 @@
-export { Get } from "./get";
+export { And } from "./and";
+export { ConcatReversed, Concat } from "./concat";
+export { DoesExtend, IsObject, IsArray } from "./extends";
+export { FilterExtending } from "./filter";
+export { Get, GetRec } from "./get";
+export { HasKeyIn } from "./hasKeyIn";
 export { Head } from "./head";
-export { Tail } from "./tail";
+export { SafeMergeRec, UnsafeMergeRec, Merge } from "./merge";
 export { Prepend } from "./prepend";
 export { Reverse } from "./reverse";
-export { ConcatReversed } from "./concat";
-export { MergeRight } from "./merge";
+export { Tail } from "./tail";
 export { Writeable } from "./writeable";
-export { DoesExtend, DoesBothExtend } from "./extends";

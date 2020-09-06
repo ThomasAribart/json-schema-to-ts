@@ -1,7 +1,7 @@
 /**
- * Returns the first element of a tuple
+ * Returns the first element of a tuple `T`
  *
- * Args:
- * - `Tuple`: Tuple
+ * @param T Tuple
+ * @return Type
  */
-export type Head<T extends any[]> = T[0];
+export type Head<T> = T extends any[] ? T[0] : never;

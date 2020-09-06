@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "*": ["./*"]
+    },
     "lib": ["es2017"],
     "removeComments": true,
     "moduleResolution": "node",
