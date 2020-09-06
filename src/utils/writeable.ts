@@ -1,8 +1,8 @@
 /**
  * Recursively remove the `readonly` directive from an object properties
  *
- * Args:
- * - `Object`: Object
+ * @param O Object
+ * @return Object
  */
 export type Writeable<O> = O extends object
   ? { -readonly [K in keyof O]: Writeable<O[K]> }

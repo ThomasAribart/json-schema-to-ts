@@ -1,19 +1,34 @@
 /**
  * Returns `true` if type `A` extends type `B`, `false` if not
  *
- * Args:
- * - `A`: Type `A`
- * - `B`: Type `B`
+ * @param A Type
+ * @param B Type
+ * @return Boolean
  */
 export type DoesExtend<A, B> = A extends B ? true : false;
 
+type ArrayKeys = keyof [];
+
 /**
- * Returns `true` if both types extend each other, `false` if not
+ * Returns `true` if type is object, `false` if not (excludes arrays)
  *
- * Args:
- * - `A`: Type `A`
- * - `B`: Type `B`
+ * @param T Type
+ * @return Boolean
  */
-export type DoesBothExtend<A, B> = DoesExtend<A, B> extends true
-  ? DoesExtend<B, A>
+export type IsObject<T> = T extends object
+  ? ArrayKeys extends Extract<keyof T, ArrayKeys>
+    ? false
+    : true
+  : false;
+
+/**
+ * Returns `true` if type is array, `false` if not (excludes objects)
+ *
+ * @param T Type
+ * @return Boolean
+ */
+export type IsArray<T> = T extends object
+  ? ArrayKeys extends Extract<keyof T, ArrayKeys>
+    ? true
+    : false
   : false;

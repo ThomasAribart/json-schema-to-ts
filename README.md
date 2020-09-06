@@ -46,7 +46,8 @@ const dogSchema = {
   required: ["name", "age"],
 } as const;
 
-type Dog = FromSchema<typeof dogSchema>; // => Will infer the same type as above
+type Dog = FromSchema<typeof dogSchema>;
+// => Will infer the same type as above
 ```
 
 Schemas can even be nested, as long as you don't forget the `as const` statement:
@@ -57,7 +58,7 @@ const catSchema = {
   properties: {
     name: { type: "string" },
     age: { type: "integer" },
-    favoriteThings: { enum: ["playing", "sleeping", "sleepingMore"] },
+    favoriteThings: { enum: ["playing", "sleeping", "moreSleeping"] },
   },
   required: ["name", "age"],
 } as const;
@@ -134,11 +135,7 @@ const litteralSchema = {
 
 type Litteral = FromSchema<typeof litteralSchema>;
 // => null, boolean, string or number
-```
 
-You can also specify several types:
-
-```typescript
 const litteralsSchema = {
   type: ["null", "string"],
 } as const;
@@ -147,64 +144,7 @@ type Litterals = FromSchema<typeof litteralsSchema>;
 // => null | string
 ```
 
-For `object` and `array` types, properties like `required` or `additionalItems` will also work 🙌
-
-### Objects
-
-```typescript
-const objectSchema = {
-  type: "object",
-  properties: {
-    foo: { type: "string" },
-    bar: { type: "number" },
-  },
-  required: ["foo"],
-} as const;
-
-type Object = FromSchema<typeof objectSchema>;
-// => { foo: string, bar?: number }
-```
-
-`FromSchema` partially supports the use of the `additionalProperties` and `patternProperties` keyword:
-
-- Contrary to the specifications, `additionalProperties` is considered `false` by default for clearer typings. Set its value to `true` to signal that additional properties can be used:
-
-```typescript
-const additionalPropertiesSchema = {
-  ...objectSchema,
-  additionalProperties: true,
-} as const;
-
-type Object = FromSchema<typeof additionalPropertiesSchema>;
-// => { [x: string]: any; foo: string; bar?: number }
-```
-
-- Used on their own, typed `additionalProperties` and/or `patternProperties` are supported:
-
-```typescript
-const typedValuesSchema = {
-  type: "object",
-  additionalProperties: {
-    type: "boolean",
-  },
-} as const;
-
-type Object = FromSchema<typeof typedValuesSchema>;
-// => { [key: string]: boolean }
-
-const patternSchema = {
-  type: "object",
-  patternProperties: {
-    "^S": { type: "string" },
-    "^I": { type: "integer" },
-  },
-} as const;
-
-type Object = FromSchema<typeof patternSchema>;
-// => { [key: string]: string | number }
-```
-
-- However, due to [TypeScript limitations](https://github.com/Microsoft/TypeScript/issues/7599), when used in combination with the `properties` keyword, extra properties will always be typed as `any` to avoid conflicts with base properties.
+(For `object` and `array` types, properties like `required` or `additionalItems` will work 🙌)
 
 ### Arrays
 
@@ -227,12 +167,10 @@ const tupleSchema = {
 } as const;
 
 type Tuple = FromSchema<typeof tupleSchema>;
-// => [] | [boolean] | [boolean, string] | [boolean, string, ...any[]]
+// => [] | [boolean] | [boolean, string] | [boolean, string, ...unknown[]]
 ```
 
-`FromSchema` supports the `additionalItems` keyword:
-
-- You can deny additional items:
+`FromSchema` supports the `additionalItems` specifications:
 
 ```typescript
 const tupleSchema = {
@@ -243,11 +181,7 @@ const tupleSchema = {
 
 type Tuple = FromSchema<typeof tupleSchema>;
 // => [] | [boolean] | [boolean, string]
-```
 
-- Or specify a type for additional items:
-
-```typescript
 const tupleSchema = {
   type: "array",
   items: [{ type: "boolean" }, { type: "string" }],
@@ -258,7 +192,7 @@ type Tuple = FromSchema<typeof tupleSchema>;
 // => [] | [boolean] | [boolean, string] | [boolean, string, ...number[]]
 ```
 
-`FromSchema` also supports the `minItems` and `maxItems` keyword:
+...as well as the `minItems` and `maxItems` specifications:
 
 ```typescript
 const tupleSchema = {
@@ -271,6 +205,58 @@ const tupleSchema = {
 type Tuple = FromSchema<typeof tupleSchema>;
 // => [boolean] | [boolean, string]
 ```
+
+(NOTE: Additional items will only work if Typescript's `strictNullChecks` option is activated)
+
+### Objects
+
+```typescript
+const objectSchema = {
+  type: "object",
+  properties: {
+    foo: { type: "string" },
+    bar: { type: "number" },
+  },
+  required: ["foo"],
+} as const;
+
+type Object = FromSchema<typeof objectSchema>;
+// => { [x: string]: unknown; foo: string; bar?: number; }
+```
+
+`FromSchema` partially supports the `additionalProperties` and `patternProperties` specifications:
+
+- `additionalProperties` can be used to deny additional items.
+
+```typescript
+const closedObjectSchema = {
+  ...objectSchema,
+  additionalProperties: false,
+} as const;
+
+type Object = FromSchema<typeof additionalPropertiesSchema>;
+// => { foo: string; bar?: number; }
+```
+
+- Used on their own, `additionalProperties` and/or `patternProperties` can be used to type unnamed properties.
+
+```typescript
+const objectSchema = {
+  type: "object",
+  additionalProperties: {
+    type: "boolean",
+  },
+  patternProperties: {
+    "^S": { type: "string" },
+    "^I": { type: "integer" },
+  },
+} as const;
+
+type Object = FromSchema<typeof typedValuesSchema>;
+// => { [x: string]: string | number | boolean }
+```
+
+- However, when used in combination with the `properties` keyword, extra properties will always be typed as `unknown` to avoid conflicts.
 
 ### AnyOf
 
@@ -288,3 +274,49 @@ const anyOfSchema = {
 type AnyOf = FromSchema<typeof fooSchema>;
 // => string | string[]
 ```
+
+`FromSchema` will correctly infer factored schemas:
+
+```typescript
+const factoredSchema = {
+  type: "object",
+  properties: { bool: { type: "boolean" } },
+  anyOf: [
+    {
+      properties: {
+        str: { type: "string" },
+      },
+      required: ["str"],
+    },
+    {
+      properties: {
+        num: { type: "number" },
+      },
+    },
+  ],
+  required: ["bool"],
+} as const;
+
+type Factored = FromSchema<typeof factoredSchema>;
+// => {
+//  [x:string]: unknown;
+//  bool: boolean;
+//  str: string;
+// } | {
+//  [x:string]: unknown;
+//  bool: boolean;
+//  num?: number;
+// }
+```
+
+### OneOf
+
+...Coming soon 😃
+
+### AllOf
+
+...Coming soon 😃
+
+### If/Else
+
+...Coming soon 😃

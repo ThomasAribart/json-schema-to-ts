@@ -1,10 +1,10 @@
 {
   "name": "json-schema-to-ts",
-  "version": "0.1.10",
+  "version": "1.0.0",
   "description": "Infer typescript types from your JSON schemas!",
   "main": "src/index.ts",
   "scripts": {
-    "test": "jest"
+    "test": "tsc --noEmit && jest --verbose"
   },
   "devDependencies": {
     "@babel/core": "^7.10.4",
