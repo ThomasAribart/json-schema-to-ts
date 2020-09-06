@@ -135,7 +135,9 @@ const litteralSchema = {
 
 type Litteral = FromSchema<typeof litteralSchema>;
 // => null, boolean, string or number
+```
 
+```typescript
 const litteralsSchema = {
   type: ["null", "string"],
 } as const;
@@ -181,7 +183,9 @@ const tupleSchema = {
 
 type Tuple = FromSchema<typeof tupleSchema>;
 // => [] | [boolean] | [boolean, string]
+```
 
+```typescript
 const tupleSchema = {
   type: "array",
   items: [{ type: "boolean" }, { type: "string" }],
@@ -280,7 +284,10 @@ type AnyOf = FromSchema<typeof fooSchema>;
 ```typescript
 const factoredSchema = {
   type: "object",
-  properties: { bool: { type: "boolean" } },
+  properties: {
+    bool: { type: "boolean" },
+  },
+  required: ["bool"],
   anyOf: [
     {
       properties: {
@@ -294,7 +301,6 @@ const factoredSchema = {
       },
     },
   ],
-  required: ["bool"],
 } as const;
 
 type Factored = FromSchema<typeof factoredSchema>;
