@@ -4,7 +4,7 @@
   "description": "Infer typescript types from your JSON schemas!",
   "main": "src/index.ts",
   "scripts": {
-    "test": "jest"
+    "test": "tsc --noEmit && jest --verbose"
   },
   "devDependencies": {
     "@babel/core": "^7.10.4",
