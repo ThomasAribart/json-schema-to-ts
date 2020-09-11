@@ -1,5 +1,4 @@
 import { Litteral, Any, Never } from "../meta-types";
-import { HasKeyIn } from "../utils";
 
 import { ParseAnyOfSchema } from "./anyOf";
 import { ParseEnumSchema } from "./enum";
@@ -27,11 +26,11 @@ type InferSchemaType<S> = S extends true | string
   ? "any"
   : S extends false
   ? "never"
-  : HasKeyIn<S, "anyOf"> extends true
+  : "anyOf" extends keyof S
   ? "anyOf"
-  : HasKeyIn<S, "enum"> extends true
+  : "enum" extends keyof S
   ? "enum"
-  : HasKeyIn<S, "const"> extends true
+  : "const" extends keyof S
   ? "const"
   : "type" extends keyof S
   ? S["type"] extends any[]
