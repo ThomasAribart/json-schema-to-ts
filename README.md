@@ -30,7 +30,7 @@ That's when `json-schema-to-ts` comes to the rescue 💪
 
 # FromSchema
 
-The `FromSchema` method allows infering TS types directly from JSON schemas:
+The `FromSchema` method lets you infer TS types directly from JSON schemas:
 
 ```typescript
 import { FromSchema } from "json-schema-to-ts";
@@ -71,7 +71,7 @@ type Pet = FromSchema<typeof petSchema>;
 // => Will work 🙌
 ```
 
-**Note**: The `as const` statement is used so that TypeScript takes the schema definition to the word (e.g. _true_ is interpreted as the _true_ constant and not widened as _boolean_). It is pure TypeScript and has zero impact on the compiled code.
+> The `as const` statement is used so that TypeScript takes the schema definition to the word (e.g. _true_ is interpreted as the _true_ constant and not widened as _boolean_). It is pure TypeScript and has zero impact on the compiled code.
 
 # Docs
 
@@ -210,7 +210,7 @@ type Tuple = FromSchema<typeof tupleSchema>;
 // => [boolean] | [boolean, string]
 ```
 
-(NOTE: Additional items will only work if Typescript's `strictNullChecks` option is activated)
+> Additional items will only work if Typescript's `strictNullChecks` option is activated
 
 ### Objects
 
@@ -317,7 +317,29 @@ type Factored = FromSchema<typeof factoredSchema>;
 
 ### OneOf
 
-...Coming soon 😃
+Because TypeScript doesn't have [refinment types](https://en.wikipedia.org/wiki/Refinement_type), `oneOf` will behave strictly the same as `anyOf`.
+
+```typescript
+const catSchema = {
+  type: "object",
+  oneOf: [
+    { properties: { name: { type: "string" } }, required: ["name"] },
+    { properties: { color: { enum: ["black", "brown", "white"] } } },
+  ],
+} as const;
+
+type Cat = FromSchema<typeof catSchema>;
+// => {
+//  [x: string]: unknown;
+//  name: string;
+// } | {
+//  [x: string]: unknown;
+//  color?: "black" | "brown" | "white";
+// }
+
+// => FromSchema cannot detect the following invalid obj 😱
+const invalidCat: Cat = { name: "Garfield" };
+```
 
 ### AllOf
 

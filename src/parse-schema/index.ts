@@ -1,12 +1,12 @@
 import { Litteral, Any, Never } from "../meta-types";
-import { HasKeyIn } from "../utils";
 
-import { ParseAnyOfSchema } from "./anyOf";
-import { ParseEnumSchema } from "./enum";
 import { ParseConstSchema } from "./const";
+import { ParseEnumSchema } from "./enum";
 import { ParseMixedSchema } from "./mixed";
-import { ParseObjectSchema } from "./object";
 import { ParseArrSchema } from "./array";
+import { ParseObjectSchema } from "./object";
+import { ParseAnyOfSchema } from "./anyOf";
+import { ParseOneOfSchema } from "./oneOf";
 
 export type ParseSchema<S> = {
   any: Any;
@@ -21,17 +21,20 @@ export type ParseSchema<S> = {
   const: ParseConstSchema<S>;
   enum: ParseEnumSchema<S>;
   anyOf: ParseAnyOfSchema<S>;
+  oneOf: ParseOneOfSchema<S>;
 }[InferSchemaType<S>];
 
 type InferSchemaType<S> = S extends true | string
   ? "any"
   : S extends false
   ? "never"
-  : HasKeyIn<S, "anyOf"> extends true
+  : "oneOf" extends keyof S
+  ? "oneOf"
+  : "anyOf" extends keyof S
   ? "anyOf"
-  : HasKeyIn<S, "enum"> extends true
+  : "enum" extends keyof S
   ? "enum"
-  : HasKeyIn<S, "const"> extends true
+  : "const" extends keyof S
   ? "const"
   : "type" extends keyof S
   ? S["type"] extends any[]
