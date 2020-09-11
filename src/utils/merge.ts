@@ -39,7 +39,7 @@ export type UnsafeMergeRec<A, B> = IsObject<A> extends true
  * - Recursively merge `A` and `B` properties if both are objects
  * - Concat `A` and `B` if both are arrays
  *
- * Contrary to `UnsafeMergeRec`, `SafeMergeRec` never returns never, but doesn't preserve non-required properties
+ * Contrary to `UnsafeMergeRec`, `SafeMergeRec` never returns `never`, but doesn't preserve non-required properties
  *
  * @param A Type
  * @param B Type

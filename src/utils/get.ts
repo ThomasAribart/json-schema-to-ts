@@ -2,7 +2,7 @@ import { Head } from "./head";
 import { Tail } from "./tail";
 
 /**
- * Returns the property value of an object `O`, `F` if property key misses from object
+ * Returns the value at key `K` in object `O`, `F` if `K` misses from object
  *
  * @param O Object
  * @param K Property key
@@ -11,7 +11,15 @@ import { Tail } from "./tail";
  */
 export type Get<O, K, F = never> = K extends keyof O ? O[K] : F;
 
-export type GetRec<O, K> = {
-  continue: GetRec<Get<O, Head<K>>, Tail<K>>;
+/**
+ * Returns the value at path `P` in object `O`, `F` if `P` misses from object
+ *
+ * @param O Object
+ * @param P Path
+ * @param F _(optional:_ `never` _)_ Fallback type
+ * @return Type
+ */
+export type GetRec<O, P, F = never> = {
+  continue: Head<P> extends keyof O ? GetRec<O[Head<P>], Tail<P>, F> : F;
   stop: O;
-}[K extends [any, ...any[]] ? "continue" : "stop"];
+}[P extends [any, ...any[]] ? "continue" : "stop"];
