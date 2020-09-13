@@ -34,16 +34,20 @@ test1b;
 
 // --- ENUM ---
 
-type Test2a = IntersectArr<Arr<Litteral<string>>, Enum<[["foo"], ["bar"], 42]>>;
-const test2a: Test2a = mEnum([["foo"], ["bar"]]);
+type Test2a = IntersectArr<Arr<Litteral<string>>, Enum<["foo"] | ["bar"] | 42>>;
+let test2a: Test2a = mEnum(["foo"]);
+test2a = mEnum(["bar"]);
 test2a;
 
-type Test2b = IntersectArr<Arr<Litteral<number>>, Enum<[["bar", "baz"], [42]]>>;
-const test2b: Test2b = mEnum([[42]]);
+type Test2b = IntersectArr<Arr<Litteral<number>>, Enum<["bar", "baz"] | [42]>>;
+let test2b: Test2b = mEnum([42]);
+// @ts-expect-error
+test2b = mEnum(["bar", "baz"]);
 test2b;
 
-type Test2c = IntersectArr<Arr<Litteral<number>>, Enum<[["bar", "baz"]]>>;
-const test2c: Test2c = mNever();
+type Test2c = IntersectArr<Arr<Litteral<number>>, Enum<["bar", "baz"]>>;
+// @ts-expect-error
+const test2c: Test2c = mEnum(["bar", "baz"]);
 test2c;
 
 // --- LITTERALS ---
@@ -84,9 +88,9 @@ test5c;
 
 type Test5d = IntersectArr<
   Arr<Litteral<string>>,
-  Tuple<[Litteral<string>], true, Enum<["foo", 42]>>
+  Tuple<[Litteral<string>], true, Enum<"foo" | 42>>
 >;
-const test5d: Test5d = mTuple([mLitteral("string")], true, mEnum(["foo"]));
+const test5d: Test5d = mTuple([mLitteral("string")], true, mEnum("foo"));
 test5d;
 
 type Test5e = IntersectArr<

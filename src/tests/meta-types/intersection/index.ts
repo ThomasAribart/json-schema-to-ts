@@ -36,7 +36,7 @@ test2d;
 type Test3 = Resolve<
   Intersection<
     Intersection<Union<Litteral<string> | Litteral<number>>, Const<"foo">>,
-    Intersection<Litteral<string>, Enum<["foo", 42]>>
+    Intersection<Litteral<string>, Enum<"foo" | 42>>
   >
 >;
 const test3a: Test3 = "foo";
@@ -52,7 +52,7 @@ type Test4 = Resolve<
       | Intersection<Union<Litteral<string> | Litteral<number>>, Const<"foo">>
       | Const<42>
     >,
-    Intersection<Litteral<string>, Enum<["foo", 42]>>
+    Intersection<Litteral<string>, Enum<"foo" | 42>>
   >
 >;
 const test4a: Test4 = "foo";

@@ -25,16 +25,22 @@ test1b;
 
 // --- ENUM ---
 
-type Test2a = IntersectLitteral<Litteral<string>, Enum<["foo", "bar", 42]>>;
-const test2a: Test2a = mEnum(["foo", "bar"]);
+type Test2a = IntersectLitteral<Litteral<string>, Enum<"foo" | "bar" | 42>>;
+let test2a: Test2a = mEnum("foo");
+test2a = mEnum("bar");
+// @ts-expect-error
+test2a = mEnum(42 as 42);
 test2a;
 
-type Test2b = IntersectLitteral<Litteral<number>, Enum<["bar", "baz", 42]>>;
-const test2b: Test2b = mEnum([42]);
+type Test2b = IntersectLitteral<Litteral<number>, Enum<"bar" | "baz" | 42>>;
+const test2b: Test2b = mEnum(42 as 42);
 test2b;
 
-type Test2c = IntersectLitteral<Litteral<number>, Enum<["bar", "baz"]>>;
-const test2c: Test2c = mNever();
+type Test2c = IntersectLitteral<Litteral<number>, Enum<"bar" | "baz">>;
+// @ts-expect-error
+let test2c: Test2c = mEnum("bar");
+// @ts-expect-error
+test2c = mEnum("baz");
 test2c;
 
 // --- LITTERALS ---

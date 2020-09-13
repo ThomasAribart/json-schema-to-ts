@@ -62,7 +62,7 @@ test3b;
 
 // --- ENUM ---
 
-type Test4 = Resolve<Arr<Enum<["foo", "bar", 42]>>>;
+type Test4 = Resolve<Arr<Enum<"foo" | "bar" | 42>>>;
 const test4a: Test4 = [42, "foo", "bar"];
 test4a;
 // @ts-expect-error

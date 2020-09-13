@@ -9,7 +9,7 @@ test1a;
 
 // --- LITTERAL ---
 
-type Test2 = Resolve<Enum<["foo", "bar"]>>;
+type Test2 = Resolve<Enum<"foo" | "bar">>;
 const test2a: Test2 = "foo";
 test2a;
 const test2b: Test2 = "bar";
@@ -20,7 +20,7 @@ test2c;
 
 // --- TUPLE ---
 
-type Test3 = Resolve<Enum<[["foo", "bar"]]>>;
+type Test3 = Resolve<Enum<["foo", "bar"]>>;
 const test3a: Test3 = ["foo", "bar"];
 test3a;
 // @ts-expect-error
@@ -29,7 +29,7 @@ test3b;
 
 // --- OBJECT ---
 
-type Test4 = Resolve<Enum<[{ foo: "bar" }]>>;
+type Test4 = Resolve<Enum<{ foo: "bar" }>>;
 const test4a: Test4 = { foo: "bar" };
 test4a;
 // @ts-expect-error
