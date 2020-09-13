@@ -40,11 +40,11 @@ test1c;
 
 type Test2a = IntersectUnion<
   Union<Const<"foo"> | Litteral<number>>,
-  Enum<["foo", 42]>
+  Enum<"foo" | 42>
 >;
 const test2a: Test2a = mUnion(mConst("foo"));
 test2a;
-const test2b: Test2a = mUnion(mEnum([42]));
+const test2b: Test2a = mUnion(mEnum(42 as 42));
 test2b;
 
 type Test2c = IntersectUnion<

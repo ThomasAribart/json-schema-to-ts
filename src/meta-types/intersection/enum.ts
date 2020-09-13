@@ -1,4 +1,4 @@
-import { Get, Head, Tail, Prepend, Reverse } from "../../utils";
+import { Get } from "../../utils";
 
 import { MetaType, Never, Const, Error } from "..";
 import { Enum, Values } from "../enum";
@@ -23,11 +23,8 @@ export type IntersectEnum<A, B> = {
 
 type FilterExtendingResolved<A, B> = Enum<RecurseOnEnumValues<Values<A>, B>>;
 
-type RecurseOnEnumValues<V, B, R extends any[] = []> = {
-  continue: RecurseOnEnumValues<
-    Tail<V>,
-    B,
-    Intersect<Const<Head<V>>, B> extends Never ? R : Prepend<Head<V>, R>
-  >;
-  stop: Reverse<R>;
-}[V extends [any, ...any[]] ? "continue" : "stop"];
+type RecurseOnEnumValues<V, B> = V extends infer T
+  ? Intersect<Const<T>, B> extends Never
+    ? never
+    : T
+  : never;

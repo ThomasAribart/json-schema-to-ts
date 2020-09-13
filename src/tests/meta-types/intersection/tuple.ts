@@ -56,26 +56,29 @@ test1d;
 
 type Test2a = IntersectTuple<
   Tuple<[Litteral<string>, Litteral<number>], true, Litteral<boolean>>,
-  Enum<[["foo"], ["foo", 42], ["foo", 42, true], ["foo", 42, { any: "value" }]]>
+  Enum<
+    ["foo"] | ["foo", 42] | ["foo", 42, true] | ["foo", 42, { any: "value" }]
+  >
 >;
-const test2a: Test2a = mEnum([
-  ["foo", 42],
-  ["foo", 42, true],
-]);
+let test2a: Test2a = mEnum(["foo", 42]);
+test2a = mEnum(["foo", 42, true]);
 test2a;
 
 type Test2b = IntersectTuple<
   Tuple<[Litteral<string>, Litteral<number>], false>,
-  Enum<[["foo"], ["foo", 42], ["foo", 42, true], ["foo", 42, { any: "value" }]]>
+  Enum<
+    ["foo"] | ["foo", 42] | ["foo", 42, true] | ["foo", 42, { any: "value" }]
+  >
 >;
-const test2b: Test2b = mEnum([["foo", 42]]);
+const test2b: Test2b = mEnum(["foo", 42]);
 test2b;
 
 type Test2c = IntersectTuple<
   Tuple<[Litteral<string>, Litteral<number>], true, Litteral<boolean>>,
-  Enum<[["bar", "baz"]]>
+  Enum<["bar", "baz"]>
 >;
-const test2c: Test2c = mNever();
+// @ts-expect-error
+const test2c: Test2c = mEnum(["bar", "baz"]);
 test2c;
 
 // --- LITTERALS ---
@@ -105,10 +108,10 @@ const test4c: Test4c = mTuple([mLitteral("string")], true, mConst("foo"));
 test4c;
 
 type Test4d = IntersectTuple<
-  Tuple<[Litteral<string>], true, Enum<["foo", 42]>>,
+  Tuple<[Litteral<string>], true, Enum<"foo" | 42>>,
   Arr<Litteral<string>>
 >;
-const test4d: Test4d = mTuple([mLitteral("string")], true, mEnum(["foo"]));
+const test4d: Test4d = mTuple([mLitteral("string")], true, mEnum("foo"));
 test4d;
 
 type Test4e = IntersectTuple<
@@ -150,9 +153,9 @@ test5c;
 
 type Test5d = IntersectTuple<
   Tuple<[Litteral<string>], true, Litteral<string>>,
-  Tuple<[Litteral<string>], true, Enum<["foo", 42]>>
+  Tuple<[Litteral<string>], true, Enum<"foo" | 42>>
 >;
-const test5d: Test5d = mTuple([mLitteral("string")], true, mEnum(["foo"]));
+const test5d: Test5d = mTuple([mLitteral("string")], true, mEnum("foo"));
 test5d;
 
 type Test5e = IntersectTuple<

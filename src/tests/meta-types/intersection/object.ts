@@ -56,23 +56,31 @@ test1d;
 
 type Test2a = IntersectObject<
   Object<{ str: Litteral<string> }, "str">,
-  Enum<[{ str: "string" }, 42]>
+  Enum<{ str: "string" } | 42>
 >;
-const test2a: Test2a = mEnum([{ str: "string" }]);
+const test2a: Test2a = mEnum({ str: "string" });
 test2a;
 
 type Test2b = IntersectObject<
   Object<{ str: Litteral<string> }, "str", false>,
-  Enum<["bar", { str: "string"; bar: 42 }]>
+  Enum<"bar" | { str: "string"; bar: 42 }>
 >;
-const test2b: Test2b = mNever();
+// @ts-expect-error
+let test2b: Test2b = mEnum("bar");
+// @ts-expect-error
+test2b = mEnum({ str: "string", bar: 42 as 42 });
 test2b;
 
 type Test2c = IntersectObject<
   Object<{ str: Litteral<string> }, "str">,
-  Enum<["bar", true, { num: 42 }]>
+  Enum<"bar" | true | { num: 42 }>
 >;
-const test2c: Test2c = mNever();
+// @ts-expect-error
+let test2c: Test2c = mEnum("bar");
+// @ts-expect-error
+test2c = mEnum(true);
+// @ts-expect-error
+test2c = mEnum({ num: 42 as 42 });
 test2c;
 
 // --- UNION ---

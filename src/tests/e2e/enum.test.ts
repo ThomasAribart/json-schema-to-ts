@@ -267,4 +267,35 @@ describe("Enum schemas", () => {
       expect(ajv.validate(foodSchema, food)).toBe(false);
     });
   });
+
+  describe("TS enums (with type)", () => {
+    enum Food {
+      Pizza = "Pizza",
+      Tacos = "Tacos",
+      Fries = "Fries",
+    }
+
+    it("infers correct enum", () => {
+      const foodSchema = {
+        type: "string",
+        enum: Object.values(Food),
+      } as const;
+
+      type FoodType = FromSchema<typeof foodSchema>;
+      let food: FoodType;
+
+      food = Food.Pizza;
+      expect(ajv.validate(foodSchema, food)).toBe(true);
+
+      food = Food.Tacos;
+      expect(ajv.validate(foodSchema, food)).toBe(true);
+
+      food = Food.Fries;
+      expect(ajv.validate(foodSchema, food)).toBe(true);
+
+      // @ts-expect-error
+      food = "Not a food";
+      expect(ajv.validate(foodSchema, food)).toBe(false);
+    });
+  });
 });

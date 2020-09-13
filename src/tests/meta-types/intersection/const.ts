@@ -25,7 +25,7 @@ test1b;
 
 // --- ENUM ---
 
-type Test2a = IntersectConst<Const<"foo">, Enum<["foo", "bar", "baz"]>>;
+type Test2a = IntersectConst<Const<"foo">, Enum<"foo" | "bar" | "baz">>;
 const test2a: Test2a = mConst("foo");
 test2a;
 

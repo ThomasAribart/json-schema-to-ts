@@ -61,7 +61,7 @@ test3e;
 
 // --- ENUMS ---
 
-type Test4 = Resolve<Union<Enum<["foo", "bar", 42]> | Enum<["baz", 43]>>>;
+type Test4 = Resolve<Union<Enum<"foo" | "bar" | 42> | Enum<"baz" | 43>>>;
 const test4a: Test4 = "foo";
 test4a;
 const test4b: Test4 = "bar";
