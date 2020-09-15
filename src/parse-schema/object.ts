@@ -24,9 +24,7 @@ type GetRequired<S> = "required" extends keyof S
     : never
   : never;
 
-type GetOpenProps<S> = "properties" extends keyof S
-  ? Any
-  : "additionalProperties" extends keyof S
+type GetOpenProps<S> = "additionalProperties" extends keyof S
   ? "patternProperties" extends keyof S
     ? AdditionalAndPatternProps<
         S["additionalProperties"],

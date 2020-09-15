@@ -4,59 +4,57 @@ import { FromSchema } from "index";
 
 var ajv = new Ajv();
 
-describe("AnyOf schemas", () => {
-  describe("Boolean or String", () => {
-    const anyOfSchema = {
-      anyOf: [{ type: "boolean" }, { type: "string" }],
+describe("AllOf schemas", () => {
+  describe("Boolean and True", () => {
+    const trueSchema = {
+      allOf: [{ type: "boolean" }, { const: true }],
     } as const;
 
-    type StringBoolOrNumber = FromSchema<typeof anyOfSchema>;
-    let boolOrStringInstance: StringBoolOrNumber;
+    type True = FromSchema<typeof trueSchema>;
+    let trueInstance: True;
 
-    it("accepts boolean or string value", () => {
-      boolOrStringInstance = "string";
-      expect(ajv.validate(anyOfSchema, boolOrStringInstance)).toBe(true);
-
-      boolOrStringInstance = true;
-      expect(ajv.validate(anyOfSchema, boolOrStringInstance)).toBe(true);
+    it("accepts true", () => {
+      trueInstance = true;
+      expect(ajv.validate(trueSchema, trueInstance)).toBe(true);
     });
 
     it("rejects other values", () => {
       // @ts-expect-error
-      boolOrStringInstance = 42;
-      expect(ajv.validate(anyOfSchema, boolOrStringInstance)).toBe(false);
+      trueInstance = false;
+      expect(ajv.validate(trueSchema, trueInstance)).toBe(false);
+
+      // @ts-expect-error
+      trueInstance = "string";
+      expect(ajv.validate(trueSchema, trueInstance)).toBe(false);
     });
   });
 
-  describe("Along Enum", () => {
-    const enumSchema = {
-      enum: ["apples", 42],
-      anyOf: [{ type: "boolean" }, { type: "string" }, { type: "number" }],
+  describe("Along OneOf", () => {
+    const appleSchema = {
+      oneOf: [{ const: "apples" }, { const: 42 }],
+      allOf: [{ type: "string" }, { enum: ["apples", "tomatoes"] }],
     } as const;
 
-    type Enum = FromSchema<typeof enumSchema>;
-    let enumInstance: Enum;
+    type Apple = FromSchema<typeof appleSchema>;
+    let appleInstance: Apple;
 
-    it("accepts enum values", () => {
-      enumInstance = "apples";
-      expect(ajv.validate(enumSchema, enumInstance)).toBe(true);
-
-      enumInstance = 42;
-      expect(ajv.validate(enumSchema, enumInstance)).toBe(true);
+    it("accepts valid string", () => {
+      appleInstance = "apples";
+      expect(ajv.validate(appleSchema, appleInstance)).toBe(true);
     });
 
     it("rejects other values", () => {
       // @ts-expect-error
-      enumInstance = "tomatoes";
-      expect(ajv.validate(enumSchema, enumInstance)).toBe(false);
+      appleInstance = "tomatoes";
+      expect(ajv.validate(appleSchema, appleInstance)).toBe(false);
 
       // @ts-expect-error
-      enumInstance = 43;
-      expect(ajv.validate(enumSchema, enumInstance)).toBe(false);
+      appleInstance = 43;
+      expect(ajv.validate(appleSchema, appleInstance)).toBe(false);
 
       // @ts-expect-error
-      enumInstance = true;
-      expect(ajv.validate(enumSchema, enumInstance)).toBe(false);
+      appleInstance = true;
+      expect(ajv.validate(appleSchema, appleInstance)).toBe(false);
     });
   });
 
@@ -66,7 +64,7 @@ describe("AnyOf schemas", () => {
         type: "object",
         properties: { bool: { type: "boolean" } },
         required: ["bool"],
-        anyOf: [
+        allOf: [
           { properties: { num: { type: "number" } }, required: ["num"] },
           { properties: { str: { type: "string" } } },
         ],
@@ -75,37 +73,50 @@ describe("AnyOf schemas", () => {
       type FactoredObj = FromSchema<typeof factoredObjSchema>;
       let factoredObjInstance: FactoredObj;
 
-      it("accepts objects matching #1", () => {
+      it("accepts objects matching parent, #1 and #2", () => {
         factoredObjInstance = { bool: true, num: 42 };
         expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(true);
+
+        factoredObjInstance = {
+          bool: true,
+          num: 42,
+          str: "string",
+          other: ["any", "value"],
+        };
+        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(true);
       });
 
-      it("accepts objects matching #2", () => {
-        factoredObjInstance = { bool: true };
-        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(true);
+      it("rejects objects not matching parent", () => {
+        // @ts-expect-error
+        factoredObjInstance = { num: 42, str: "string" };
+        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
+          false
+        );
 
+        // @ts-expect-error
+        factoredObjInstance = { bool: "not a boolean", num: 42, str: "string" };
+        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
+          false
+        );
+      });
+
+      it("rejects objects not matching #1", () => {
+        // @ts-expect-error
         factoredObjInstance = { bool: true, str: "string" };
-        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(true);
+        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
+          false
+        );
 
-        factoredObjInstance = { bool: true, num: "not a number" };
-        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(true);
+        // @ts-expect-error
+        factoredObjInstance = { bool: true, str: "str", num: "not a number" };
+        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
+          false
+        );
       });
 
-      it("rejects objects matching neither", () => {
-        // @ts-expect-error: Bool should be boolean
-        factoredObjInstance = { bool: "true" };
-        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
-          false
-        );
-
-        // @ts-expect-error: Bool is required
-        factoredObjInstance = { num: 42 };
-        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
-          false
-        );
-
-        // @ts-expect-error: Bool is required
-        factoredObjInstance = { str: "string" };
+      it("rejects objects not matching #2", () => {
+        // @ts-expect-error
+        factoredObjInstance = { bool: true, num: 42, str: ["not", "a", "str"] };
         expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
           false
         );
@@ -116,7 +127,7 @@ describe("AnyOf schemas", () => {
       const factoredObjSchema = {
         type: "object",
         properties: { bool: { type: "boolean" } },
-        anyOf: [
+        allOf: [
           {
             properties: { num: { type: "number" } },
             required: ["num"],
@@ -129,17 +140,23 @@ describe("AnyOf schemas", () => {
       type FactoredObj = FromSchema<typeof factoredObjSchema>;
       let factoredObjInstance: FactoredObj;
 
-      it("accepts objects matching #1", () => {
+      it("accepts objects matching parent, #1 and #2", () => {
         factoredObjInstance = { num: 42 };
         expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(true);
       });
 
-      it("accepts objects matching #2", () => {
+      it("rejects objects not matching closed #1", () => {
+        // @ts-expect-error
         factoredObjInstance = {};
-        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(true);
+        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
+          false
+        );
 
+        // @ts-expect-error
         factoredObjInstance = { bool: true, str: "string" };
-        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(true);
+        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
+          false
+        );
       });
     });
 
@@ -147,44 +164,77 @@ describe("AnyOf schemas", () => {
       const factoredObjSchema = {
         type: "object",
         properties: { bool: { type: "boolean" } },
-        anyOf: [
+        allOf: [
           {
             properties: { num: { type: "number" } },
             required: ["num"],
-            additionalProperties: false,
+            additionalProperties: { type: "boolean" },
           },
-          {
-            properties: { str: { type: "string" } },
-            additionalProperties: false,
-          },
+          { properties: { str: { type: "string" } } },
         ],
       } as const;
 
       type FactoredObj = FromSchema<typeof factoredObjSchema>;
       let factoredObjInstance: FactoredObj;
 
-      it("accepts objects matching #1", () => {
-        factoredObjInstance = { num: 42 };
+      it("accepts objects matching parent, #1 and #2", () => {
+        factoredObjInstance = { num: 42, bool: true, other: false };
         expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(true);
       });
 
-      it("accepts objects matching #2", () => {
-        factoredObjInstance = {};
-        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(true);
-
-        factoredObjInstance = { str: "string" };
-        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(true);
-      });
-
-      it("rejects objects matching neither", () => {
-        // @ts-expect-error
-        factoredObjInstance = { num: 42, bool: true };
+      it("rejects objects not matching #1", () => {
+        // Impossible to raise error at the moment...
+        factoredObjInstance = { num: 42, str: "str" };
         expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
           false
         );
 
         // @ts-expect-error
-        factoredObjInstance = { str: "string", bool: true };
+        factoredObjInstance = { bool: true, str: "string" };
+        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
+          false
+        );
+      });
+    });
+
+    describe("Closed (3) to open object", () => {
+      const factoredObjSchema = {
+        type: "object",
+        allOf: [
+          {
+            properties: { str: { type: "string" } },
+            required: ["str"],
+            additionalProperties: { type: "boolean" },
+          },
+          { additionalProperties: { type: "string" } },
+        ],
+      } as const;
+
+      type FactoredObj = FromSchema<typeof factoredObjSchema>;
+      let factoredObjInstance: FactoredObj;
+
+      it("accepts objects matching #1 and #2", () => {
+        factoredObjInstance = { str: "string" };
+        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(true);
+      });
+
+      it("rejects objects not matching #1", () => {
+        // @ts-expect-error
+        factoredObjInstance = {};
+        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
+          false
+        );
+
+        // @ts-expect-error
+        factoredObjInstance = { str: "string", other: "not boolean" };
+        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
+          false
+        );
+      });
+
+      it("rejects objects not matching #2", () => {
+        // @ts-expect-error
+        factoredObjInstance = { other: true };
         expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
           false
         );
@@ -195,7 +245,7 @@ describe("AnyOf schemas", () => {
       const factoredObjSchema = {
         type: "object",
         properties: { bool: { type: "boolean" } },
-        anyOf: [
+        allOf: [
           {
             properties: { num: { type: "number" } },
             required: ["num"],
@@ -229,7 +279,7 @@ describe("AnyOf schemas", () => {
       const factoredObjSchema = {
         type: "object",
         properties: { bool: { type: "boolean" } },
-        anyOf: [
+        allOf: [
           {
             properties: { num: { type: "number" }, bool: { type: "string" } },
             required: ["num"],
@@ -259,11 +309,51 @@ describe("AnyOf schemas", () => {
       });
     });
 
+    describe("Closed to open object (impossible 3)", () => {
+      const factoredObjSchema = {
+        type: "object",
+        properties: { bool: { type: "boolean" } },
+        allOf: [
+          {
+            properties: { num: { type: "number" } },
+            required: ["num"],
+            additionalProperties: false,
+          },
+          {
+            properties: { str: { type: "string" } },
+            additionalProperties: false,
+          },
+        ],
+      } as const;
+
+      type FactoredObj = FromSchema<typeof factoredObjSchema>;
+      let factoredObjInstance: FactoredObj;
+
+      it("rejects objects not matching #1", () => {
+        // @ts-expect-error
+        factoredObjInstance = { str: "string" };
+        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
+          false
+        );
+      });
+
+      it("rejects objects not matching #2", () => {
+        // @ts-expect-error
+        factoredObjInstance = { num: 42 };
+        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
+          false
+        );
+      });
+    });
+
     describe("Open (1) to closed object", () => {
       const factoredObjSchema = {
         type: "object",
         properties: { bool: { type: "boolean" } },
-        anyOf: [{ properties: { str: { type: "string" } } }],
+        allOf: [
+          { properties: { str: { type: "string" } } },
+          { properties: { num: { type: "number" } } },
+        ],
         required: ["bool"],
         additionalProperties: false,
       } as const;
@@ -291,11 +381,11 @@ describe("AnyOf schemas", () => {
       });
     });
 
-    describe("Open (2) to closed object", () => {
+    describe("Open to closed object (impossible 1)", () => {
       const factoredObjSchema = {
         type: "object",
         properties: { bool: { type: "boolean" } },
-        anyOf: [
+        allOf: [
           { properties: { str: { type: "string" } }, required: ["str"] },
           { properties: { num: { type: "number" } } },
         ],
@@ -305,36 +395,42 @@ describe("AnyOf schemas", () => {
       type FactoredObj = FromSchema<typeof factoredObjSchema>;
       let factoredObjInstance: FactoredObj;
 
-      it("accepts objects matching #2", () => {
+      it("rejects objects matching parent as #1 requires 'str' property", () => {
+        // @ts-expect-error
         factoredObjInstance = {};
-        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(true);
+        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
+          false
+        );
 
+        // @ts-expect-error
         factoredObjInstance = { bool: true };
-        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(true);
+        expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
+          false
+        );
       });
 
       it("rejects objects matching #1 as parent is closed", () => {
-        // @ts-expect-error: "str" is not allowed as additionalProperty
+        // @ts-expect-error
         factoredObjInstance = { str: "string" };
         expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
           false
         );
 
-        // @ts-expect-error: event with bool present
+        // @ts-expect-error
         factoredObjInstance = { bool: true, str: "string" };
         expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
           false
         );
       });
 
-      it("rejects objects matching neigher", () => {
-        // @ts-expect-error: "num" is not allowed as additionalProperty
+      it("rejects objects matching #2 as parent is closed", () => {
+        // @ts-expect-error
         factoredObjInstance = { num: 42 };
         expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
           false
         );
 
-        // @ts-expect-error: event with bool present
+        // @ts-expect-error
         factoredObjInstance = { bool: true, num: 42 };
         expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
           false
@@ -342,11 +438,11 @@ describe("AnyOf schemas", () => {
       });
     });
 
-    describe("Open to closed object (impossible 1)", () => {
+    describe("Open to closed object (impossible 2)", () => {
       const factoredObjSchema = {
         type: "object",
         properties: { bool: { type: "boolean" } },
-        anyOf: [{ properties: { str: { type: "string" } }, required: ["str"] }],
+        allOf: [{ properties: { str: { type: "string" } }, required: ["str"] }],
         required: ["bool"],
         additionalProperties: false,
       } as const;
@@ -379,11 +475,11 @@ describe("AnyOf schemas", () => {
       });
     });
 
-    describe("Open to closed object (impossible 2)", () => {
+    describe("Open to closed object (impossible 3)", () => {
       const factoredObjSchema = {
         type: "object",
         properties: { bool: { type: "boolean" } },
-        anyOf: [
+        allOf: [
           {
             properties: { str: { type: "string" } },
             additionalProperties: false,

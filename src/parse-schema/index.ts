@@ -7,6 +7,7 @@ import { ParseArrSchema } from "./array";
 import { ParseObjectSchema } from "./object";
 import { ParseAnyOfSchema } from "./anyOf";
 import { ParseOneOfSchema } from "./oneOf";
+import { ParseAllOfSchema } from "./allOf";
 
 export type ParseSchema<S> = {
   any: Any;
@@ -22,12 +23,15 @@ export type ParseSchema<S> = {
   enum: ParseEnumSchema<S>;
   anyOf: ParseAnyOfSchema<S>;
   oneOf: ParseOneOfSchema<S>;
+  allOf: ParseAllOfSchema<S>;
 }[InferSchemaType<S>];
 
 type InferSchemaType<S> = S extends true | string
   ? "any"
   : S extends false
   ? "never"
+  : "allOf" extends keyof S
+  ? "allOf"
   : "oneOf" extends keyof S
   ? "oneOf"
   : "anyOf" extends keyof S
