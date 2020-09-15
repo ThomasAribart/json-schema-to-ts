@@ -146,7 +146,7 @@ type Litterals = FromSchema<typeof litteralsSchema>;
 // => null | string
 ```
 
-(For `object` and `array` types, properties like `required` or `additionalItems` will work 🙌)
+> For `object` and `array` types, properties like `required` or `additionalItems` will apply 🙌
 
 ### Arrays
 
@@ -317,14 +317,23 @@ type Factored = FromSchema<typeof factoredSchema>;
 
 ### OneOf
 
-Because TypeScript doesn't have [refinment types](https://en.wikipedia.org/wiki/Refinement_type), `oneOf` will behave strictly the same as `anyOf`.
+Because TypeScript misses [refinment types](https://en.wikipedia.org/wiki/Refinement_type), `FromSchema` will use the `oneOf` keyword in the same way as `anyOf`:
 
 ```typescript
 const catSchema = {
   type: "object",
   oneOf: [
-    { properties: { name: { type: "string" } }, required: ["name"] },
-    { properties: { color: { enum: ["black", "brown", "white"] } } },
+    {
+      properties: {
+        name: { type: "string" },
+      },
+      required: ["name"],
+    },
+    {
+      properties: {
+        color: { enum: ["black", "brown", "white"] },
+      },
+    },
   ],
 } as const;
 
@@ -337,14 +346,44 @@ type Cat = FromSchema<typeof catSchema>;
 //  color?: "black" | "brown" | "white";
 // }
 
-// => FromSchema cannot detect the following invalid obj 😱
+// => FromSchema will not detect the following invalid obj 😱
 const invalidCat: Cat = { name: "Garfield" };
 ```
 
 ### AllOf
 
-...Coming soon 😃
+```typescript
+const addressSchema = {
+  type: "object",
+  allOf: [
+    {
+      properties: {
+        address: { type: "string" },
+        city: { type: "string" },
+        state: { type: "string" },
+      },
+      required: ["address", "city", "state"],
+    },
+    {
+      properties: {
+        type: { enum: ["residential", "business"] },
+      },
+    },
+  ],
+} as const;
 
-### If/Else
+type Address = FromSchema<typeof addressSchema>;
+// => {
+//   [x: string]: unknown;
+//   address: string;
+//   city: string;
+//   state: string;
+//   type?: "residential" | "business";
+// }
+```
 
-...Coming soon 😃
+### Not & If/Then/Else
+
+For the same reason as `oneOf` (missing refinment types), I feel like implementing the `not` and the `if/then/else` keywords in `FromSchema` would lead into a rabbit hole...
+
+But I may be wrong ! If you have a use case and you think that it can be implemented, feel free to submit a PR 🤗
