@@ -75,12 +75,12 @@ On the other hand, JSON schemas have the benefit of being widely used, more vers
 
 If you prefer to stick to them and can define your schemas in TS instead of JSON (importing JSONs `as const` is not available yet), then `json-schema-to-ts` is made for you:
 
-- 🙅‍♂️**No dependency**
-- ✨**No impact on compiled code**: `FromSchema` only operates in type space. And after all, what's lighter than a dev-dependency?
-- 🍸**DRYness**: Less code means less embarrassing typos
-- 🤝**Consistency**: See that `string` that you used instead of an `enum`? Or this `additionalProperties` you confused with `additionalItems`? Or forgot entirely? Well, `FromSchema` does!
-- 🔧**Reliability**: `FromSchema` is extensively tested against [AJV](https://github.com/ajv-validator/ajv), and covers all the use cases that can be handled by TS for now\*
-- 🏋️‍♂️**Help on complex schemas**: Get complex schemas right first time with instantaneous typing feedbacks! For instance, it's not obvious the following schema can never be validated:
+- 🙅‍♂️ **No dependency**
+- ✨ **No impact on compiled code**: `FromSchema` only operates in type space. And after all, what's lighter than a dev-dependency?
+- 🍸 **DRYness**: Less code means less embarrassing typos
+- 🤝 **Consistency**: See that `string` that you used instead of an `enum`? Or this `additionalProperties` you confused with `additionalItems`? Or forgot entirely? Well, `FromSchema` does!
+- 🔧 **Reliability**: `FromSchema` is extensively tested against [AJV](https://github.com/ajv-validator/ajv), and covers all the use cases that can be handled by TS for now\*
+- 🏋️‍♂️ **Help on complex schemas**: Get complex schemas right first time with instantaneous typing feedbacks! For instance, it's not obvious the following schema can never be validated:
 
 ```typescript
 const addressSchema = {
