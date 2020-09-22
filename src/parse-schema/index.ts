@@ -1,4 +1,4 @@
-import { Litteral, Any, Never } from "../meta-types";
+import { Primitive, Any, Never } from "../meta-types";
 
 import { ParseConstSchema } from "./const";
 import { ParseEnumSchema } from "./enum";
@@ -12,10 +12,10 @@ import { ParseAllOfSchema } from "./allOf";
 export type ParseSchema<S> = {
   any: Any;
   never: Never;
-  null: Litteral<null>;
-  boolean: Litteral<boolean>;
-  number: Litteral<number>;
-  string: Litteral<string>;
+  null: Primitive<null>;
+  boolean: Primitive<boolean>;
+  number: Primitive<number>;
+  string: Primitive<string>;
   mixed: ParseMixedSchema<S>;
   object: ParseObjectSchema<S>;
   array: ParseArrSchema<S>;

@@ -5,7 +5,7 @@ import { Resolve, Any } from ".";
 export type TupleType = "tuple";
 
 export type Tuple<V, O = true, P = Any> = {
-  type: "tuple";
+  type: TupleType;
   values: V;
   isOpen: O;
   openProps: P;

@@ -2,7 +2,7 @@ import {
   Any,
   Never,
   Const,
-  Litteral,
+  Primitive,
   Arr,
   Tuple,
   Object,
@@ -22,8 +22,8 @@ export const mEnum = <T>(values: T): { type: "enum"; values: T } => ({
   values,
 });
 
-export const mLitteral = <T>(value: T): Litteral<T> => ({
-  type: "litteral",
+export const mPrimitive = <T>(value: T): Primitive<T> => ({
+  type: "primitive",
   value,
 });
 

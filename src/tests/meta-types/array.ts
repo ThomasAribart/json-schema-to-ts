@@ -4,7 +4,7 @@ import {
   Never,
   Const,
   Enum,
-  Litteral,
+  Primitive,
   Arr,
   Tuple,
   Object,
@@ -69,9 +69,9 @@ test4a;
 const test4b: Test4 = ["baz"];
 test4b;
 
-// --- LITTERALS ---
+// --- PRIMITIVES ---
 
-type Test5 = Resolve<Arr<Litteral<string>>>;
+type Test5 = Resolve<Arr<Primitive<string>>>;
 const test5a: Test5 = ["foo", "bar"];
 test5a;
 // @ts-expect-error
@@ -80,7 +80,7 @@ test5b;
 
 // --- ARRAY ---
 
-type Test6 = Resolve<Arr<Arr<Litteral<string>>>>;
+type Test6 = Resolve<Arr<Arr<Primitive<string>>>>;
 const test6a: Test6 = [["foo", "bar"]];
 test6a;
 // @ts-expect-error
@@ -89,7 +89,7 @@ test6b;
 
 // --- TUPLE ---
 
-type Test7 = Resolve<Arr<Tuple<[Litteral<string>], false>>>;
+type Test7 = Resolve<Arr<Tuple<[Primitive<string>], false>>>;
 const test7a: Test7 = [["foo"]];
 test7a;
 // @ts-expect-error
@@ -104,10 +104,10 @@ test7c;
 type Test8 = Resolve<
   Arr<
     Object<
-      { foo: Litteral<string>; bar: Litteral<number> },
+      { foo: Primitive<string>; bar: Primitive<number> },
       "bar",
       false,
-      Litteral<string>
+      Primitive<string>
     >
   >
 >;
@@ -125,7 +125,7 @@ test8d;
 
 // --- UNION ---
 
-type Test9 = Resolve<Arr<Union<Litteral<string> | Const<42>>>>;
+type Test9 = Resolve<Arr<Union<Primitive<string> | Const<42>>>>;
 const test9a: Test9 = [42, "foo", "bar"];
 test9a;
 // @ts-expect-error
@@ -134,7 +134,7 @@ test9b;
 
 // --- INTERSECTION ---
 
-type Test10 = Resolve<Arr<Intersection<Litteral<string>, Const<"foo">>>>;
+type Test10 = Resolve<Arr<Intersection<Primitive<string>, Const<"foo">>>>;
 const test10a: Test10 = ["foo"];
 test10a;
 // @ts-expect-error

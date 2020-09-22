@@ -2,7 +2,7 @@ import {
   Resolve,
   Const,
   Enum,
-  Litteral,
+  Primitive,
   Arr,
   Tuple,
   Union,
@@ -10,7 +10,7 @@ import {
 } from "meta-types";
 
 type Test1 = Resolve<
-  Intersection<Union<Litteral<string> | Litteral<number>>, Const<"foo">>
+  Intersection<Union<Primitive<string> | Primitive<number>>, Const<"foo">>
 >;
 const test1a: Test1 = "foo";
 test1a;
@@ -20,7 +20,7 @@ const test1b: Test1 = "other string";
 const test1c: Test1 = { not: "a string" };
 
 type Test2 = Resolve<
-  Intersection<Arr<Litteral<string>>, Tuple<[Const<"foo">]>>
+  Intersection<Arr<Primitive<string>>, Tuple<[Const<"foo">]>>
 >;
 const test2a: Test2 = ["foo"];
 test2a;
@@ -35,8 +35,8 @@ test2d;
 
 type Test3 = Resolve<
   Intersection<
-    Intersection<Union<Litteral<string> | Litteral<number>>, Const<"foo">>,
-    Intersection<Litteral<string>, Enum<"foo" | 42>>
+    Intersection<Union<Primitive<string> | Primitive<number>>, Const<"foo">>,
+    Intersection<Primitive<string>, Enum<"foo" | 42>>
   >
 >;
 const test3a: Test3 = "foo";
@@ -49,10 +49,10 @@ const test3c: Test3 = { not: "a string" };
 type Test4 = Resolve<
   Intersection<
     Union<
-      | Intersection<Union<Litteral<string> | Litteral<number>>, Const<"foo">>
+      | Intersection<Union<Primitive<string> | Primitive<number>>, Const<"foo">>
       | Const<42>
     >,
-    Intersection<Litteral<string>, Enum<"foo" | 42>>
+    Intersection<Primitive<string>, Enum<"foo" | 42>>
   >
 >;
 const test4a: Test4 = "foo";

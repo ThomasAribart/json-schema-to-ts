@@ -4,7 +4,7 @@ import { Resolve, MetaType, Never, Error } from "..";
 
 import { IntersectConst } from "./const";
 import { IntersectEnum } from "./enum";
-import { IntersectLitteral } from "./litteral";
+import { IntersectPrimitive } from "./primitive";
 import { ClearArrIntersections, IntersectArr } from "./array";
 import { ClearTupleIntersections, IntersectTuple } from "./tuple";
 import { ClearObjectIntersections, IntersectObject } from "./object";
@@ -31,7 +31,7 @@ export type ClearIntersections<T> = {
   never: T;
   const: T;
   enum: T;
-  litteral: T;
+  primitive: T;
   array: ClearArrIntersections<T>;
   tuple: ClearTupleIntersections<T>;
   object: ClearObjectIntersections<T>;
@@ -49,7 +49,7 @@ export type Intersect<A, B> = {
   never: Never;
   const: IntersectConst<A, B>;
   enum: IntersectEnum<A, B>;
-  litteral: IntersectLitteral<A, B>;
+  primitive: IntersectPrimitive<A, B>;
   array: IntersectArr<A, B>;
   tuple: IntersectTuple<A, B>;
   object: IntersectObject<A, B>;

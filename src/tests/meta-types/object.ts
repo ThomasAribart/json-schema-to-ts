@@ -1,13 +1,13 @@
-import { Resolve, Object, Litteral } from "meta-types";
+import { Resolve, Object, Primitive } from "meta-types";
 
 // --- OPEN ---
 
 type Test1 = Resolve<
   Object<
-    { str: Litteral<string>; num: Litteral<number> },
+    { str: Primitive<string>; num: Primitive<number> },
     "str",
     true,
-    Litteral<string>
+    Primitive<string>
   >
 >;
 
@@ -29,7 +29,7 @@ test1d;
 const test1e: Test1 = { str: "str", num: 42, openProp: { foo: "bar" } };
 test1e;
 
-type Test2 = Resolve<Object<{}, never, true, Litteral<string>>>;
+type Test2 = Resolve<Object<{}, never, true, Primitive<string>>>;
 
 const test2a: Test2 = {};
 test2a;
@@ -44,7 +44,7 @@ test2c;
 // --- CLOSED ---
 
 type Test3 = Resolve<
-  Object<{ str: Litteral<string>; num: Litteral<number> }, "str", false>
+  Object<{ str: Primitive<string>; num: Primitive<number> }, "str", false>
 >;
 
 // @ts-expect-error: Requires 'str' property
@@ -69,7 +69,7 @@ const test3e: Test3 = {
 };
 test3e;
 
-type Test4 = Resolve<Object<{ str: Litteral<string> }, "str" | "num", false>>;
+type Test4 = Resolve<Object<{ str: Primitive<string> }, "str" | "num", false>>;
 
 // @ts-expect-error: Requires 'num' property
 const test4a: Test4 = { str: "str" };

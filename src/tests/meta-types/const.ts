@@ -1,6 +1,6 @@
 import { Resolve, Const } from "meta-types";
 
-// --- LITTERAL ---
+// --- PRIMITIVE ---
 
 type Test1 = Resolve<Const<null>>;
 const test1a: Test1 = null;

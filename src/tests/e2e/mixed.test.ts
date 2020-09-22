@@ -5,7 +5,7 @@ import { FromSchema } from "index";
 var ajv = new Ajv();
 
 describe("Mixed types schemas", () => {
-  describe("Litterals", () => {
+  describe("Primitives", () => {
     const simpleTypesSchema = {
       type: ["null", "boolean", "integer"],
     } as const;

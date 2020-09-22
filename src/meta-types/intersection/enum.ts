@@ -11,7 +11,7 @@ export type IntersectEnum<A, B> = {
   never: Never;
   const: IntersectConst<B, A>;
   enum: FilterExtendingResolved<A, B>;
-  litteral: FilterExtendingResolved<A, B>;
+  primitive: FilterExtendingResolved<A, B>;
   array: FilterExtendingResolved<A, B>;
   tuple: FilterExtendingResolved<A, B>;
   object: FilterExtendingResolved<A, B>;

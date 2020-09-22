@@ -15,7 +15,7 @@ export type IntersectArr<A, B> = {
   never: Never;
   const: IntersectConst<B, A>;
   enum: IntersectEnum<B, A>;
-  litteral: Never;
+  primitive: Never;
   array: IntersectArrs<A, B>;
   tuple: IntersectTuple<B, A>;
   object: Never;

@@ -7,7 +7,7 @@ type Test1 = Resolve<Enum<[]>>;
 const test1a: Test1 = "any value";
 test1a;
 
-// --- LITTERAL ---
+// --- PRIMITIVE ---
 
 type Test2 = Resolve<Enum<"foo" | "bar">>;
 const test2a: Test2 = "foo";

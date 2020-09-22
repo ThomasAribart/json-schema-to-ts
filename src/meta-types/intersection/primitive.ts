@@ -1,18 +1,18 @@
 import { Get } from "../../utils";
 
 import { MetaType, Never, Error } from "..";
-import { Value } from "../litteral";
+import { Value } from "../primitive";
 
 import { IntersectConst } from "./const";
 import { IntersectEnum } from "./enum";
 import { Intersect } from ".";
 
-export type IntersectLitteral<A, B> = {
+export type IntersectPrimitive<A, B> = {
   any: A;
   never: Never;
   const: IntersectConst<B, A>;
   enum: IntersectEnum<B, A>;
-  litteral: Value<A> extends Value<B>
+  primitive: Value<A> extends Value<B>
     ? A
     : Value<B> extends Value<A>
     ? B

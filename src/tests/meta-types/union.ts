@@ -4,7 +4,7 @@ import {
   Never,
   Const,
   Enum,
-  Litteral,
+  Primitive,
   Arr,
   Tuple,
   Object,
@@ -15,7 +15,7 @@ import {
 
 // --- ANY ---
 
-type Test1 = Resolve<Union<Any | Litteral<string>>>;
+type Test1 = Resolve<Union<Any | Primitive<string>>>;
 const test1a: Test1 = null;
 test1a;
 const test1b: Test1 = true;
@@ -31,7 +31,7 @@ test1f;
 
 // --- NEVER ---
 
-type Test2a = Resolve<Union<Never | Litteral<string>>>;
+type Test2a = Resolve<Union<Never | Primitive<string>>>;
 const test2a: Test2a = "string";
 test2a;
 // @ts-expect-error
@@ -79,9 +79,9 @@ test4f;
 const test4g: Test4 = 44;
 test4g;
 
-// --- LITTERALS ---
+// --- PRIMITIVES ---
 
-type Test5 = Resolve<Union<Litteral<string> | Litteral<number>>>;
+type Test5 = Resolve<Union<Primitive<string> | Primitive<number>>>;
 const test5a: Test5 = "string";
 test5a;
 const test5b: Test5 = 42;
@@ -92,7 +92,7 @@ test5c;
 
 // --- ARRAYS ---
 
-type Test6 = Resolve<Union<Arr<Litteral<string>> | Arr<Litteral<number>>>>;
+type Test6 = Resolve<Union<Arr<Primitive<string>> | Arr<Primitive<number>>>>;
 
 const test6a: Test6 = ["string", "array"];
 test6a;
@@ -109,8 +109,8 @@ test6d;
 
 type Test7 = Resolve<
   Union<
-    | Tuple<[Litteral<string>, Litteral<number>]>
-    | Tuple<[Litteral<string>, Litteral<boolean>], false>
+    | Tuple<[Primitive<string>, Primitive<number>]>
+    | Tuple<[Primitive<string>, Primitive<boolean>], false>
   >
 >;
 
@@ -128,8 +128,8 @@ test7d;
 
 type Test8 = Resolve<
   Union<
-    | Object<{ bar: Litteral<number> }, "bar">
-    | Object<{ foo: Litteral<string> }, "foo", false>
+    | Object<{ bar: Primitive<number> }, "bar">
+    | Object<{ foo: Primitive<string> }, "foo", false>
   >
 >;
 
@@ -147,7 +147,7 @@ test8d;
 
 type Test9 = Resolve<
   Union<
-    | Union<Litteral<string> | Litteral<boolean>>
+    | Union<Primitive<string> | Primitive<boolean>>
     | Union<Const<"foo"> | Const<42>>
   >
 >;
@@ -168,8 +168,8 @@ test9e;
 
 type Test10 = Resolve<
   Union<
-    | Intersection<Litteral<string>, Const<"foo">>
-    | Intersection<Litteral<number>, Const<42>>
+    | Intersection<Primitive<string>, Const<"foo">>
+    | Intersection<Primitive<number>, Const<42>>
   >
 >;
 

@@ -1,7 +1,7 @@
 import {
   Const,
   Enum,
-  Litteral,
+  Primitive,
   Arr,
   Tuple,
   Object,
@@ -45,9 +45,9 @@ test2b = mEnum(43);
 test2b = mEnum(true);
 test2b;
 
-// --- LITTERALS ---
+// --- PRIMITIVES ---
 
-type Test4a = IntersectEnum<Enum<"foo" | "bar" | 42>, Litteral<string>>;
+type Test4a = IntersectEnum<Enum<"foo" | "bar" | 42>, Primitive<string>>;
 let test4a: Test4a = mEnum("foo");
 test4a = mEnum("bar");
 // @ts-expect-error
@@ -60,13 +60,13 @@ enum Food {
   Fries = "fries",
 }
 
-type Test4b = IntersectEnum<Enum<Food>, Litteral<string>>;
+type Test4b = IntersectEnum<Enum<Food>, Primitive<string>>;
 let test4b: Test4b = mEnum(Food.Pizza);
 test4b = mEnum(Food.Tacos);
 test4b = mEnum(Food.Fries);
 test4b;
 
-type Test4c = IntersectEnum<Enum<"foo" | "bar" | 42>, Litteral<boolean>>;
+type Test4c = IntersectEnum<Enum<"foo" | "bar" | 42>, Primitive<boolean>>;
 // @ts-expect-error
 let test4c: Test4c = mEnum("foo");
 // @ts-expect-error
@@ -77,13 +77,16 @@ test4c;
 
 // --- ARRAY ---
 
-type Test5a = IntersectEnum<Enum<["foo", "bar"] | [42]>, Arr<Litteral<string>>>;
+type Test5a = IntersectEnum<
+  Enum<["foo", "bar"] | [42]>,
+  Arr<Primitive<string>>
+>;
 let test5a: Test5a = mEnum(["foo", "bar"]);
 // @ts-expect-error
 test5a = mEnum([42 as 42]);
 test5a;
 
-type Test5b = IntersectEnum<Enum<"foo" | 42>, Arr<Litteral<string>>>;
+type Test5b = IntersectEnum<Enum<"foo" | 42>, Arr<Primitive<string>>>;
 // @ts-expect-error
 let test5b: Test5b = mEnum("foo");
 // @ts-expect-error
@@ -94,7 +97,7 @@ test5b;
 
 type Test6a = IntersectEnum<
   Enum<["foo", "bar"] | ["foo", 42]>,
-  Tuple<[Litteral<string>], true, Litteral<string>>
+  Tuple<[Primitive<string>], true, Primitive<string>>
 >;
 let test6a: Test6a = mEnum(["foo", "bar"]);
 // @ts-expect-error
@@ -103,7 +106,7 @@ test6a;
 
 type Test6b = IntersectEnum<
   Enum<"foo" | "bar" | 42>,
-  Tuple<[Litteral<string>], true, Litteral<string>>
+  Tuple<[Primitive<string>], true, Primitive<string>>
 >;
 // @ts-expect-error
 let test6b: Test6b = mEnum("foo");
@@ -117,7 +120,7 @@ test6b;
 
 type Test7a = IntersectEnum<
   Enum<{ foo: "str"; bar: "str" } | { foo: "str"; bar: 42 }>,
-  Object<{ foo: Litteral<string> }, "foo", true, Litteral<string>>
+  Object<{ foo: Primitive<string> }, "foo", true, Primitive<string>>
 >;
 let test7a: Test7a = mEnum({ foo: "str", bar: "str" });
 // @ts-expect-error
@@ -126,7 +129,7 @@ test7a;
 
 type Test7b = IntersectEnum<
   Enum<"foo" | "bar" | 42>,
-  Object<{ foo: Litteral<string> }, "foo", true, Litteral<string>>
+  Object<{ foo: Primitive<string> }, "foo", true, Primitive<string>>
 >;
 // @ts-expect-error
 let test7b: Test7b = mEnum("foo");
@@ -138,7 +141,7 @@ test7b;
 
 // --- UNION ---
 
-type Test3a = IntersectEnum<Enum<"foo" | "bar" | 42>, Union<Litteral<string>>>;
+type Test3a = IntersectEnum<Enum<"foo" | "bar" | 42>, Union<Primitive<string>>>;
 let test3a: Test3a = mUnion(mEnum("foo"));
 test3a = mUnion(mEnum("bar"));
 // @ts-expect-error
@@ -147,14 +150,14 @@ test3a;
 
 type Test3b = IntersectEnum<
   Enum<"foo" | "bar" | 42>,
-  Union<Const<"foo"> | Litteral<boolean>>
+  Union<Const<"foo"> | Primitive<boolean>>
 >;
 const test3b: Test3b = mUnion(mConst("foo"));
 test3b;
 
 type Test3c = IntersectEnum<
   Enum<"foo" | "bar" | 42>,
-  Union<Object | Litteral<boolean>>
+  Union<Object | Primitive<boolean>>
 >;
 // @ts-expect-error
 let test3c: Test3c = mUnion(mEnum("foo"));
@@ -168,7 +171,7 @@ test3c;
 
 type Test8a = IntersectEnum<
   Enum<"foo" | "bar" | 42>,
-  Intersection<Litteral<string>, Litteral<number>>
+  Intersection<Primitive<string>, Primitive<number>>
 >;
 const test8a: Test8a = mError("Cannot intersect intersection");
 test8a;

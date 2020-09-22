@@ -367,7 +367,7 @@ describe("OneOf schemas", () => {
       let factoredObjInstance: FactoredObj;
 
       it('rejects object having "str" child schema as parent is closed', () => {
-        // @ts-expect-errors
+        // @ts-expect-error
         factoredObjInstance = { bool: true, str: "str" };
         expect(ajv.validate(factoredObjSchema, factoredObjInstance)).toBe(
           false

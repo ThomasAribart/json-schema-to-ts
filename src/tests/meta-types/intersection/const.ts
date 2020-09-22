@@ -3,7 +3,7 @@ import {
   Const,
   Enum,
   Union,
-  Litteral,
+  Primitive,
   Arr,
   Tuple,
   Object,
@@ -33,23 +33,23 @@ type Test2b = IntersectConst<Const<"foo">, Enum<["bar", "baz"]>>;
 const test2b: Test2b = mNever();
 test2b;
 
-// --- LITTERALS ---
+// --- PRIMITIVES ---
 
-type Test3a = IntersectConst<Const<"foo">, Litteral<string>>;
+type Test3a = IntersectConst<Const<"foo">, Primitive<string>>;
 const test3a: Test3a = mConst("foo");
 test3a;
 
-type Test3b = IntersectConst<Const<"foo">, Litteral<boolean>>;
+type Test3b = IntersectConst<Const<"foo">, Primitive<boolean>>;
 const test3b: Test3b = mNever();
 test3b;
 
 // --- ARRAY ---
 
-type Test4a = IntersectConst<Const<["foo", "bar"]>, Arr<Litteral<string>>>;
+type Test4a = IntersectConst<Const<["foo", "bar"]>, Arr<Primitive<string>>>;
 const test4a: Test4a = mConst(["foo", "bar"]);
 test4a;
 
-type Test4b = IntersectConst<Const<"foo">, Arr<Litteral<string>>>;
+type Test4b = IntersectConst<Const<"foo">, Arr<Primitive<string>>>;
 const test4b: Test4b = mNever();
 test4b;
 
@@ -57,28 +57,28 @@ test4b;
 
 type Test5a = IntersectConst<
   Const<["foo", "bar"]>,
-  Tuple<[Litteral<string>], true, Litteral<string>>
+  Tuple<[Primitive<string>], true, Primitive<string>>
 >;
 const test5a: Test5a = mConst(["foo", "bar"]);
 test5a;
 
 type Test5b = IntersectConst<
   Const<["foo", 42, "bar"]>,
-  Tuple<[Litteral<string>, Litteral<number>], true, Litteral<string>>
+  Tuple<[Primitive<string>, Primitive<number>], true, Primitive<string>>
 >;
 const test5b: Test5b = mConst(["foo", 42, "bar"]);
 test5b;
 
 type Test5c = IntersectConst<
   Const<["foo", 42]>,
-  Tuple<[Litteral<string>], true, Litteral<string>>
+  Tuple<[Primitive<string>], true, Primitive<string>>
 >;
 const test5c: Test5c = mNever();
 test5c;
 
 type Test5d = IntersectConst<
   Const<"foo">,
-  Tuple<[Litteral<string>], true, Litteral<string>>
+  Tuple<[Primitive<string>], true, Primitive<string>>
 >;
 const test5d: Test5d = mNever();
 test5d;
@@ -87,14 +87,14 @@ test5d;
 
 type Test6a = IntersectConst<
   Const<{ foo: "bar" }>,
-  Object<{ foo: Litteral<string> }, "foo", true, Litteral<string>>
+  Object<{ foo: Primitive<string> }, "foo", true, Primitive<string>>
 >;
 const test6a: Test6a = mConst({ foo: "bar" });
 test6a;
 
 type Test6b = IntersectConst<
   Const<"foo">,
-  Object<{ foo: Litteral<string> }, "foo", true, Litteral<string>>
+  Object<{ foo: Primitive<string> }, "foo", true, Primitive<string>>
 >;
 const test6b: Test6b = mNever();
 test6b;
@@ -103,21 +103,21 @@ test6b;
 
 type Test7a = IntersectConst<
   Const<"foo">,
-  Union<Litteral<string> | Litteral<number>>
+  Union<Primitive<string> | Primitive<number>>
 >;
 const test7a: Test7a = mUnion(mConst("foo"));
 test7a;
 
 type Test7b = IntersectConst<
   Const<"foo">,
-  Union<Const<"foo"> | Litteral<number>>
+  Union<Const<"foo"> | Primitive<number>>
 >;
 const test7b: Test7b = mUnion(mConst("foo"));
 test7b;
 
 type Test7c = IntersectConst<
   Const<"foo">,
-  Union<Litteral<number> | Arr<Litteral<string>>>
+  Union<Primitive<number> | Arr<Primitive<string>>>
 >;
 const test7c: Test7c = mUnion(mNever());
 test7c;
@@ -126,7 +126,7 @@ test7c;
 
 type Test8a = IntersectConst<
   Const<"foo">,
-  Intersection<Const<"foo">, Litteral<string>>
+  Intersection<Const<"foo">, Primitive<string>>
 >;
 const test8a: Test8a = mError("Cannot intersect intersection");
 test8a;

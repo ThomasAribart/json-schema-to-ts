@@ -1,8 +1,8 @@
-import { Resolve, Tuple, Litteral } from "meta-types";
+import { Resolve, Tuple, Primitive } from "meta-types";
 
 // --- OPEN ---
 
-type Test1 = Resolve<Tuple<[Litteral<string>, Litteral<number>]>>;
+type Test1 = Resolve<Tuple<[Primitive<string>, Primitive<number>]>>;
 const test1a: Test1 = ["string", 42];
 test1a;
 const test1b: Test1 = ["string", 42, { any: "value" }];
@@ -18,7 +18,7 @@ const test1e: Test1 = [42, "string"];
 test1e;
 
 type Test2 = Resolve<
-  Tuple<[Litteral<string>, Litteral<number>], true, Litteral<boolean>>
+  Tuple<[Primitive<string>, Primitive<number>], true, Primitive<boolean>>
 >;
 const test2a: Test2 = ["string", 42];
 test2a;
@@ -39,7 +39,7 @@ test2f;
 
 // --- CLOSED ---
 
-type Test3 = Resolve<Tuple<[Litteral<string>, Litteral<number>], false>>;
+type Test3 = Resolve<Tuple<[Primitive<string>, Primitive<number>], false>>;
 const test3a: Test3 = ["string", 42];
 test3a;
 // @ts-expect-error

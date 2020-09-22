@@ -11,7 +11,7 @@ export type IntersectConst<A, B> = {
   never: Never;
   const: CheckExtendsResolved<A, B>;
   enum: CheckExtendsResolved<A, B>;
-  litteral: CheckExtendsResolved<A, B>;
+  primitive: CheckExtendsResolved<A, B>;
   array: CheckExtendsResolved<A, B>;
   tuple: CheckExtendsResolved<A, B>;
   object: ToObject<A, B>;

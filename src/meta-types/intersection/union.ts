@@ -18,7 +18,7 @@ export type IntersectUnion<A, B> = {
   never: Never;
   const: DistributeIntersection<A, B>;
   enum: DistributeIntersection<A, B>;
-  litteral: DistributeIntersection<A, B>;
+  primitive: DistributeIntersection<A, B>;
   array: DistributeIntersection<A, B>;
   tuple: DistributeIntersection<A, B>;
   object: DistributeIntersection<A, B>;
