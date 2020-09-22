@@ -1,4 +1,4 @@
-> If you use this repo, star it 🤩
+_If you use this repo, star it ✨_
 
 # Stop typing twice 🙅‍♂️
 
@@ -67,20 +67,20 @@ type Pet = FromSchema<typeof petSchema>;
 
 > The `as const` statement is used so that TypeScript takes the schema definition to the word (e.g. _true_ is interpreted as the _true_ constant and not widened as _boolean_). It is pure TypeScript and has zero impact on the compiled code.
 
-# Why use json-schema-to-ts ?
+# Why use json-schema-to-ts?
 
 If you're looking for runtime validation with added types, libraries like [yup](https://github.com/jquense/yup), [zod](https://github.com/vriad/zod) or [runtypes](https://github.com/pelotom/runtypes) may suit your needs while being easier to use!
 
 On the other hand, JSON schemas have the benefit of being widely used, more versatile and reusable (swaggers, APIaaS...).
 
-If you prefer to stick to them AND can define your schemas in TypeScript instead of JSON (the `as const` statement doesn't work on JSON imports yet), then `json-schema-to-ts` is made for you:
+If you prefer to stick to them and can define your schemas in TS instead of JSON (importing JSONs `as const` is not available yet), then `json-schema-to-ts` is made for you:
 
-- 🙅‍♂️ **No dependency**
-- ✨ **No impact on compiled code**: `FromSchema` only operates in type space. And after all, what's lighter than a dev-dependency ?
-- 🍸 **DRYness**: Less code means less embarrassing typos
-- 🤝 **Consistency**: See that `string` that you used instead of an `enum` ? Or this `additionalProperties` you confused with `additionalItems` ? Or forgot entirely ? Well, `FromSchema` does !
-- 🔧 **Reliability**: `FromSchema` is extensively tested against [AJV](https://github.com/ajv-validator/ajv), and covers all the use cases that can be handled by TS for now\*
-- 🏋️‍♂️ **Help on complex schemas**: Get complex schemas right first time with instantaneous typing feedbacks ! For instance, it's not obvious the following schema can never be validated:
+- 🙅‍♂️**No dependency**
+- ✨**No impact on compiled code**: `FromSchema` only operates in type space. And after all, what's lighter than a dev-dependency?
+- 🍸**DRYness**: Less code means less embarrassing typos
+- 🤝**Consistency**: See that `string` that you used instead of an `enum`? Or this `additionalProperties` you confused with `additionalItems`? Or forgot entirely? Well, `FromSchema` does!
+- 🔧**Reliability**: `FromSchema` is extensively tested against [AJV](https://github.com/ajv-validator/ajv), and covers all the use cases that can be handled by TS for now\*
+- 🏋️‍♂️**Help on complex schemas**: Get complex schemas right first time with instantaneous typing feedbacks! For instance, it's not obvious the following schema can never be validated:
 
 ```typescript
 const addressSchema = {
@@ -119,7 +119,7 @@ type Address = FromSchema<typeof addressSchema>;
 - [Use cases](#use-cases)
   - [Const](#const)
   - [Enums](#enums)
-  - [Primitives](#primitives)
+  - [Primitive types](#primitive-types)
   - [Arrays](#arrays)
   - [Tuples](#tuples)
   - [Objects](#objects)
@@ -127,7 +127,7 @@ type Address = FromSchema<typeof addressSchema>;
   - [AnyOf](#anyof)
   - [AllOf](#allof)
   - [OneOf](#oneof)
-  - [Not & If/Then/Else](#not-&-if/then/else)
+  - [Not and If-Then-Else](#not-and-if-then-else)
 
 # Installation
 
@@ -440,8 +440,8 @@ type Address = FromSchema<typeof addressSchema>;
 // }
 ```
 
-## Not & If/Then/Else
+## Not and If-Then-Else
 
 For the same reason as `oneOf` (missing refinment types), I feel like implementing the `not` and the `if/then/else` keywords in `FromSchema` would lead into a rabbit hole...
 
-But I may be wrong ! If you think that it can be implemented, feel free to [open an issue](https://github.com/ThomasAribart/json-schema-to-ts/issues) 🤗
+But I may be wrong! If you think that it can be implemented, feel free to [open an issue](https://github.com/ThomasAribart/json-schema-to-ts/issues) 🤗
