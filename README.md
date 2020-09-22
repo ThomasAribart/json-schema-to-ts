@@ -30,7 +30,7 @@ Both objects carry similar if not exactly the same information. This is a code d
 
 That's when `json-schema-to-ts` comes to the rescue 💪
 
-# FromSchema
+## FromSchema
 
 The `FromSchema` method lets you infer TS types directly from JSON schemas:
 
@@ -67,7 +67,7 @@ type Pet = FromSchema<typeof petSchema>;
 
 > The `as const` statement is used so that TypeScript takes the schema definition to the word (e.g. _true_ is interpreted as the _true_ constant and not widened as _boolean_). It is pure TypeScript and has zero impact on the compiled code.
 
-# Why use json-schema-to-ts?
+## Why use `json-schema-to-ts`?
 
 If you're looking for runtime validation with added types, libraries like [yup](https://github.com/jquense/yup), [zod](https://github.com/vriad/zod) or [runtypes](https://github.com/pelotom/runtypes) may suit your needs while being easier to use!
 
@@ -76,9 +76,9 @@ On the other hand, JSON schemas have the benefit of being widely used, more vers
 If you prefer to stick to them and can define your schemas in TS instead of JSON (importing JSONs `as const` is not available yet), then `json-schema-to-ts` is made for you:
 
 - 🙅‍♂️ **No dependency**
-- ✨ **No impact on compiled code**: `FromSchema` only operates in type space. And after all, what's lighter than a dev-dependency?
+- ✨ **No impact on compiled code**: `json-schema-to-ts` only operates in type space. And after all, what's lighter than a dev-dependency?
 - 🍸 **DRYness**: Less code means less embarrassing typos
-- 🤝 **Consistency**: See that `string` that you used instead of an `enum`? Or this `additionalProperties` you confused with `additionalItems`? Or forgot entirely? Well, `FromSchema` does!
+- 🤝 **Consistency**: See that `string` that you used instead of an `enum`? Or this `additionalProperties` you confused with `additionalItems`? Or forgot entirely? Well, `json-schema-to-ts` does!
 - 🔧 **Reliability**: `FromSchema` is extensively tested against [AJV](https://github.com/ajv-validator/ajv), and covers all the use cases that can be handled by TS for now\*
 - 🏋️‍♂️ **Help on complex schemas**: Get complex schemas right first time with instantaneous typing feedbacks! For instance, it's not obvious the following schema can never be validated:
 
@@ -111,9 +111,9 @@ type Address = FromSchema<typeof addressSchema>;
 // => never 🙌
 ```
 
-> \*If `FromSchema` misses one of your use case, feel free to [open an issue](https://github.com/ThomasAribart/json-schema-to-ts/issues) 🤗
+> \*If `json-schema-to-ts` misses one of your use case, feel free to [open an issue](https://github.com/ThomasAribart/json-schema-to-ts/issues) 🤗
 
-# Table of content
+## Table of content
 
 - [Installation](#installation)
 - [Use cases](#use-cases)
@@ -129,7 +129,7 @@ type Address = FromSchema<typeof addressSchema>;
   - [OneOf](#oneof)
   - [Not and If-Then-Else](#not-and-if-then-else)
 
-# Installation
+## Installation
 
 ```bash
 # npm
@@ -141,9 +141,9 @@ yarn add --dev json-schema-to-ts
 
 > `json-schema-to-ts` requires TypeScript 3.3+. Activating `strictNullChecks` or using `strict` mode is recommended.
 
-# Use cases
+## Use cases
 
-## Const
+### Const
 
 ```typescript
 const fooSchema = {
@@ -154,7 +154,7 @@ type Foo = FromSchema<typeof fooSchema>;
 // => "foo"
 ```
 
-## Enums
+### Enums
 
 ```typescript
 const enumSchema = {
@@ -182,7 +182,7 @@ type Enum = FromSchema<typeof enumSchema>;
 // => Food
 ```
 
-## Primitive types
+### Primitive types
 
 ```typescript
 const primitiveTypeSchema = {
@@ -204,7 +204,7 @@ type PrimitiveTypes = FromSchema<typeof primitiveTypesSchema>;
 
 > For more complex types, refinment keywords like `required` or `additionalItems` will apply 🙌
 
-## Arrays
+### Arrays
 
 ```typescript
 const arraySchema = {
@@ -216,7 +216,7 @@ type Array = FromSchema<typeof arraySchema>;
 // => string[]
 ```
 
-## Tuples
+### Tuples
 
 ```typescript
 const tupleSchema = {
@@ -268,7 +268,7 @@ type Tuple = FromSchema<typeof tupleSchema>;
 
 > Additional items will only work if Typescript's `strictNullChecks` option is activated
 
-## Objects
+### Objects
 
 ```typescript
 const objectSchema = {
@@ -318,9 +318,9 @@ type Object = FromSchema<typeof typedValuesSchema>;
 
 - However, when used in combination with the `properties` keyword, extra properties will always be typed as `unknown` to avoid conflicts.
 
-# Combining schemas
+## Combining schemas
 
-## AnyOf
+### AnyOf
 
 ```typescript
 const anyOfSchema = {
@@ -373,7 +373,7 @@ type Factored = FromSchema<typeof factoredSchema>;
 // }
 ```
 
-## OneOf
+### OneOf
 
 Because TypeScript misses [refinment types](https://en.wikipedia.org/wiki/Refinement_type), `FromSchema` will use the `oneOf` keyword in the same way as `anyOf`:
 
@@ -408,7 +408,7 @@ type Cat = FromSchema<typeof catSchema>;
 const invalidCat: Cat = { name: "Garfield" };
 ```
 
-## AllOf
+### AllOf
 
 ```typescript
 const addressSchema = {
@@ -440,7 +440,7 @@ type Address = FromSchema<typeof addressSchema>;
 // }
 ```
 
-## Not and If-Then-Else
+### Not and If-Then-Else
 
 For the same reason as `oneOf` (missing refinment types), I feel like implementing the `not` and the `if/then/else` keywords in `FromSchema` would lead into a rabbit hole...
 
