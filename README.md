@@ -1,4 +1,8 @@
-_If you use this repo, star it ✨_
+<img src="header.jpg" width="100%" align="center" />
+
+<p align="right">
+  <i>If you use this repo, star it ✨</i>
+</p>
 
 # Stop typing twice 🙅‍♂️
 
