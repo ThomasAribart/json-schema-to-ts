@@ -294,14 +294,14 @@ const closedObjectSchema = {
   additionalProperties: false,
 } as const;
 
-type Object = FromSchema<typeof additionalPropertiesSchema>;
+type Object = FromSchema<typeof closedObjectSchema>;
 // => { foo: string; bar?: number; }
 ```
 
 - Used on their own, `additionalProperties` and/or `patternProperties` can be used to type unnamed properties.
 
 ```typescript
-const objectSchema = {
+const openObjectSchema = {
   type: "object",
   additionalProperties: {
     type: "boolean",
@@ -312,7 +312,7 @@ const objectSchema = {
   },
 } as const;
 
-type Object = FromSchema<typeof typedValuesSchema>;
+type Object = FromSchema<typeof openObjectSchema>;
 // => { [x: string]: string | number | boolean }
 ```
 
@@ -333,7 +333,7 @@ const anyOfSchema = {
   ],
 } as const;
 
-type AnyOf = FromSchema<typeof fooSchema>;
+type AnyOf = FromSchema<typeof anyOfSchema>;
 // => string | string[]
 ```
 
