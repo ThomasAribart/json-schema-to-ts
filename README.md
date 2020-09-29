@@ -1,4 +1,4 @@
-<img src="header.jpg" width="100%" align="center" />
+<img src="assets/header.jpg" width="100%" align="center" />
 
 <p align="right">
   <i>If you use this repo, star it ✨</i>
