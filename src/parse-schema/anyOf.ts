@@ -1,7 +1,8 @@
 import { Intersection, Union } from "../meta-types";
-import { Tail, Head, Get, HasKeyIn, SafeMergeRec, Merge } from "../utils";
+import { Tail, Head, Get, HasKeyIn, Merge } from "../utils";
 
 import { ParseSchema } from ".";
+import { RemoveInvalidAdditionalItems } from "./utils";
 
 export type ParseAnyOfSchema<S> = Union<
   RecurseOnAnyOfSchema<Get<S, "anyOf">, S>
@@ -20,18 +21,20 @@ type RecurseOnAnyOfSchema<S, P, R = never> = {
                 ParseSchema<
                   Merge<
                     Omit<P, "anyOf">,
-                    SafeMergeRec<
+                    Merge<
                       {
                         properties: {};
                         additionalProperties: true;
                         required: [];
                       },
-                      Head<S>
+                      RemoveInvalidAdditionalItems<Head<S>>
                     >
                   >
                 >
               >
-            : ParseSchema<SafeMergeRec<Omit<P, "anyOf">, Head<S>>>)
+            : ParseSchema<
+                Merge<Omit<P, "anyOf">, RemoveInvalidAdditionalItems<Head<S>>>
+              >)
       >
     : never;
 }[S extends [any, ...any[]] ? "continue" : "stop"];
