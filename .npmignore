@@ -1,6 +1,8 @@
 .circleci
+.github
+assets
 node_modules
+src/tests/*
 babel.config.js
 tsconfig.json
 yarn.lock
-src/tests/*
