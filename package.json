@@ -6,6 +6,9 @@
   "scripts": {
     "test": "tsc --noEmit && jest --verbose"
   },
+  "dependencies": {
+    "@types/json-schema": "^7.0.6"
+  },
   "devDependencies": {
     "@babel/core": "^7.10.4",
     "@babel/preset-env": "^7.10.4",
