@@ -1,9 +1,9 @@
 /**
- * Recursively remove the `readonly` directive from an object properties
+ * Recursively remove the `readonly` directive from an object properties or tuple items
  *
- * @param O Object
- * @return Object
+ * @param O Object / Tuple
+ * @return Object / Tuple
  */
-export type Writeable<O> = O extends object
-  ? { -readonly [K in keyof O]: Writeable<O[K]> }
+export type WriteableRec<O> = O extends object
+  ? { -readonly [K in keyof O]: WriteableRec<O[K]> }
   : O;

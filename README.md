@@ -79,7 +79,7 @@ On the other hand, JSON schemas have the benefit of being widely used, more vers
 
 If you prefer to stick to them and can define your schemas in TS instead of JSON (importing JSONs `as const` is not available yet), then `json-schema-to-ts` is made for you:
 
-- 🙅‍♂️ **No dependency**
+- ✅ **Schema validation** `FromSchema` raises TS errors on invalid schemas, based on [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/json-schema)'s definitions
 - ✨ **No impact on compiled code**: `json-schema-to-ts` only operates in type space. And after all, what's lighter than a dev-dependency?
 - 🍸 **DRYness**: Less code means less embarrassing typos
 - 🤝 **Consistency**: See that `string` that you used instead of an `enum`? Or this `additionalProperties` you confused with `additionalItems`? Or forgot entirely? Well, `json-schema-to-ts` does!

@@ -60,36 +60,4 @@ describe("No schema", () => {
       expect(ajv.validate(false, neverInstance)).toBe(false);
     });
   });
-
-  describe("String", () => {
-    // No need to test validation here, string = schema ref
-    type Unknown = FromSchema<string>;
-    let unknownInstance: Unknown;
-
-    it("accepts any value", () => {
-      unknownInstance = null;
-      unknownInstance = true;
-      unknownInstance = "string";
-      unknownInstance = 42;
-      unknownInstance = { foo: "bar" };
-      unknownInstance = ["foo", "bar"];
-      unknownInstance;
-    });
-  });
-
-  describe('"foo"', () => {
-    // No need to test validation here, string = schema ref
-    type Unknown = FromSchema<"foo">;
-    let unknownInstance: Unknown;
-
-    it("accepts any value", () => {
-      unknownInstance = null;
-      unknownInstance = true;
-      unknownInstance = "string";
-      unknownInstance = 42;
-      unknownInstance = { foo: "bar" };
-      unknownInstance = ["foo", "bar"];
-      unknownInstance;
-    });
-  });
 });
