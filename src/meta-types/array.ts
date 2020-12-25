@@ -1,4 +1,4 @@
-import { Get } from "../utils";
+import { Get, Prettify } from "../utils";
 
 import { Resolve, Any } from ".";
 
@@ -11,4 +11,4 @@ export type Arr<V = Any> = {
 
 export type Values<A> = Get<A, "values">;
 
-export type ResolveArr<T> = Resolve<Values<T>>[];
+export type ResolveArr<T> = Prettify<Resolve<Values<T>>[]>;

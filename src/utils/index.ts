@@ -8,6 +8,7 @@ export { Head } from "./head";
 export { SafeMergeRec, UnsafeMergeRec, Merge } from "./merge";
 export { OptionalProps } from "./optionalProps";
 export { Prepend } from "./prepend";
+export { Prettify } from "./prettify";
 export { ReadonlyRec } from "./readonly";
 export { Replace } from "./replace";
 export { RequiredProps } from "./requiredProps";
