@@ -4,6 +4,6 @@
  * @param O Object / Tuple
  * @return Object / Tuple
  */
-export type ReadonlyRec<O> = O extends object
-  ? { readonly [K in keyof O]: ReadonlyRec<O[K]> }
+export type DeepReadonly<O> = O extends object
+  ? { readonly [K in keyof O]: DeepReadonly<O[K]> }
   : O;

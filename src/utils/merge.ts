@@ -7,18 +7,18 @@ import { IsObject, IsArray } from "./extends";
  * - Recursively merge `A` and `B` properties if both are objects
  * - Concat `A` and `B` if both are arrays
  *
- * `UnsafeMergeRec` preserves non-required properties, but can return `never` if TS infers that `A & B = never` (which can happen if some properties are incompatible)
+ * `DeepMergeUnsafe` preserves non-required properties, but can return `never` if TS infers that `A & B = never` (which can happen if some properties are incompatible)
  *
  * @param A Type
  * @param B Type
  * @return Type
  */
-export type UnsafeMergeRec<A, B> = IsObject<A> extends true
+export type DeepMergeUnsafe<A, B> = IsObject<A> extends true
   ? IsObject<B> extends true
     ? {
         [K in keyof (A & B)]: K extends keyof B
           ? K extends keyof A
-            ? UnsafeMergeRec<A[K], B[K]>
+            ? DeepMergeUnsafe<A[K], B[K]>
             : B[K]
           : K extends keyof A
           ? A[K]
@@ -39,18 +39,18 @@ export type UnsafeMergeRec<A, B> = IsObject<A> extends true
  * - Recursively merge `A` and `B` properties if both are objects
  * - Concat `A` and `B` if both are arrays
  *
- * Contrary to `UnsafeMergeRec`, `SafeMergeRec` never returns `never`, but doesn't preserve non-required properties
+ * Contrary to `DeepMergeUnsafe`, `DeepMergeSafe` never returns `never`, but doesn't preserve non-required properties
  *
  * @param A Type
  * @param B Type
  * @return Type
  */
-export type SafeMergeRec<A, B> = IsObject<A> extends true
+export type DeepMergeSafe<A, B> = IsObject<A> extends true
   ? IsObject<B> extends true
     ? {
         [K in keyof A | keyof B]: K extends keyof B
           ? K extends keyof A
-            ? SafeMergeRec<A[K], B[K]>
+            ? DeepMergeSafe<A[K], B[K]>
             : B[K]
           : K extends keyof A
           ? A[K]

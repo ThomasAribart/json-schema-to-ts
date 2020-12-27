@@ -1,4 +1,4 @@
-import { UnsafeMergeRec } from "./merge";
+import { DeepMergeUnsafe } from "./merge";
 import { OptionalProps } from "./optionalProps";
 import { RequiredProps } from "./requiredProps";
 
@@ -16,7 +16,7 @@ export type Replace<
   V,
   Req extends keyof O = RequiredProps<O>,
   Opt extends keyof O = OptionalProps<O>
-> = UnsafeMergeRec<
-  UnsafeMergeRec<Omit<O, P>, { [key in P & Req]: V }>,
+> = DeepMergeUnsafe<
+  DeepMergeUnsafe<Omit<O, P>, { [key in P & Req]: V }>,
   { [key in P & Opt]?: V }
 >;

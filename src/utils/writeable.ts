@@ -4,6 +4,6 @@
  * @param O Object / Tuple
  * @return Object / Tuple
  */
-export type WriteableRec<O> = O extends object
-  ? { -readonly [K in keyof O]: WriteableRec<O[K]> }
+export type DeepWriteable<O> = O extends object
+  ? { -readonly [K in keyof O]: DeepWriteable<O[K]> }
   : O;

@@ -1,4 +1,4 @@
-import { DoesExtend, Get, UnsafeMergeRec } from "../utils";
+import { DoesExtend, Get, DeepMergeUnsafe } from "../utils";
 
 import { Resolve, Any } from ".";
 
@@ -34,13 +34,13 @@ type IsObjectValid<O> = IsOpen<O> extends false
     : false
   : true;
 
-type ResolveValidObject<O> = UnsafeMergeRec<
+type ResolveValidObject<O> = DeepMergeUnsafe<
   IsOpen<O> extends true
     ? IsEmpty<O> extends true
       ? { [key: string]: Resolve<Get<O, "openProps">> }
       : { [key: string]: Resolve<Any> }
     : {},
-  UnsafeMergeRec<
+  DeepMergeUnsafe<
     {
       [key in Exclude<keyof Values<O>, Required<O>>]?: Resolve<Values<O>[key]>;
     },
