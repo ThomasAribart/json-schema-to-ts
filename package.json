@@ -1,6 +1,6 @@
 {
   "name": "json-schema-to-ts",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "Infer typescript types from your JSON schemas!",
   "main": "lib/index.d.ts",
   "scripts": {
