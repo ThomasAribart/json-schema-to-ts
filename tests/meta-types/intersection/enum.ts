@@ -7,11 +7,12 @@ import {
   Object,
   Union,
   Intersection,
+  Exclusion,
   Error,
 } from "meta-types";
 import { IntersectEnum } from "meta-types/intersection/enum";
 
-import { mNever, mConst, mEnum, mError, mUnion } from "./helpers";
+import { mNever, mConst, mEnum, mError, mUnion, mExclusion } from "./helpers";
 
 // --- CONSTS ---
 
@@ -181,3 +182,19 @@ test8a;
 type Test9a = IntersectEnum<Enum<"foo" | "bar" | 42>, Error<"Any">>;
 const test9a: Test9a = mError("Any");
 test9a;
+
+// --- EXCLUSION ---
+
+type Test10 = IntersectEnum<
+  Enum<"foo" | "bar" | "baz" | 42>,
+  Exclusion<Primitive<string>, Enum<"foo" | "bar">>
+>;
+const test10a: Test10 = mExclusion(mEnum("foo"), mEnum("foo"));
+test10a;
+const test10b: Test10 = mExclusion(mEnum("bar"), mEnum("bar"));
+test10b;
+const test10c: Test10 = mExclusion(mEnum("baz"), mEnum("foo"));
+test10c;
+// @ts-expect-error
+const test10d: Test10 = mExclusion(mEnum(42), mEnum("foo"));
+test10d;

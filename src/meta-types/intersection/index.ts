@@ -9,6 +9,7 @@ import { ClearArrIntersections, IntersectArr } from "./array";
 import { ClearTupleIntersections, IntersectTuple } from "./tuple";
 import { ClearObjectIntersections, IntersectObject } from "./object";
 import { ClearUnionIntersections, IntersectUnion } from "./union";
+import { ClearExclusionIntersections, IntersectExclusion } from "./exclusion";
 
 export type IntersectionType = "intersection";
 
@@ -36,11 +37,12 @@ export type ClearIntersections<T> = {
   tuple: ClearTupleIntersections<T>;
   object: ClearObjectIntersections<T>;
   union: ClearUnionIntersections<T>;
-  error: T;
   intersection: Intersect<
     ClearIntersections<Left<T>>,
     ClearIntersections<Right<T>>
   >;
+  exclusion: ClearExclusionIntersections<T>;
+  error: T;
   errorMissingType: Error<"Missing type property">;
 }[Get<T, "type"> extends MetaType ? Get<T, "type"> : "errorMissingType"];
 
@@ -54,7 +56,8 @@ export type Intersect<A, B> = {
   tuple: IntersectTuple<A, B>;
   object: IntersectObject<A, B>;
   union: IntersectUnion<A, B>;
+  intersection: Error<"Cannot intersect intersection">;
+  exclusion: IntersectExclusion<A, B>;
   error: A;
   errorMissingType: Error<"Missing type property">;
-  intersection: Error<"Cannot intersect intersection">;
 }[Get<A, "type"> extends MetaType ? Get<A, "type"> : "errorMissingType"];

@@ -5,6 +5,7 @@ import { Value } from "../primitive";
 
 import { IntersectConst } from "./const";
 import { IntersectEnum } from "./enum";
+import { IntersectExclusion } from "./exclusion";
 import { Intersect } from ".";
 
 export type IntersectPrimitive<A, B> = {
@@ -22,6 +23,7 @@ export type IntersectPrimitive<A, B> = {
   object: Never;
   union: Intersect<B, A>;
   intersection: Error<"Cannot intersect intersection">;
+  exclusion: IntersectExclusion<B, A>;
   error: B;
   errorTypeProperty: Error<"Missing type property">;
 }[Get<B, "type"> extends MetaType ? Get<B, "type"> : "errorTypeProperty"];

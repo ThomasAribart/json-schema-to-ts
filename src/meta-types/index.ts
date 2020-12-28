@@ -15,6 +15,7 @@ import {
   ResolveIntersection,
 } from "./intersection";
 import { Error, ErrorType } from "./error";
+import { Exclusion, ExclusionType, ResolveExclusion } from "./exclusion";
 
 export type MetaType =
   | AnyType
@@ -27,6 +28,7 @@ export type MetaType =
   | ObjectType
   | UnionType
   | IntersectionType
+  | ExclusionType
   | ErrorType;
 
 export type Resolve<T, D = Exclude<T, undefined>> = {
@@ -40,6 +42,7 @@ export type Resolve<T, D = Exclude<T, undefined>> = {
   object: ResolveObject<D>;
   union: ResolveUnion<D>;
   intersection: ResolveIntersection<D>;
+  exclusion: ResolveExclusion<D>;
   error: never;
 }[Get<D, "type"> extends MetaType ? Get<D, "type"> : "error"];
 
@@ -54,5 +57,6 @@ export {
   Object,
   Union,
   Intersection,
+  Exclusion,
   Error,
 };

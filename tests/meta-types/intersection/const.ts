@@ -7,11 +7,12 @@ import {
   Arr,
   Tuple,
   Object,
+  Exclusion,
   Error,
 } from "meta-types";
 import { IntersectConst } from "meta-types/intersection/const";
 
-import { mNever, mConst, mError, mUnion } from "./helpers";
+import { mNever, mConst, mError, mUnion, mExclusion } from "./helpers";
 
 // --- CONSTS ---
 
@@ -137,3 +138,12 @@ type Err = Error<"Any">;
 type Test9a = IntersectConst<Const<"foo">, Err>;
 const test9a: Test9a = mError("Any");
 test9a;
+
+// --- EXCLUSION ---
+
+type Test10 = IntersectConst<
+  Const<"foo">,
+  Exclusion<Primitive<string>, Const<"bar">>
+>;
+const test10: Test10 = mExclusion(mConst("foo"), mConst("bar"));
+test10;

@@ -6,6 +6,8 @@ import { Values } from "../array";
 import { IntersectConst } from "./const";
 import { IntersectEnum } from "./enum";
 import { IntersectTuple } from "./tuple";
+import { IntersectUnion } from "./union";
+import { IntersectExclusion } from "./exclusion";
 import { ClearIntersections, Intersect } from "./index";
 
 export type ClearArrIntersections<A> = Arr<ClearIntersections<Values<A>>>;
@@ -19,7 +21,8 @@ export type IntersectArr<A, B> = {
   array: IntersectArrs<A, B>;
   tuple: IntersectTuple<B, A>;
   object: Never;
-  union: Intersect<B, A>;
+  union: IntersectUnion<B, A>;
+  exclusion: IntersectExclusion<B, A>;
   intersection: Error<"Cannot intersect intersection">;
   error: B;
   errorTypeProperty: Error<"Missing type property">;

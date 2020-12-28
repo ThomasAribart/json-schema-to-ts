@@ -6,6 +6,7 @@ import { Object, Values, Required, IsOpen, OpenProps } from "../object";
 import { IntersectConst } from "./const";
 import { IntersectEnum } from "./enum";
 import { DistributeIntersection } from "./union";
+import { IntersectExclusion } from "./exclusion";
 import { ClearIntersections, Intersect } from "./index";
 
 export type ClearObjectIntersections<
@@ -39,6 +40,7 @@ export type IntersectObject<A, B> = {
   object: IntersectObjects<A, B>;
   union: DistributeIntersection<B, A>;
   intersection: Error<"Cannot intersect intersection">;
+  exclusion: IntersectExclusion<B, A>;
   error: B;
   errorTypeProperty: Error<"Missing type property">;
 }[Get<B, "type"> extends MetaType ? Get<B, "type"> : "errorTypeProperty"];

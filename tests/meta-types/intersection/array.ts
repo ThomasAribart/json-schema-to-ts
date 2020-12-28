@@ -7,6 +7,7 @@ import {
   Arr,
   Tuple,
   Object,
+  Exclusion,
   Error,
 } from "meta-types";
 import { IntersectArr } from "meta-types/intersection/array";
@@ -20,6 +21,7 @@ import {
   mTuple,
   mUnion,
   mError,
+  mExclusion,
 } from "./helpers";
 
 // --- CONSTS ---
@@ -171,3 +173,12 @@ type Err = Error<"Any">;
 type Test9a = IntersectArr<Arr<Primitive<string>>, Err>;
 const test9a: Test9a = mError("Any");
 test9a;
+
+// --- EXCLUSION ---
+
+type Test10 = IntersectArr<
+  Arr<Const<"foo">>,
+  Exclusion<Arr<Primitive<string>>, Const<[]>>
+>;
+const test10: Test10 = mExclusion(mArr(mConst("foo")), mConst([]));
+test10;

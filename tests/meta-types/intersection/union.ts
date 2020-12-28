@@ -7,11 +7,20 @@ import {
   Object,
   Union,
   Intersection,
+  Exclusion,
   Error,
 } from "meta-types";
 import { IntersectUnion } from "meta-types/intersection/union";
 
-import { mNever, mConst, mUnion, mEnum, mPrimitive, mError } from "./helpers";
+import {
+  mNever,
+  mConst,
+  mUnion,
+  mEnum,
+  mPrimitive,
+  mError,
+  mExclusion,
+} from "./helpers";
 
 // --- CONSTS ---
 
@@ -105,7 +114,7 @@ test6a;
 
 type Test7a = IntersectUnion<
   Union<Const<"foo"> | Primitive<number>>,
-  Object<{ foo: Primitive<string> }, ["foo"], true, Primitive<string>>
+  Object<{ foo: Primitive<string> }, "foo", true, Primitive<string>>
 >;
 const test7a: Test7a = mUnion(mNever());
 test7a;
@@ -160,3 +169,26 @@ type Test9a = IntersectUnion<
 >;
 const test9a: Test9a = mError("Any");
 test9a;
+
+// --- EXCLUSION ---
+
+type Test10a = IntersectUnion<
+  Union<Const<"foo"> | Primitive<boolean>>,
+  Exclusion<Enum<42 | true | "foo" | "bar">, Primitive<number>>
+>;
+const test10a: Test10a = mUnion(
+  mExclusion(mConst("foo" as "foo"), mPrimitive(42))
+);
+test10a;
+const test10a2: Test10a = mUnion(
+  mExclusion(mEnum(true as true), mPrimitive(42))
+);
+test10a2;
+// @ts-expect-error
+const test10a3: Test10a = mUnion(mExclusion(mEnum(42 as 42), mPrimitive(42)));
+test10a3;
+// @ts-expect-error
+const test10a4: Test10a = mUnion(
+  mExclusion(mEnum("bar" as "bar"), mPrimitive(42))
+);
+test10a4;
