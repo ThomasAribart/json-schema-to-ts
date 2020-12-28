@@ -9,6 +9,6 @@ import { Replace } from "../utils";
 // It is not ideal, but it's the best thing to do at the moment
 export type JSONSchema6DefinitionWithoutInterface = JSONSchema6Definition extends infer S
   ? S extends JSONSchema6
-    ? Replace<S, "const" | "enum", unknown>
+    ? Replace<S, "const" | "enum" | "not", unknown>
     : S
   : never;
