@@ -1,2 +1,2 @@
 publish:
-	git stash && git checkout master && git pull && yarn build && npm publish
+	git stash && git checkout master && git pull && yarn test && yarn build && npm publish
