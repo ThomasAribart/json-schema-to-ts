@@ -9,6 +9,7 @@ import {
   Union,
   Intersection,
   Error,
+  Exclusion,
 } from "meta-types";
 
 export const mAny = (): Any => ({ type: "any" });
@@ -65,3 +66,9 @@ export const mIntersection = <L, R>(left: L, right: R): Intersection<L, R> => ({
 });
 
 export const mError = <M>(message: M): Error<M> => ({ type: "error", message });
+
+export const mExclusion = <T, E>(value: T, excluded: E): Exclusion<T, E> => ({
+  type: "exclusion",
+  value,
+  excluded,
+});

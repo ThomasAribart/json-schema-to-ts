@@ -444,8 +444,47 @@ type Address = FromSchema<typeof addressSchema>;
 // }
 ```
 
-### Not and If-Then-Else
+### Not
 
-For the same reason as `oneOf` (missing refinment types), I feel like implementing the `not` and the `if/then/else` keywords in `FromSchema` would lead into a rabbit hole...
+```typescript
+const tupleSchema = {
+  type: "array",
+  items: [{ const: 1 }, { const: 2 }],
+  additionalItems: false,
+  not: {
+    const: [1],
+  },
+} as const;
 
-But I may be wrong! If you think that it can be implemented, feel free to [open an issue](https://github.com/ThomasAribart/json-schema-to-ts/issues) 🤗
+type Tuple = FromSchema<typeof tupleSchema>;
+// => [] | [1, 2]
+```
+
+```typescript
+const primitiveTypeSchema = {
+  not: {
+    type: ["array", "object"],
+  },
+} as const;
+
+type PrimitiveType = FromSchema<typeof primitiveTypeSchema>;
+// => null | boolean | number | string
+```
+
+Keep in mind that the `not` type computation uses the `Exclude` utility type, which suffers from Typescript's limitations:
+
+```typescript
+const goodLanguageSchema = {
+  type: "string",
+  not: {
+    enum: ["Bummer", "Silly", "Lazy sod !"],
+  },
+} as const;
+
+type GoodLanguage = FromSchema<typeof goodLanguageSchema>;
+// => string
+```
+
+### If-Then-Else
+
+The `if/then/else` keyword is not implemented yet.

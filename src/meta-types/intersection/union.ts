@@ -23,6 +23,7 @@ export type IntersectUnion<A, B> = {
   tuple: DistributeIntersection<A, B>;
   object: DistributeIntersection<A, B>;
   union: DistributeIntersection<A, B>;
+  exclusion: DistributeIntersection<A, B>;
   intersection: Error<"Cannot intersect intersection">;
   error: B;
   errorTypeProperty: Error<"Missing type property">;

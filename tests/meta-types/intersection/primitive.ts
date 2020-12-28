@@ -7,11 +7,20 @@ import {
   Arr,
   Tuple,
   Object,
+  Exclusion,
   Error,
 } from "meta-types";
 import { IntersectPrimitive } from "meta-types/intersection/primitive";
 
-import { mNever, mConst, mEnum, mPrimitive, mError, mUnion } from "./helpers";
+import {
+  mNever,
+  mConst,
+  mEnum,
+  mPrimitive,
+  mError,
+  mUnion,
+  mExclusion,
+} from "./helpers";
 
 // --- CONSTS ---
 
@@ -118,3 +127,25 @@ type Err = Error<"Any">;
 type Test9a = IntersectPrimitive<Primitive<string>, Err>;
 const test9a: Test9a = mError("Any");
 test9a;
+
+// --- EXCLUSION ---
+
+type Test10a = IntersectPrimitive<
+  Primitive<string>,
+  Exclusion<Enum<"foo" | 42 | true>, Primitive<number>>
+>;
+const test10a: Test10a = mExclusion(mEnum("foo"), mPrimitive(42));
+test10a;
+// @ts-expect-error
+const test10a2: Test10a = mExclusion(mEnum(42), mPrimitive(42));
+test10a2;
+// @ts-expect-error
+const test10a3: Test10a = mExclusion(mEnum(true), mPrimitive(42));
+test10a3;
+
+type Test10b = IntersectPrimitive<
+  Primitive<number>,
+  Exclusion<Primitive<number>, Const<42>>
+>;
+const test10b: Test10b = mExclusion(mPrimitive(42), mConst(42));
+test10b;

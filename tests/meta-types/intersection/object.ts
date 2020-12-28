@@ -7,6 +7,7 @@ import {
   Object,
   Union,
   Intersection,
+  Exclusion,
   Error,
 } from "meta-types";
 import { IntersectObject } from "meta-types/intersection/object";
@@ -20,6 +21,7 @@ import {
   mError,
   mObject,
   mUnion,
+  mExclusion,
 } from "./helpers";
 
 // --- CONSTS ---
@@ -196,7 +198,7 @@ test7c;
 
 type Test7d = IntersectObject<
   Object<{ str: Primitive<string> }, "str">,
-  Object<{ otherStr: Primitive<string> }, ["otherStr"], false>
+  Object<{ otherStr: Primitive<string> }, "otherStr", false>
 >;
 // Rejects "str" property because B is closed
 const test7d: Test7d = mNever();
@@ -204,7 +206,7 @@ test7d;
 
 type Test7e = IntersectObject<
   Object<{ str: Primitive<string> }, "str">,
-  Object<{ bool: Primitive<boolean> }, ["bool"], true, Primitive<boolean>>
+  Object<{ bool: Primitive<boolean> }, "bool", true, Primitive<boolean>>
 >;
 // Rejects "str" property because it should be bool AND str
 const test7e: Test7e = mNever();
@@ -227,3 +229,33 @@ type Test9a = IntersectObject<
 >;
 const test9a: Test9a = mError("Any");
 test9a;
+
+// --- EXCLUSION ---
+
+type Test10 = IntersectObject<
+  Object<{ baz: Primitive<string> }, "baz", true>,
+  Exclusion<
+    Object<{ foo: Primitive<string> }, "foo", true, Primitive<string>>,
+    Const<{ foo: "bar" }>
+  >
+>;
+const test10a: Test10 = mExclusion(
+  mObject(
+    { foo: mPrimitive("str"), baz: mPrimitive("str") },
+    "foo",
+    true,
+    mPrimitive("str")
+  ),
+  mConst({ foo: "bar" })
+);
+test10a;
+const test10b: Test10 = mExclusion(
+  mObject(
+    { foo: mPrimitive("str"), baz: mPrimitive("str") },
+    "baz",
+    true,
+    mPrimitive("str")
+  ),
+  mConst({ foo: "bar" })
+);
+test10b;

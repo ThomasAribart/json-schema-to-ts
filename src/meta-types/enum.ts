@@ -2,7 +2,7 @@ import { Get } from "../utils";
 
 export type EnumType = "enum";
 
-export type Enum<V> = { type: "enum"; values: V };
+export type Enum<V> = { type: EnumType; values: V };
 
 export type Values<E> = Get<E, "values">;
 

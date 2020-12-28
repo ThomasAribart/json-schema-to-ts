@@ -4,6 +4,8 @@ import { MetaType, Never, Const, Error } from "..";
 import { Enum, Values } from "../enum";
 
 import { IntersectConst } from "./const";
+import { IntersectUnion } from "./union";
+import { IntersectExclusion } from "./exclusion";
 import { Intersect } from "./index";
 
 export type IntersectEnum<A, B> = {
@@ -15,7 +17,8 @@ export type IntersectEnum<A, B> = {
   array: FilterExtendingResolved<A, B>;
   tuple: FilterExtendingResolved<A, B>;
   object: FilterExtendingResolved<A, B>;
-  union: Intersect<B, A>;
+  union: IntersectUnion<B, A>;
+  exclusion: IntersectExclusion<B, A>;
   intersection: Error<"Cannot intersect intersection">;
   error: B;
   errorTypeProperty: Error<"Missing type property">;

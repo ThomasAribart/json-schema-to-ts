@@ -4,6 +4,8 @@ import { Resolve, MetaType, Never, Error } from "..";
 import { Const, Value } from "../const";
 import { Values, Required, IsOpen, OpenProps } from "../object";
 
+import { IntersectUnion } from "./union";
+import { IntersectExclusion } from "./exclusion";
 import { Intersect } from "./index";
 
 export type IntersectConst<A, B> = {
@@ -15,7 +17,8 @@ export type IntersectConst<A, B> = {
   array: CheckExtendsResolved<A, B>;
   tuple: CheckExtendsResolved<A, B>;
   object: ToObject<A, B>;
-  union: Intersect<B, A>;
+  union: IntersectUnion<B, A>;
+  exclusion: IntersectExclusion<B, A>;
   intersection: Error<"Cannot intersect intersection">;
   error: B;
   errorTypeProperty: Error<"Missing type property">;

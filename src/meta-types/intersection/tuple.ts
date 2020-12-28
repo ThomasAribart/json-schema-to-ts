@@ -7,6 +7,7 @@ import { Values, IsOpen, OpenProps } from "../tuple";
 import { IntersectConst } from "./const";
 import { IntersectEnum } from "./enum";
 import { DistributeIntersection } from "./union";
+import { IntersectExclusion } from "./exclusion";
 import { ClearIntersections, Intersect } from ".";
 
 export type ClearTupleIntersections<
@@ -37,6 +38,7 @@ export type IntersectTuple<A, B> = {
   object: Never;
   union: DistributeIntersection<B, A>;
   intersection: Error<"Cannot intersect intersection">;
+  exclusion: IntersectExclusion<B, A>;
   error: B;
   errorTypeProperty: Error<"Missing type property">;
 }[Get<B, "type"> extends MetaType ? Get<B, "type"> : "errorTypeProperty"];
