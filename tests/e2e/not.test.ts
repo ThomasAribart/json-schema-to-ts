@@ -125,4 +125,39 @@ describe("Not schemas", () => {
       expect(ajv.validate(correctLanguageSchema, correctLanguage)).toBe(true);
     });
   });
+
+  describe("additionalItems", () => {
+    const openArraySchema1 = {
+      type: "array",
+      items: [{ const: 0 }, { enum: [0, 1] }],
+      not: { const: [0, 0], additionalItems: false },
+    } as const;
+
+    type OpenArray1 = FromSchema<typeof openArraySchema1>;
+    let openArray1: OpenArray1;
+
+    it("accepts correct item", () => {
+      // Still works as additionalItems is not bound to items
+      openArray1 = [0, 0, 1];
+      expect(ajv.validate(openArraySchema1, openArray1)).toBe(true);
+    });
+
+    const openArraySchema2 = {
+      type: "array",
+      items: [{ const: 0 }, { const: 1 }],
+      not: { items: [{ const: 0 }, { const: 1 }], additionalItems: false },
+    } as const;
+
+    type OpenArray2 = FromSchema<typeof openArraySchema2>;
+    let openArray2: OpenArray2;
+
+    it("accepts correct item", () => {
+      openArray2 = [0, 1, 2];
+      expect(ajv.validate(openArraySchema2, openArray2)).toBe(true);
+
+      // Is correctly rejected but impossible to throw right now as [] can be assigned to ...unknown[]
+      openArray2 = [0, 1];
+      expect(ajv.validate(openArraySchema2, openArray2)).toBe(false);
+    });
+  });
 });

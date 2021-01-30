@@ -1,7 +1,8 @@
 import { Exclusion, Union, Any, Primitive, Arr, Object } from "../meta-types";
-import { Get, HasKeyIn, Merge } from "../utils";
+import { Get, HasKeyIn } from "../utils";
 
 import { ParseSchema } from ".";
+import { MergeSubSchema } from "./utils";
 
 type AllTypes = Union<
   | Primitive<null>
@@ -19,5 +20,5 @@ export type ParseNotSchema<S> = Exclusion<
   > extends true
     ? ParseSchema<Omit<S, "not">>
     : AllTypes,
-  ParseSchema<Merge<Omit<S, "not">, Get<S, "not">>>
+  ParseSchema<MergeSubSchema<Omit<S, "not">, Get<S, "not">>>
 >;
