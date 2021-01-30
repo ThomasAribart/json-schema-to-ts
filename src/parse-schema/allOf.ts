@@ -1,8 +1,8 @@
 import { Any, Intersection } from "../meta-types";
-import { Tail, Head, Get, HasKeyIn, Merge } from "../utils";
+import { Tail, Head, Get, HasKeyIn } from "../utils";
 
 import { ParseSchema } from ".";
-import { RemoveInvalidAdditionalItems } from "./utils";
+import { MergeSubSchema } from "./utils";
 
 export type ParseAllOfSchema<S> = RecurseOnAllOfSchema<
   Get<S, "allOf">,
@@ -18,18 +18,7 @@ type RecurseOnAllOfSchema<V, S, R> = {
     ? RecurseOnAllOfSchema<
         Tail<V>,
         S,
-        Intersection<
-          ParseSchema<
-            Merge<
-              Omit<S, "allOf">,
-              Merge<
-                { properties: {}; additionalProperties: true; required: [] },
-                RemoveInvalidAdditionalItems<Head<V>>
-              >
-            >
-          >,
-          R
-        >
+        Intersection<ParseSchema<MergeSubSchema<Omit<S, "allOf">, Head<V>>>, R>
       >
     : never;
 }[V extends [any, ...any[]] ? "continue" : "stop"];
