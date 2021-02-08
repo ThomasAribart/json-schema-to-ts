@@ -1,6 +1,7 @@
 import { DoesExtend, Get } from "../../utils";
 
 import { Resolve, MetaType, Never, Error } from "..";
+import { ErrorType } from "../error";
 
 import { IntersectConst } from "./const";
 import { IntersectEnum } from "./enum";
@@ -48,7 +49,7 @@ export type ClearIntersections<T> = {
 
 export type Intersect<A, B> = {
   any: B;
-  never: Never;
+  never: Get<B, "type"> extends ErrorType ? B : Never;
   const: IntersectConst<A, B>;
   enum: IntersectEnum<A, B>;
   primitive: IntersectPrimitive<A, B>;

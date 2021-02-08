@@ -12,11 +12,11 @@ export type IntersectEnum<A, B> = {
   any: A;
   never: Never;
   const: IntersectConst<B, A>;
-  enum: FilterExtendingResolved<A, B>;
-  primitive: FilterExtendingResolved<A, B>;
-  array: FilterExtendingResolved<A, B>;
-  tuple: FilterExtendingResolved<A, B>;
-  object: FilterExtendingResolved<A, B>;
+  enum: FilterUnintersecting<A, B>;
+  primitive: FilterUnintersecting<A, B>;
+  array: FilterUnintersecting<A, B>;
+  tuple: FilterUnintersecting<A, B>;
+  object: FilterUnintersecting<A, B>;
   union: IntersectUnion<B, A>;
   exclusion: IntersectExclusion<B, A>;
   intersection: Error<"Cannot intersect intersection">;
@@ -24,7 +24,7 @@ export type IntersectEnum<A, B> = {
   errorTypeProperty: Error<"Missing type property">;
 }[Get<B, "type"> extends MetaType ? Get<B, "type"> : "errorTypeProperty"];
 
-type FilterExtendingResolved<A, B> = Enum<RecurseOnEnumValues<Values<A>, B>>;
+type FilterUnintersecting<A, B> = Enum<RecurseOnEnumValues<Values<A>, B>>;
 
 type RecurseOnEnumValues<V, B> = V extends infer T
   ? Intersect<Const<T>, B> extends Never

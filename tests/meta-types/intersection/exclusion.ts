@@ -1,4 +1,8 @@
+import { A } from "ts-toolbelt";
+
 import {
+  Any,
+  Never,
   Exclusion,
   Const,
   Enum,
@@ -10,153 +14,147 @@ import {
   Intersection,
   Error,
 } from "meta-types";
-import { IntersectExclusion } from "meta-types/intersection/exclusion";
+import { Intersect } from "meta-types/intersection";
 
-import {
-  mConst,
-  mUnion,
-  mEnum,
-  mPrimitive,
-  mError,
-  mExclusion,
-  mArr,
-  mTuple,
-  mObject,
-} from "./helpers";
+// --- ANY ---
+
+const anyAlwaysIntersect: A.Equals<
+  Intersect<Exclusion<Primitive<string>, Const<"bar">>, Any>,
+  Exclusion<Primitive<string>, Const<"bar">>
+> = 1;
+anyAlwaysIntersect;
+
+// --- NEVER ---
+
+const neverNeverIntersect: A.Equals<
+  Intersect<Exclusion<Primitive<string>, Const<"bar">>, Never>,
+  Never
+> = 1;
+neverNeverIntersect;
 
 // --- CONSTS ---
 
-type Test1 = IntersectExclusion<
-  Exclusion<Primitive<string>, Const<"bar">>,
-  Const<"foo">
->;
-const test1: Test1 = mExclusion(mConst("foo"), mConst("bar"));
-test1;
+const intersectingConst: A.Equals<
+  Intersect<Exclusion<Primitive<string>, Const<"bar">>, Const<"foo">>,
+  Exclusion<Const<"foo">, Const<"bar">>
+> = 1;
+intersectingConst;
 
 // --- ENUM ---
 
-type Test2 = IntersectExclusion<
-  Exclusion<Primitive<string>, Enum<"foo" | "bar">>,
-  Enum<"foo" | "bar" | "baz" | 42>
->;
-const test2a: Test2 = mExclusion(mEnum("foo"), mEnum("foo"));
-test2a;
-const test2b: Test2 = mExclusion(mEnum("bar"), mEnum("bar"));
-test2b;
-const test2c: Test2 = mExclusion(mEnum("baz"), mEnum("foo"));
-test2c;
-// @ts-expect-error
-const test2d: Test2 = mExclusion(mEnum(42), mEnum("foo"));
-test2d;
+const intersectingEnum: A.Equals<
+  Intersect<
+    Exclusion<Primitive<string>, Enum<"foo" | "bar">>,
+    Enum<"foo" | "bar" | "baz" | 42>
+  >,
+  Exclusion<Enum<"foo" | "bar" | "baz">, Enum<"bar" | "foo">>
+> = 1;
+intersectingEnum;
 
 // --- PRIMITIVES ---
 
-type Test3a = IntersectExclusion<
-  Exclusion<Enum<"foo" | 42 | true>, Primitive<number>>,
-  Primitive<string>
->;
-const test3a: Test3a = mExclusion(mEnum("foo"), mPrimitive(42));
-test3a;
-// @ts-expect-error
-const test3a2: Test3a = mExclusion(mEnum(42), mPrimitive(42));
-test3a2;
-// @ts-expect-error
-const test3a3: Test3a = mExclusion(mEnum(true), mPrimitive(42));
-test3a3;
+const intersectingPrimitive: A.Equals<
+  Intersect<
+    Exclusion<Enum<"foo" | 42 | true>, Primitive<number>>,
+    Primitive<string>
+  >,
+  Exclusion<Enum<"foo">, Primitive<number>>
+> = 1;
+intersectingPrimitive;
 
-type Test3b = IntersectExclusion<
-  Exclusion<Primitive<number>, Const<42>>,
-  Primitive<number>
->;
-const test3b: Test3b = mExclusion(mPrimitive(42), mConst(42));
-test3b;
+const nonIntersectingPrimitive: A.Equals<
+  Intersect<Exclusion<Primitive<number>, Const<42>>, Primitive<number>>,
+  Exclusion<Primitive<number>, Const<42>>
+> = 1;
+nonIntersectingPrimitive;
 
 // --- ARRAY ---
 
-type Test4 = IntersectExclusion<
-  Exclusion<Arr<Primitive<string>>, Const<[]>>,
-  Arr<Const<"foo">>
->;
-const test4: Test4 = mExclusion(mArr(mConst("foo")), mConst([]));
-test4;
+const intersectingArray: A.Equals<
+  Intersect<Exclusion<Arr<Primitive<string>>, Const<[]>>, Arr<Const<"foo">>>,
+  Exclusion<Arr<Const<"foo">>, Const<[]>>
+> = 1;
+intersectingArray;
 
 // --- TUPLE ---
 
-type Test5 = IntersectExclusion<
-  Exclusion<Tuple<[Primitive<string>]>, Const<[]>>,
-  Tuple<[Primitive<string>], true, Primitive<string>>
->;
-const test5: Test5 = mExclusion(
-  mTuple([mPrimitive("str")], true, mPrimitive("str")),
-  mConst([])
-);
-test5;
+const intersectingTuple: A.Equals<
+  Intersect<
+    Exclusion<Tuple<[Primitive<string>]>, Const<[]>>,
+    Tuple<[Primitive<string>], true, Primitive<string>>
+  >,
+  Exclusion<Tuple<[Primitive<string>], true, Primitive<string>>, Const<[]>>
+> = 1;
+intersectingTuple;
 
 // --- OBJECT ---
 
-type Test6 = IntersectExclusion<
-  Exclusion<
-    Object<{ foo: Primitive<string> }, "foo", true, Primitive<string>>,
-    Const<{ foo: "bar" }>
+const intersectingObject: A.Equals<
+  Intersect<
+    Exclusion<
+      Object<{ foo: Primitive<string> }, "foo", true, Primitive<string>>,
+      Const<{ foo: "bar" }>
+    >,
+    Object<{ baz: Primitive<string> }, "baz", true>
   >,
-  Object<{ baz: Primitive<string> }, "baz", true>
->;
-const test6a: Test6 = mExclusion(
-  mObject(
-    { foo: mPrimitive("str"), baz: mPrimitive("str") },
-    "foo",
-    true,
-    mPrimitive("str")
-  ),
-  mConst({ foo: "bar" })
-);
-test6a;
-const test6b: Test6 = mExclusion(
-  mObject(
-    { foo: mPrimitive("str"), baz: mPrimitive("str") },
-    "baz",
-    true,
-    mPrimitive("str")
-  ),
-  mConst({ foo: "bar" })
-);
-test6b;
+  Exclusion<
+    Object<
+      { foo: Primitive<string>; baz: Primitive<string> },
+      "foo" | "baz",
+      true,
+      Primitive<string>
+    >,
+    Const<{ foo: "bar" }>
+  >
+> = 1;
+intersectingObject;
 
 // --- UNION ---
 
-type Test7a = IntersectExclusion<
-  Exclusion<Enum<42 | true | "foo" | "bar">, Primitive<number>>,
-  Union<Const<"foo"> | Primitive<boolean>>
->;
-const test7a: Test7a = mUnion(
-  mExclusion(mConst("foo" as "foo"), mPrimitive(42))
-);
-test7a;
-const test7a2: Test7a = mUnion(mExclusion(mEnum(true as true), mPrimitive(42)));
-test7a2;
-// @ts-expect-error
-const test7a3: Test7a = mUnion(mExclusion(mEnum(42 as 42), mPrimitive(42)));
-test7a3;
-// @ts-expect-error
-const test7a4: Test7a = mUnion(
-  mExclusion(mEnum("bar" as "bar"), mPrimitive(42))
-);
-test7a4;
+const intersectingUnion: A.Equals<
+  Intersect<
+    Exclusion<Enum<42 | true | "foo" | "bar">, Primitive<number>>,
+    Union<Const<"foo"> | Primitive<boolean>>
+  >,
+  Union<
+    | Exclusion<Const<"foo">, Primitive<number>>
+    | Exclusion<Enum<true>, Primitive<number>>
+  >
+> = 1;
+intersectingUnion;
 
 // --- INTERSECTION ---
 
-type Test8 = IntersectExclusion<
-  Exclusion<Primitive<string>, Const<"foo">>,
-  Intersection<Primitive<string>, Enum<"foo" | "bar">>
->;
-const test8: Test8 = mError("Cannot intersect intersection");
-test8;
+const cannotIntersectIntersection: A.Equals<
+  Intersect<
+    Exclusion<Primitive<string>, Const<"foo">>,
+    Intersection<Primitive<string>, Enum<"foo" | "bar">>
+  >,
+  Error<"Cannot intersect intersection">
+> = 1;
+cannotIntersectIntersection;
+
+// --- EXCLUSION ---
+
+const intersectingExclusion: A.Equals<
+  Intersect<
+    Exclusion<
+      Union<Const<"A"> | Const<"B"> | Const<"C"> | Const<"D">>,
+      Const<"A">
+    >,
+    Exclusion<Enum<"B" | "C">, Const<"B">>
+  >,
+  Exclusion<
+    Union<Never | Const<"B"> | Const<"C">>,
+    Union<Const<"A"> | Const<"B">>
+  >
+> = 1;
+intersectingExclusion;
 
 // --- ERROR ---
 
-type Test9 = IntersectExclusion<
-  Exclusion<Primitive<string>, Const<"foo">>,
+const error: A.Equals<
+  Intersect<Exclusion<Primitive<string>, Const<"foo">>, Error<"Any">>,
   Error<"Any">
->;
-const test9: Test9 = mError("Any");
-test9;
+> = 1;
+error;
