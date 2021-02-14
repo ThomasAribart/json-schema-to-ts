@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@types/json-schema": "^7.0.6",
-    "ts-toolbelt": "^8.4.0"
+    "ts-toolbelt": "^6.15.5"
   },
   "devDependencies": {
     "@babel/core": "^7.10.4",
