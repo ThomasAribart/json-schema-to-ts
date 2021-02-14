@@ -11,6 +11,7 @@ import { ClearTupleIntersections, IntersectTuple } from "./tuple";
 import { ClearObjectIntersections, IntersectObject } from "./object";
 import { ClearUnionIntersections, IntersectUnion } from "./union";
 import { ClearExclusionIntersections, IntersectExclusion } from "./exclusion";
+import { IsRepresentable } from "../utils";
 
 export type IntersectionType = "intersection";
 
@@ -62,3 +63,7 @@ export type Intersect<A, B> = {
   error: A;
   errorMissingType: Error<"Missing type property">;
 }[Get<A, "type"> extends MetaType ? Get<A, "type"> : "errorMissingType"];
+
+export type IsIntersectionRepresentable<A> = IsRepresentable<
+  ClearIntersections<A>
+>;
