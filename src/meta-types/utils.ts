@@ -6,6 +6,7 @@ import { IsTupleRepresentable } from "./tuple";
 import { IsObjectRepresentable } from "./object";
 import { IsUnionRepresentable } from "./union";
 import { IsIntersectionRepresentable } from "./intersection";
+import { IsExclusionRepresentable } from "./exclusion";
 
 export type IsRepresentable<A> = {
   any: true;
@@ -18,6 +19,7 @@ export type IsRepresentable<A> = {
   object: IsObjectRepresentable<A>;
   union: IsUnionRepresentable<A>;
   intersection: IsIntersectionRepresentable<A>;
+  exclusion: IsExclusionRepresentable<A>;
   error: false;
   errorMissingType: false;
 }[Get<A, "type"> extends MetaType ? Get<A, "type"> : "errorMissingType"];
