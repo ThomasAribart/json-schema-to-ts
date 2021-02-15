@@ -113,7 +113,7 @@ const bothClosed1Key: A.Equals<
     Object<{ a: Enum<"A" | "B"> }, "a", false>,
     Object<{ a: Const<"B"> }, "a", false>
   >,
-  Object<{ a: Enum<"A"> }, "a", false, Never>
+  Object<{ a: Enum<"A"> }, "a", false>
 > = 1;
 bothClosed1Key;
 
@@ -122,7 +122,7 @@ const bothClosed2Keys: A.Equals<
     Object<{ a: Enum<"A" | "B">; b: Const<"B"> }, "a" | "b", false>,
     Object<{ a: Const<"A">; b: Const<"B"> }, "a" | "b", false>
   >,
-  Object<{ a: Enum<"B">; b: Const<"B"> }, "a" | "b", false, Never>
+  Object<{ a: Enum<"B">; b: Const<"B"> }, "a" | "b", false>
 > = 1;
 bothClosed2Keys;
 
@@ -139,12 +139,7 @@ const bothClosed3Keys: A.Equals<
       false
     >
   >,
-  Object<
-    { a: Enum<"A">; b: Const<"B">; c: Const<"C"> },
-    "a" | "b" | "c",
-    false,
-    Never
-  >
+  Object<{ a: Enum<"A">; b: Const<"B">; c: Const<"C"> }, "a" | "b" | "c", false>
 > = 1;
 bothClosed3Keys;
 
@@ -286,7 +281,7 @@ const bothOpenMatch3: A.Equals<
     Object<{ a: Enum<"A" | "B">; b: Const<"B"> }, "a", true, Const<"B">>,
     Object<{}, never, true, Const<"B">>
   >,
-  Object<{ a: Enum<"A">; b: Const<"B"> }, "a", false, Never>
+  Object<{ a: Enum<"A">; b: Const<"B"> }, "a", true, Const<"B">>
 > = 1;
 bothOpenMatch3;
 
@@ -318,7 +313,7 @@ const bothOpenKeyAdded: A.Equals<
       Primitive<string>
     >
   >,
-  Object<{ a: Enum<"A" | "B">; b: Enum<"A"> }, "a", false, Enum<never>>
+  Object<{ a: Enum<"A" | "B">; b: Enum<"A"> }, "a", true, Enum<"A" | "B">>
 > = 1;
 bothOpenKeyAdded;
 
@@ -329,7 +324,7 @@ const excludingUnion: A.Equals<
     Object<{ a: Enum<"A" | "B" | "C"> }, "a", false>,
     Union<Const<{ a: "C" }> | Object<{ a: Const<"B"> }, "a", false>>
   >,
-  Object<{ a: Enum<"A"> }, "a", false, Never>
+  Object<{ a: Enum<"A"> }, "a", false>
 > = 1;
 excludingUnion;
 
@@ -338,7 +333,7 @@ const nonExcludingUnion: A.Equals<
     Object<{ a: Enum<"A" | "B"> }, "a", false>,
     Union<Const<{ a: "C" }> | Object<{ a: Const<"D"> }, "a", false>>
   >,
-  Object<{ a: Enum<"A" | "B"> }, "a", false, Never>
+  Object<{ a: Enum<"A" | "B"> }, "a", false>
 > = 1;
 nonExcludingUnion;
 
@@ -378,7 +373,7 @@ const excludingExclusion: A.Equals<
       Const<{ a: "C" }>
     >
   >,
-  Object<{ a: Enum<"C"> }, "a", false, Never>
+  Object<{ a: Enum<"C"> }, "a", false>
 > = 1;
 excludingExclusion;
 
@@ -390,7 +385,7 @@ const nonExcludingExclusion: A.Equals<
       Object<{ a: Primitive<string> }, "a", false>
     >
   >,
-  Object<{ a: Enum<"A" | "B" | "C"> }, "a", false, Never>
+  Object<{ a: Enum<"A" | "B" | "C"> }, "a", false>
 > = 1;
 nonExcludingExclusion;
 

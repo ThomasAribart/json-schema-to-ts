@@ -41,7 +41,7 @@ describe("If/Then/Else schemas", () => {
       petInstance = { type: "dog" };
       expect(ajv.validate(petSchema, petInstance)).toBe(false);
 
-      // Unable to throw as "dog" type is not perceived as impossible in else case
+      // @ts-expect-error
       petInstance = { type: "dog", catRace: "persan" };
       expect(ajv.validate(petSchema, petInstance)).toBe(false);
 
@@ -94,11 +94,11 @@ describe("If/Then/Else schemas", () => {
     });
 
     it("rejects invalid dogs/cats", () => {
-      // Unable to throw as "dog" type is not perceived as impossible in else case
+      // @ts-expect-error
       petInstance = { type: "dog" };
       expect(ajv.validate(petSchema, petInstance)).toBe(false);
 
-      // Unable to throw as "dog" type is not excluded in else case
+      // @ts-expect-error
       petInstance = { type: "dog", catRace: "persan" };
       expect(ajv.validate(petSchema, petInstance)).toBe(false);
 
@@ -175,7 +175,7 @@ describe("If/Then/Else schemas", () => {
     let petInstance: Pet;
 
     it("rejects invalid dog instances", () => {
-      // error is not throwed at the moment because we cannot differ "cat" from "dog" in else statement (exclusion)
+      // @ts-expect-error
       petInstance = ["dog"];
       expect(ajv.validate(petSchema, petInstance)).toBe(false);
 
@@ -205,7 +205,7 @@ describe("If/Then/Else schemas", () => {
       petInstance = ["dog"];
       expect(ajv.validate(petSchema, petInstance)).toBe(true);
 
-      // error is not throwed at the moment because we cannot differ "cat" from "dog" in else statement (exclusion)
+      // @ts-expect-error
       petInstance = ["dog", "poodle", "other"];
       expect(ajv.validate(petSchema, petInstance)).toBe(false);
     });

@@ -14,6 +14,7 @@ import { ExcludeIntersection } from "./intersection";
 import { ExcludeExclusion } from "./exclusion";
 import {
   CrossValue,
+  SourceValue,
   IsExclusionValueRepresentable,
   IsOutsideOfSourceScope,
   IsOutsideOfExcludedScope,
@@ -42,14 +43,15 @@ type ExcludeObjects<
   E,
   C = CrossObjectValues<S, E>,
   R = RepresentableKeys<C>,
-  P = Exclude<OpenProps<S>, OpenProps<E>>,
-  I = IsRepresentable<P>
+  P = Exclude<OpenProps<S>, OpenProps<E>>
 > = DoesObjectSizesMatch<S, E, C> extends true
   ? {
       moreThanTwo: S;
-      onlyOne: PropagateExclusion<S, C, I, P>;
+      onlyOne: PropagateExclusion<S, C>;
       none: OmitOmittableKeys<S, C>;
-    }[And<IsOpen<S>, I> extends true ? "moreThanTwo" : GetUnionLength<R>]
+    }[And<IsOpen<S>, IsRepresentable<P>> extends true
+      ? "moreThanTwo"
+      : GetUnionLength<R>]
   : S;
 
 type CrossObjectValues<S, E> = {
@@ -111,13 +113,13 @@ type RepresentableKeys<C> = {
     : never;
 }[keyof C];
 
-type PropagateExclusion<S, C, I, P> = Object<
+type PropagateExclusion<S, C> = Object<
   {
     [key in keyof C]: Propagate<C[key]>;
   },
   Required<S>,
-  I extends true ? IsOpen<S> : false,
-  P
+  IsOpen<S>,
+  OpenProps<S>
 >;
 
 // OMITTABLE KEYS
@@ -126,9 +128,7 @@ type OmitOmittableKeys<S, C, K = OmittableKeys<C>> = {
   moreThanTwo: S;
   onlyOne: Object<
     {
-      [key in keyof Values<S> | A.Cast<K, string>]: key extends K
-        ? Never
-        : Get<Values<S>, key>;
+      [key in keyof C]: key extends K ? Never : SourceValue<C[key]>;
     },
     Required<S>,
     IsOpen<S>,

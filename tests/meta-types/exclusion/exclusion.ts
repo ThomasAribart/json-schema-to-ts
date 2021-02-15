@@ -97,7 +97,7 @@ const excludingObject: A.Equals<
     Exclusion<Object<{ a: Enum<"A" | "B"> }, "a", false>, Never>,
     Object<{ a: Const<"B"> }, "a", false>
   >,
-  Object<{ a: Enum<"A"> }, "a", false, Never>
+  Object<{ a: Enum<"A"> }, "a", false>
 > = 1;
 excludingObject;
 

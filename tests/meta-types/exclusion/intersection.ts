@@ -194,8 +194,7 @@ const excludingObject: A.Equals<
     Object<{ a: Primitive<number> }, "a", false>
   >,
   Union<
-    | Union<Never>
-    | Union<Never | Object<{ a: Primitive<string> }, "a", false, Never>>
+    Union<Never> | Union<Never | Object<{ a: Primitive<string> }, "a", false>>
   >
 > = 1;
 excludingObject;
@@ -217,8 +216,8 @@ const nonExcludingObject: A.Equals<
   >,
   Union<
     | Union<Never>
-    | Union<Never | Object<{ a: Primitive<string> }, "a", false, Never>>
-    | Union<Never | Object<{ a: Primitive<number> }, "a", false, Never>>
+    | Union<Never | Object<{ a: Primitive<string> }, "a", false>>
+    | Union<Never | Object<{ a: Primitive<number> }, "a", false>>
   >
 > = 1;
 nonExcludingObject;

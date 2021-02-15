@@ -24,6 +24,7 @@ import { ExcludeIntersection } from "./intersection";
 import { ExcludeExclusion } from "./exclusion";
 import {
   CrossValue,
+  SourceValue,
   IsExclusionValueRepresentable,
   IsOutsideOfSourceScope,
   IsOutsideOfExcludedScope,
@@ -173,7 +174,7 @@ type RequiredTupleValues<S, C, R extends any[] = []> = {
   stop: Reverse<R>;
   continue: IsOmittable<Head<C>> extends true
     ? Reverse<R>
-    : RequiredTupleValues<Tail<S>, Tail<C>, Prepend<Head<S>, R>>;
+    : RequiredTupleValues<Tail<S>, Tail<C>, Prepend<SourceValue<Head<C>>, R>>;
 }[C extends [any, ...any[]] ? "continue" : "stop"];
 
 // CONST

@@ -1,4 +1,4 @@
-import { ParseSchema } from "parse-schema";
+import { ParseSchema } from "../parse-schema";
 import { Intersection, Union, Exclusion } from "../meta-types";
 import { HasKeyIn } from "../utils";
 
