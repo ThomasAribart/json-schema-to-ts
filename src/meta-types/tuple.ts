@@ -36,6 +36,6 @@ type AreAllTupleValuesRepresentable<V> = {
   continue: V extends any[]
     ? IsRepresentable<Head<V>> extends false
       ? false
-      : RecurseOnTuple<Tail<V>>
+      : AreAllTupleValuesRepresentable<Tail<V>>
     : never;
 }[V extends [any, ...any[]] ? "continue" : "stop"];
