@@ -18,19 +18,14 @@ type ApplyIfThenElse<
   S,
   R,
   I = "if" extends keyof S ? MergeSubSchema<R, S["if"]> : never
-> = "if" extends keyof S
-  ? Union<
-      | ("then" extends keyof S
-          ? Intersection<
-              ParseSchema<I>,
-              ParseSchema<MergeSubSchema<R, S["then"]>>
-            >
-          : ParseSchema<I>)
-      | Exclusion<
-          "else" extends keyof S
-            ? ParseSchema<MergeSubSchema<R, S["else"]>>
-            : ParseSchema<R>,
-          ParseSchema<I>
-        >
+> = Union<
+  | ("then" extends keyof S
+      ? Intersection<ParseSchema<I>, ParseSchema<MergeSubSchema<R, S["then"]>>>
+      : ParseSchema<I>)
+  | Exclusion<
+      "else" extends keyof S
+        ? ParseSchema<MergeSubSchema<R, S["else"]>>
+        : ParseSchema<R>,
+      ParseSchema<I>
     >
-  : never;
+>;
