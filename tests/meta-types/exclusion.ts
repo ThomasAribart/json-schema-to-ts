@@ -12,6 +12,7 @@ import {
   Object,
   Tuple,
 } from "meta-types";
+import { IsRepresentable } from "meta-types/utils";
 
 const test1: A.Equals<
   Resolve<Exclusion<Enum<"foo" | 42>, Primitive<string>>>,
@@ -46,3 +47,17 @@ const test4: A.Equals<
   "C"
 > = 1;
 test4;
+
+// --- ISREPRESENTABLE ---
+
+const notRepresentable: A.Equals<
+  IsRepresentable<Exclusion<Const<"A">, Primitive<string>>>,
+  false
+> = 1;
+notRepresentable;
+
+const representable: A.Equals<
+  IsRepresentable<Exclusion<Primitive<string>, Const<"A">>>,
+  true
+> = 1;
+representable;
