@@ -1,6 +1,7 @@
 import { A } from "ts-toolbelt";
 
-import { Resolve, Object, Primitive } from "meta-types";
+import { Resolve, Never, Const, Primitive, Object } from "meta-types";
+import { IsRepresentable } from "meta-types/utils";
 
 // --- OPEN ---
 
@@ -38,3 +39,41 @@ const test4: A.Equals<
   never
 > = 1;
 test4;
+
+// --- ISREPRESENTABLE ---
+
+const notRepresentable1: A.Equals<
+  IsRepresentable<Object<{ a: Const<"A">; b: Never }, "b">>,
+  false
+> = 1;
+notRepresentable1;
+
+const notRepresentable2: A.Equals<
+  IsRepresentable<Object<{}, "b", false>>,
+  false
+> = 1;
+notRepresentable2;
+
+const notRepresentable3: A.Equals<
+  IsRepresentable<Object<{}, "b", true, Never>>,
+  false
+> = 1;
+notRepresentable3;
+
+const representable1: A.Equals<
+  IsRepresentable<Object<{ a: Const<"A">; b: Never }, "a">>,
+  true
+> = 1;
+representable1;
+
+const representable2: A.Equals<
+  IsRepresentable<Object<{}, "b", true>>,
+  true
+> = 1;
+representable2;
+
+const representable3: A.Equals<
+  IsRepresentable<Object<{}, "b", true, Const<"A">>>,
+  true
+> = 1;
+representable3;

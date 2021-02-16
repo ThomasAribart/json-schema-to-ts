@@ -14,6 +14,7 @@ import {
   Intersection,
   Error,
 } from "meta-types";
+import { IsRepresentable } from "meta-types/utils";
 
 // --- ANY ---
 
@@ -93,3 +94,8 @@ test10;
 
 const test11: A.Equals<Resolve<Arr<Error<"Any">>>, never[]> = 1;
 test11;
+
+// --- ISREPRESENTABLE ---
+
+const representable: A.Equals<IsRepresentable<Arr<Never>>, true> = 1;
+representable;

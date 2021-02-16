@@ -14,6 +14,7 @@ import {
   Intersection,
   Error,
 } from "meta-types";
+import { IsRepresentable } from "meta-types/utils";
 
 // --- ANY ---
 
@@ -122,3 +123,14 @@ const testError: A.Equals<
   "foo"
 > = 1;
 testError;
+
+// --- ISREPRESENTABLE ---
+
+const notRepresentable: A.Equals<IsRepresentable<Union<never>>, false> = 1;
+notRepresentable;
+
+const representable: A.Equals<
+  IsRepresentable<Union<Never | Const<"A">>>,
+  true
+> = 1;
+representable;

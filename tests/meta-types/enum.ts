@@ -1,6 +1,7 @@
 import { A } from "ts-toolbelt";
 
 import { Resolve, Enum } from "meta-types";
+import { IsRepresentable } from "meta-types/utils";
 
 // --- EMPTY ---
 
@@ -21,3 +22,11 @@ test3;
 
 const test4: A.Equals<Resolve<Enum<{ foo: "bar" }>>, { foo: "bar" }> = 1;
 test4;
+
+// --- ISREPRESENTABLE ---
+
+const notRepresentable: A.Equals<IsRepresentable<Enum<never>>, false> = 1;
+notRepresentable;
+
+const representable: A.Equals<IsRepresentable<Enum<"A">>, true> = 1;
+representable;

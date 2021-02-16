@@ -1,6 +1,7 @@
 import { A } from "ts-toolbelt";
 
-import { Resolve, Tuple, Primitive, Never } from "meta-types";
+import { Resolve, Never, Const, Primitive, Tuple } from "meta-types";
+import { IsRepresentable } from "meta-types/utils";
 
 // --- OPEN ---
 
@@ -25,3 +26,14 @@ const neverItem: A.Equals<
   [string, never]
 > = 1;
 neverItem;
+
+// --- ISREPRESENTABLE ---
+
+const notRepresentable: A.Equals<
+  IsRepresentable<Tuple<[Const<"A">, Never]>>,
+  false
+> = 1;
+notRepresentable;
+
+const representable: A.Equals<IsRepresentable<Tuple<[Const<"A">]>>, true> = 1;
+representable;

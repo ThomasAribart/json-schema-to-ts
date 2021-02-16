@@ -1,6 +1,7 @@
 import { A } from "ts-toolbelt";
 
 import { Resolve, Const } from "meta-types";
+import { IsRepresentable } from "meta-types/utils";
 
 // --- PRIMITIVE ---
 
@@ -25,3 +26,8 @@ test5;
 
 const test6: A.Equals<Resolve<Const<{ foo: "bar" }>>, { foo: "bar" }> = 1;
 test6;
+
+// --- ISREPRESENTABLE ---
+
+const representable: A.Equals<IsRepresentable<Const<"A">>, true> = 1;
+representable;
