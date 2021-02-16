@@ -1,4 +1,8 @@
+import { A } from "ts-toolbelt";
+
 import {
+  Any,
+  Never,
   Intersection,
   Const,
   Enum,
@@ -10,175 +14,196 @@ import {
   Exclusion,
   Error,
 } from "meta-types";
-import { IntersectArr } from "meta-types/intersection/array";
+import { Intersect } from "meta-types/intersection";
 
-import {
-  mNever,
-  mConst,
-  mEnum,
-  mPrimitive,
-  mArr,
-  mTuple,
-  mUnion,
-  mError,
-  mExclusion,
-} from "./helpers";
+// --- ANY ---
+
+const anyAlwaysIntersects: A.Equals<
+  Intersect<Arr<Primitive<string>>, Any>,
+  Arr<Primitive<string>>
+> = 1;
+anyAlwaysIntersects;
+
+// --- NEVER ---
+
+const neverNeverIntersects: A.Equals<
+  Intersect<Arr<Primitive<string>>, Never>,
+  Never
+> = 1;
+neverNeverIntersects;
 
 // --- CONSTS ---
 
-type Test1a = IntersectArr<Arr<Primitive<string>>, Const<["foo", "bar"]>>;
-const test1a: Test1a = mConst(["foo", "bar"]);
-test1a;
+const intersectingConst: A.Equals<
+  Intersect<Arr<Primitive<string>>, Const<["foo", "bar"]>>,
+  Const<["foo", "bar"]>
+> = 1;
+intersectingConst;
 
-type Test1b = IntersectArr<Arr<Primitive<string>>, Const<["foo", 42]>>;
-const test1b: Test1b = mNever();
+const test1b: A.Equals<
+  Intersect<Arr<Primitive<string>>, Const<["foo", 42]>>,
+  Never
+> = 1;
 test1b;
 
 // --- ENUM ---
 
-type Test2a = IntersectArr<
-  Arr<Primitive<string>>,
-  Enum<["foo"] | ["bar"] | 42>
->;
-let test2a: Test2a = mEnum(["foo"]);
-test2a = mEnum(["bar"]);
-test2a;
+let intersectingEnum1: A.Equals<
+  Intersect<Arr<Primitive<string>>, Enum<["foo"] | ["bar"] | 42>>,
+  Enum<["foo"] | ["bar"]>
+> = 1;
+intersectingEnum1;
 
-type Test2b = IntersectArr<Arr<Primitive<number>>, Enum<["bar", "baz"] | [42]>>;
-let test2b: Test2b = mEnum([42]);
-// @ts-expect-error
-test2b = mEnum(["bar", "baz"]);
-test2b;
+let intersectingEnum2: A.Equals<
+  Intersect<Arr<Primitive<number>>, Enum<["bar", "baz"] | [42]>>,
+  Enum<[42]>
+> = 1;
+intersectingEnum2;
 
-type Test2c = IntersectArr<Arr<Primitive<number>>, Enum<["bar", "baz"]>>;
-// @ts-expect-error
-const test2c: Test2c = mEnum(["bar", "baz"]);
-test2c;
+const nonIntersectingEnum: A.Equals<
+  Intersect<Arr<Primitive<number>>, Enum<["bar", "baz"]>>,
+  Enum<never>
+> = 1;
+nonIntersectingEnum;
 
 // --- PRIMITIVES ---
 
-type Test3a = IntersectArr<Arr<Primitive<string>>, Primitive<string>>;
-const test3a: Test3a = mNever();
-test3a;
+const primitivesNeverIntersect: A.Equals<
+  Intersect<Arr<Primitive<string>>, Primitive<string>>,
+  Never
+> = 1;
+primitivesNeverIntersect;
 
 // --- ARRAY ---
 
-type Test4a = IntersectArr<Arr<Primitive<string>>, Arr<Primitive<string>>>;
-const test4a: Test4a = mArr(mPrimitive("string"));
-test4a;
+const intersectingArray: A.Equals<
+  Intersect<Arr<Primitive<string>>, Arr<Primitive<string>>>,
+  Arr<Primitive<string>>
+> = 1;
+intersectingArray;
 
-type Test4b = IntersectArr<Arr<Primitive<string>>, Arr<Primitive<number>>>;
-const test4b: Test4b = mNever();
-test4b;
+const nonIntersectingArray: A.Equals<
+  Intersect<Arr<Primitive<string>>, Arr<Primitive<number>>>,
+  Never
+> = 1;
+nonIntersectingArray;
 
 // --- TUPLE ---
 
-type Test5a = IntersectArr<Arr<Primitive<string>>, Tuple<[Primitive<string>]>>;
-const test5a: Test5a = mTuple(
-  [mPrimitive("string")],
-  true,
-  mPrimitive("string")
-);
-test5a;
-
-type Test5b = IntersectArr<
-  Arr<Primitive<string>>,
+const intersectingTuple1: A.Equals<
+  Intersect<
+    Arr<Primitive<string>>,
+    Tuple<[Primitive<string>], true, Primitive<string>>
+  >,
   Tuple<[Primitive<string>], true, Primitive<string>>
->;
-const test5b: Test5b = mTuple(
-  [mPrimitive("string")],
-  true,
-  mPrimitive("string")
-);
-test5b;
+> = 1;
+intersectingTuple1;
 
-type Test5c = IntersectArr<
-  Arr<Primitive<string>>,
+const intersectingTuple2: A.Equals<
+  Intersect<
+    Arr<Primitive<string>>,
+    Tuple<[Primitive<string>], true, Const<"foo">>
+  >,
   Tuple<[Primitive<string>], true, Const<"foo">>
->;
-const test5c: Test5c = mTuple([mPrimitive("string")], true, mConst("foo"));
-test5c;
+> = 1;
+intersectingTuple2;
 
-type Test5d = IntersectArr<
-  Arr<Primitive<string>>,
-  Tuple<[Primitive<string>], true, Enum<"foo" | 42>>
->;
-const test5d: Test5d = mTuple([mPrimitive("string")], true, mEnum("foo"));
-test5d;
+const tupleOpenPropsBecomeString: A.Equals<
+  Intersect<Arr<Primitive<string>>, Tuple<[Primitive<string>]>>,
+  Tuple<[Primitive<string>], true, Primitive<string>>
+> = 1;
+tupleOpenPropsBecomeString;
 
-type Test5e = IntersectArr<
-  Arr<Primitive<string>>,
-  Tuple<[Primitive<string>], true, Primitive<number>>
->;
-const test5e: Test5e = mTuple([mPrimitive("string")], false, mNever());
-test5e;
+const tupleOpenPropsBecomeFoo: A.Equals<
+  Intersect<
+    Arr<Primitive<string>>,
+    Tuple<[Primitive<string>], true, Enum<"foo" | 42>>
+  >,
+  Tuple<[Primitive<string>], true, Enum<"foo">>
+> = 1;
+tupleOpenPropsBecomeFoo;
 
-type Test5f = IntersectArr<
-  Arr<Primitive<string>>,
-  Tuple<[Primitive<string>, Primitive<boolean>], true, Primitive<string>>
->;
-const test5f: Test5f = mNever();
-test5f;
+const tupleBecomeClose: A.Equals<
+  Intersect<
+    Arr<Primitive<string>>,
+    Tuple<[Primitive<string>], true, Primitive<number>>
+  >,
+  Tuple<[Primitive<string>], false, Never>
+> = 1;
+tupleBecomeClose;
+
+const nonIntersectingTuple: A.Equals<
+  Intersect<
+    Arr<Primitive<string>>,
+    Tuple<[Primitive<string>, Primitive<boolean>], true, Primitive<string>>
+  >,
+  Never
+> = 1;
+nonIntersectingTuple;
 
 // --- OBJECT ---
 
-type Test6a = IntersectArr<
-  Arr<Primitive<string>>,
-  Object<{ foo: Primitive<string> }, "foo", true, Primitive<string>>
->;
-const test6a: Test6a = mNever();
-test6a;
+const objectsNeverIntersect: A.Equals<
+  Intersect<
+    Arr<Primitive<string>>,
+    Object<{ foo: Primitive<string> }, "foo", true, Primitive<string>>
+  >,
+  Never
+> = 1;
+objectsNeverIntersect;
 
 // --- UNION ---
 
-type Test7a = IntersectArr<
-  Arr<Primitive<string>>,
-  Union<Arr<Primitive<string>> | Arr<Primitive<number>>>
->;
-const test7a: Test7a = mUnion(mArr(mPrimitive("string")));
-test7a;
-// @ts-expect-error
-const test7a2: Test7a = mUnion(mArr(mPrimitive(42)));
-test7a2;
+const numberIsExcluded1: A.Equals<
+  Intersect<
+    Arr<Primitive<string>>,
+    Union<Arr<Primitive<string>> | Arr<Primitive<number>>>
+  >,
+  Union<Arr<Primitive<string>> | Never>
+> = 1;
+numberIsExcluded1;
 
-type Test7b = IntersectArr<
-  Arr<Primitive<string>>,
-  Union<Const<["foo"]> | Arr<Primitive<number>>>
->;
-const test7b: Test7b = mUnion(mConst(["foo"]));
-test7b;
-// @ts-expect-error
-const test7b2: Test7b = mUnion(mConst([42]));
-test7b2;
+const numberIsExcluded2: A.Equals<
+  Intersect<
+    Arr<Primitive<string>>,
+    Union<Const<["foo"]> | Arr<Primitive<number>>>
+  >,
+  Union<Const<["foo"]> | Never>
+> = 1;
+numberIsExcluded2;
 
-type Test7c = IntersectArr<
-  Arr<Primitive<string>>,
-  Union<Arr<Primitive<number>> | Tuple<[Primitive<string>]>>
->;
-const test7c: Test7c = mUnion(mNever());
-test7c;
+const tupleIsKept: A.Equals<
+  Intersect<
+    Arr<Primitive<string>>,
+    Union<Arr<Primitive<number>> | Tuple<[Primitive<string>]>>
+  >,
+  Union<Never | Tuple<[Primitive<string>], true, Primitive<string>>>
+> = 1;
+tupleIsKept;
 
 // --- INTERSECTION ---
 
-type Test8a = IntersectArr<
-  Arr<Primitive<string>>,
-  Intersection<Primitive<string>, Primitive<string>>
->;
-const test8a: Test8a = mError("Cannot intersect intersection");
-test8a;
-
-// --- ERROR ---
-
-type Err = Error<"Any">;
-type Test9a = IntersectArr<Arr<Primitive<string>>, Err>;
-const test9a: Test9a = mError("Any");
-test9a;
+const cannonIntersectIntersection: A.Equals<
+  Intersect<
+    Arr<Primitive<string>>,
+    Intersection<Primitive<string>, Primitive<string>>
+  >,
+  Error<"Cannot intersect intersection">
+> = 1;
+cannonIntersectIntersection;
 
 // --- EXCLUSION ---
 
-type Test10 = IntersectArr<
-  Arr<Const<"foo">>,
-  Exclusion<Arr<Primitive<string>>, Const<[]>>
->;
-const test10: Test10 = mExclusion(mArr(mConst("foo")), mConst([]));
-test10;
+const intersectingExclusion: A.Equals<
+  Intersect<Arr<Const<"foo">>, Exclusion<Arr<Primitive<string>>, Const<[]>>>,
+  Exclusion<Arr<Const<"foo">>, Const<[]>>
+> = 1;
+intersectingExclusion;
+
+// --- ERROR ---
+
+const error: A.Equals<
+  Intersect<Arr<Primitive<string>>, Error<"Any">>,
+  Error<"Any">
+> = 1;
+error;

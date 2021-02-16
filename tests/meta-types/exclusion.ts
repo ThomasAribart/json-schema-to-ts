@@ -1,49 +1,48 @@
+import { A } from "ts-toolbelt";
+
 import {
   Resolve,
   Exclusion,
+  Any,
+  Never,
   Enum,
   Const,
   Primitive,
   Union,
   Object,
   Tuple,
-  Any,
 } from "meta-types";
 
-type Test1 = Resolve<Exclusion<Enum<"foo" | 42>, Primitive<string>>>;
-// @ts-expect-error
-const test1a: Test1 = "foo";
-test1a;
-// @ts-expect-error
-const test1b: Test1 = "any string";
-test1b;
-const test1c: Test1 = 42;
-test1c;
+const test1: A.Equals<
+  Resolve<Exclusion<Enum<"foo" | 42>, Primitive<string>>>,
+  42
+> = 1;
+test1;
 
-type Test2 = Resolve<Exclusion<Enum<"foo" | "bar">, Const<"bar">>>;
-const test2a: Test2 = "foo";
-test2a;
-// @ts-expect-error
-const test2b: Test2 = "bar";
-test2b;
-// @ts-expect-error
-const test2c: Test2 = "any string";
-test2c;
-// @ts-expect-error
-const test2d: Test2 = 42;
-test2d;
+const test2: A.Equals<
+  Resolve<Exclusion<Enum<"foo" | "bar">, Const<"bar">>>,
+  "foo"
+> = 1;
+test2;
 
-type Test3 = Resolve<
-  Exclusion<
-    Union<Object | Tuple<[Primitive<string>]> | Primitive<string>>,
-    Union<Primitive<string> | Tuple<[Any]>>
-  >
->;
-const test3a: Test3 = { foo: "bar" };
-test3a;
-// @ts-expect-error
-const test3b: Test3 = "string";
-test3b;
-// @ts-expect-error
-const test3c: Test3 = ["foo"];
-test3c;
+const test3: A.Equals<
+  Resolve<
+    Exclusion<
+      Union<Object | Tuple<[Primitive<string>]> | Primitive<string>>,
+      Union<Primitive<string> | Tuple<[Any]>>
+    >
+  >,
+  { [k: string]: unknown }
+> = 1;
+test3;
+
+const test4: A.Equals<
+  Resolve<
+    Exclusion<
+      Union<Never | Const<"B"> | Const<"C">>,
+      Union<Const<"A"> | Const<"B">>
+    >
+  >,
+  "C"
+> = 1;
+test4;

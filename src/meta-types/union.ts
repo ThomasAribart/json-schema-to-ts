@@ -1,6 +1,7 @@
-import { Get } from "../utils";
+import { DoesExtend, Get } from "../utils";
 
 import { Resolve } from ".";
+import { IsRepresentable } from "./utils";
 
 export type UnionType = "union";
 
@@ -11,6 +12,15 @@ export type Union<V> = {
 
 export type Values<U> = Get<U, "values">;
 
-export type ResolveUnion<T> = RecurseOnUnionTree<Values<T>>;
+export type ResolveUnion<U> = RecurseOnUnion<Values<U>>;
 
-type RecurseOnUnionTree<V> = V extends infer T ? Resolve<T> : never;
+type RecurseOnUnion<V> = V extends infer T ? Resolve<T> : never;
+
+export type IsUnionRepresentable<U> = DoesExtend<
+  true,
+  AreUnionValuesRepresentable<Values<U>>
+>;
+
+type AreUnionValuesRepresentable<V> = V extends infer T
+  ? IsRepresentable<T>
+  : never;

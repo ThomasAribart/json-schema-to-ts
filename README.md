@@ -131,7 +131,9 @@ type Address = FromSchema<typeof addressSchema>;
   - [AnyOf](#anyof)
   - [AllOf](#allof)
   - [OneOf](#oneof)
-  - [Not and If-Then-Else](#not-and-if-then-else)
+  - [Not](#not)
+  - [If/Then/Else](#ifthenelse)
+- [Definitions](#definitions)
 
 ## Installation
 
@@ -290,7 +292,7 @@ type Object = FromSchema<typeof objectSchema>;
 
 `FromSchema` partially supports the `additionalProperties` and `patternProperties` keywords:
 
-- `additionalProperties` can be used to deny additional items.
+- `additionalProperties` can be used to deny additional properties.
 
 ```typescript
 const closedObjectSchema = {
@@ -379,7 +381,7 @@ type Factored = FromSchema<typeof factoredSchema>;
 
 ### OneOf
 
-Because TypeScript misses [refinment types](https://en.wikipedia.org/wiki/Refinement_type), `FromSchema` will use the `oneOf` keyword in the same way as `anyOf`:
+For the moment, `FromSchema` will use the `oneOf` keyword in the same way as `anyOf`:
 
 ```typescript
 const catSchema = {
@@ -408,9 +410,11 @@ type Cat = FromSchema<typeof catSchema>;
 //  color?: "black" | "brown" | "white";
 // }
 
-// => FromSchema will not detect the following invalid obj 😱
+// => Error will NOT be raised 😱
 const invalidCat: Cat = { name: "Garfield" };
 ```
+
+> This may be revised soon now that `not` exclusions are now possible
 
 ### AllOf
 
@@ -471,7 +475,66 @@ type PrimitiveType = FromSchema<typeof primitiveTypeSchema>;
 // => null | boolean | number | string
 ```
 
-Keep in mind that the `not` type computation uses the `Exclude` utility type, which suffers from Typescript's limitations:
+In objects and tuples, the exclusion will propagate to properties/items if it can collapse on a single one.
+
+```typescript
+// 👍 Can be propagated on "animal" property
+const petSchema = {
+  type: "object",
+  properties: {
+    animal: { enum: ["cat", "dog", "boat"] },
+  },
+  not: {
+    properties: { animal: { const: "boat" } },
+  },
+  required: ["animal"],
+  additionalProperties: false,
+} as const;
+
+type Pet = FromSchema<typeof petSchema>;
+// => { animal: "cat" | "dog" }
+```
+
+```typescript
+// ❌ Cannot be propagated
+const petSchema = {
+  type: "object",
+  properties: {
+    animal: { enum: ["cat", "dog"] },
+    color: { enum: ["black", "brown", "white"] },
+  },
+  not: {
+    const: { animal: "cat", color: "white" },
+  },
+  required: ["animal", "color"],
+  additionalProperties: false,
+} as const;
+
+type Pet = FromSchema<typeof petSchema>;
+// => { animal: "cat" | "dog", color: "black" | "brown" | "white" }
+```
+
+As some actionable keywords are not yet parsed, exclusions that resolve to `never` are granted the benefit of the doubt and omitted. For the moment, `FromSchema` assumes that you are not crafting unvalidatable exclusions.
+
+```typescript
+const oddNumberSchema = {
+  type: "number",
+  not: { multipleOf: 2 },
+} as const;
+
+type OddNumber = FromSchema<typeof oddNumberSchema>;
+// => should and will resolve to "number"
+
+const incorrectSchema = {
+  type: "number",
+  not: { bogus: "option" },
+} as const;
+
+type Incorrect = FromSchema<typeof incorrectSchema>;
+// => should resolve to "never" but will still resolve to "number"
+```
+
+Also, keep in mind that TypeScript misses [refinment types](https://en.wikipedia.org/wiki/Refinement_type):
 
 ```typescript
 const goodLanguageSchema = {
@@ -485,6 +548,42 @@ type GoodLanguage = FromSchema<typeof goodLanguageSchema>;
 // => string
 ```
 
-### If-Then-Else
+### If/Then/Else
 
-The `if/then/else` keyword is not implemented yet.
+```typescript
+const petSchema = {
+  type: "object",
+  properties: {
+    animal: { enum: ["cat", "dog"] },
+    dogBreed: { enum: Object.values(DogBreed) },
+    catBreed: { enum: Object.values(CatBreed) },
+  },
+  required: ["animal"],
+  additionalProperties: false,
+  if: {
+    properties: {
+      animal: { const: "dog" },
+    },
+  },
+  then: {
+    required: ["dogBreed"],
+    not: { required: ["catBreed"] },
+  },
+  else: {
+    required: ["catBreed"],
+    not: { required: ["dogBreed"] },
+  },
+} as const;
+
+type Pet = FromSchema<typeof petSchema>;
+// => { animal: "dog"; dogBreed: DogBreed }
+// | { animal: "cat"; catBreed: CatBreed }
+```
+
+> `FromSchema` computes the resulting type as `(If ∩ Then) ∪ (¬If ∩ Else)`. While correct in theory, remember that the `not` keyword is not perfectly assimilated, which may become an issue in some complex schemas.
+
+## Definitions
+
+Since the introduction of [template literal types](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html) with Typescript 4.1, the `definitions` keyword seems implementable in `json-schema-to-ts`.
+
+I'll soon be looking into it. Meanwhile, feel free to [open an issue](https://github.com/ThomasAribart/json-schema-to-ts/issues) 🤗

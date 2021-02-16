@@ -1,6 +1,7 @@
 import { Get, Head, Tail, Prepend, Concat, Reverse } from "../utils";
 
 import { Resolve, Any } from ".";
+import { IsRepresentable } from "./utils";
 
 export type TupleType = "tuple";
 
@@ -25,5 +26,16 @@ type RecurseOnTuple<V, R extends any[] = []> = {
   stop: Reverse<R>;
   continue: V extends any[]
     ? RecurseOnTuple<Tail<V>, Prepend<Resolve<Head<V>>, R>>
+    : never;
+}[V extends [any, ...any[]] ? "continue" : "stop"];
+
+export type IsTupleRepresentable<T> = AreAllTupleValuesRepresentable<Values<T>>;
+
+type AreAllTupleValuesRepresentable<V> = {
+  stop: true;
+  continue: V extends any[]
+    ? IsRepresentable<Head<V>> extends false
+      ? false
+      : AreAllTupleValuesRepresentable<Tail<V>>
     : never;
 }[V extends [any, ...any[]] ? "continue" : "stop"];

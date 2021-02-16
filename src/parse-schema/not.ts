@@ -1,7 +1,10 @@
-import { Exclusion, Union, Any, Primitive, Arr, Object } from "../meta-types";
-import { Get, HasKeyIn, Merge } from "../utils";
+import { Any, Primitive, Arr, Object, Union, Exclusion } from "../meta-types";
+import { IsRepresentable } from "../meta-types/utils";
+
+import { Get, HasKeyIn } from "../utils";
 
 import { ParseSchema } from ".";
+import { MergeSubSchema } from "./utils";
 
 type AllTypes = Union<
   | Primitive<null>
@@ -12,12 +15,16 @@ type AllTypes = Union<
   | Object
 >;
 
-export type ParseNotSchema<S> = Exclusion<
-  HasKeyIn<
-    S,
-    "enum" | "const" | "type" | "anyOf" | "oneOf" | "allOf"
-  > extends true
-    ? ParseSchema<Omit<S, "not">>
-    : AllTypes,
-  ParseSchema<Merge<Omit<S, "not">, Get<S, "not">>>
->;
+export type ParseNotSchema<
+  S,
+  P = ParseSchema<Omit<S, "not">>,
+  E = Exclusion<
+    HasKeyIn<
+      S,
+      "enum" | "const" | "type" | "anyOf" | "oneOf" | "allOf"
+    > extends true
+      ? P
+      : AllTypes,
+    ParseSchema<MergeSubSchema<Omit<S, "not">, Get<S, "not">>>
+  >
+> = IsRepresentable<E> extends true ? E : P;

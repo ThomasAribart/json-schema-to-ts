@@ -1,37 +1,23 @@
+import { A } from "ts-toolbelt";
+
 import { Resolve, Enum } from "meta-types";
 
 // --- EMPTY ---
 
-type Test1 = Resolve<Enum<[]>>;
-// @ts-expect-error
-const test1a: Test1 = "any value";
-test1a;
+const test1: A.Equals<Resolve<Enum<never>>, never> = 1;
+test1;
 
 // --- PRIMITIVE ---
 
-type Test2 = Resolve<Enum<"foo" | "bar">>;
-const test2a: Test2 = "foo";
-test2a;
-const test2b: Test2 = "bar";
-test2b;
-// @ts-expect-error
-const test2c: Test2 = "baz";
-test2c;
+const test2: A.Equals<Resolve<Enum<"foo" | "bar">>, "foo" | "bar"> = 1;
+test2;
 
 // --- TUPLE ---
 
-type Test3 = Resolve<Enum<["foo", "bar"]>>;
-const test3a: Test3 = ["foo", "bar"];
-test3a;
-// @ts-expect-error
-const test3b: Test3 = ["foo", "baz"];
-test3b;
+const test3: A.Equals<Resolve<Enum<["foo", "bar"]>>, ["foo", "bar"]> = 1;
+test3;
 
 // --- OBJECT ---
 
-type Test4 = Resolve<Enum<{ foo: "bar" }>>;
-const test4a: Test4 = { foo: "bar" };
-test4a;
-// @ts-expect-error
-const test4b: Test4 = { foo: "baz" };
-test4b;
+const test4: A.Equals<Resolve<Enum<{ foo: "bar" }>>, { foo: "bar" }> = 1;
+test4;

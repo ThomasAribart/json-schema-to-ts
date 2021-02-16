@@ -9,6 +9,7 @@ import { ParseAnyOfSchema } from "./anyOf";
 import { ParseOneOfSchema } from "./oneOf";
 import { ParseAllOfSchema } from "./allOf";
 import { ParseNotSchema } from "./not";
+import { ParseIfThenElseSchema } from "./ifThenElse";
 
 export type ParseSchema<S> = {
   any: Any;
@@ -26,12 +27,15 @@ export type ParseSchema<S> = {
   oneOf: ParseOneOfSchema<S>;
   allOf: ParseAllOfSchema<S>;
   not: ParseNotSchema<S>;
+  ifThenElse: ParseIfThenElseSchema<S>;
 }[InferSchemaType<S>];
 
 type InferSchemaType<S> = S extends true | string
   ? "any"
   : S extends false
   ? "never"
+  : "if" extends keyof S
+  ? "ifThenElse"
   : "not" extends keyof S
   ? "not"
   : "allOf" extends keyof S

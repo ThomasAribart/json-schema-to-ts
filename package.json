@@ -4,11 +4,12 @@
   "description": "Infer typescript types from your JSON schemas!",
   "main": "lib/index.d.ts",
   "scripts": {
-    "build": "tsc --emitDeclarationOnly --declaration --declarationDir lib ./src/*.ts",
+    "build": "rm -rf lib && tsc --emitDeclarationOnly --declaration --declarationDir lib ./src/*.ts",
     "test": "tsc --noEmit && jest --verbose"
   },
   "dependencies": {
-    "@types/json-schema": "^7.0.6"
+    "@types/json-schema": "^7.0.6",
+    "ts-toolbelt": "^6.15.5"
   },
   "devDependencies": {
     "@babel/core": "^7.10.4",

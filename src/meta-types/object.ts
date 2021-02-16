@@ -1,6 +1,9 @@
-import { DoesExtend, Get, DeepMergeUnsafe } from "../utils";
+import { A, B } from "ts-toolbelt";
 
-import { Resolve, Any } from ".";
+import { DoesExtend, Or, Not, Get, DeepMergeUnsafe } from "../utils";
+
+import { Resolve, Any, Never } from ".";
+import { IsRepresentable } from "./utils";
 
 export type ObjectType = "object";
 
@@ -13,6 +16,12 @@ export type Object<V = {}, R = never, O = true, P = Any> = {
 };
 
 export type Values<O> = Get<O, "values">;
+
+export type Value<O, K> = K extends keyof Values<O>
+  ? Values<O>[K]
+  : IsOpen<O> extends true
+  ? OpenProps<O>
+  : Never;
 
 export type Required<O> = Get<O, "required"> extends string
   ? Get<O, "required">
@@ -49,5 +58,23 @@ type ResolveValidObject<O> = DeepMergeUnsafe<
         ? Resolve<Values<O>[key]>
         : Resolve<Any>;
     }
+  >
+>;
+
+type IsObjectValueRepresentable<O, K> = K extends keyof Values<O>
+  ? IsRepresentable<Values<O>[K]>
+  : IsOpen<O> extends true
+  ? IsRepresentable<OpenProps<O>>
+  : false;
+
+export type IsObjectRepresentable<O> = Or<
+  DoesExtend<A.Equals<Required<O>, never>, B.True>,
+  Not<
+    DoesExtend<
+      false,
+      {
+        [key in Required<O>]: IsObjectValueRepresentable<O, key>;
+      }[Required<O>]
+    >
   >
 >;
