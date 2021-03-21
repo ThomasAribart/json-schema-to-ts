@@ -18,10 +18,8 @@ export type ParseObjectSchema<S> = "properties" extends keyof S
     >
   : Object<{}, GetRequired<S>, true, GetOpenProps<S>>;
 
-type GetRequired<S> = "required" extends keyof S
-  ? number extends keyof S["required"]
-    ? S["required"][number]
-    : never
+type GetRequired<S> = S extends { required: ReadonlyArray<string> }
+  ? S["required"][number]
   : never;
 
 type GetOpenProps<S> = "additionalProperties" extends keyof S
