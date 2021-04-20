@@ -4,7 +4,7 @@
   "description": "Infer typescript types from your JSON schemas!",
   "main": "lib/index.d.ts",
   "scripts": {
-    "build": "rm -rf lib && tsc --emitDeclarationOnly --declaration --declarationDir lib ./src/*.ts",
+    "build": "rm -rf lib && tsc --emitDeclarationOnly --declaration --declarationDir lib ./src/*.ts && node transform.js lib lib/deno .d.ts",
     "test": "tsc --noEmit && jest --verbose"
   },
   "dependencies": {
