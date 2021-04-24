@@ -1,0 +1,27 @@
+import { A, B } from "https://cdn.skypack.dev/ts-toolbelt@^6.15.5?dts";
+import { Get, And, DoesExtend } from "../../utils/index.d.ts";
+import { MetaType, Never, Const, Error } from "../index.d.ts";
+import { Arr, Values } from "../array.d.ts";
+import { Values as TupleValues, IsOpen, OpenProps } from "../tuple.d.ts";
+import { Exclude } from "./index.d.ts";
+import { ExcludeUnion } from "./union.d.ts";
+import { ExcludeIntersection } from "./intersection.d.ts";
+import { ExcludeExclusion } from "./exclusion.d.ts";
+import { IsRepresentable } from "../utils.d.ts";
+export declare type ExcludeFromArray<Source, Excluded> = {
+    any: Never;
+    never: Source;
+    const: Source;
+    enum: Source;
+    primitive: Source;
+    array: ExcludeArrs<Source, Excluded>;
+    tuple: And<DoesExtend<A.Equals<TupleValues<Excluded>, []>, B.True>, IsOpen<Excluded>> extends true ? ExcludeArrs<Source, Arr<OpenProps<Excluded>>> : Source;
+    object: Source;
+    union: ExcludeUnion<Source, Excluded>;
+    intersection: ExcludeIntersection<Source, Excluded>;
+    exclusion: ExcludeExclusion<Source, Excluded>;
+    error: Excluded;
+    errorTypeProperty: Error<"Missing type property">;
+}[Get<Excluded, "type"> extends MetaType ? Get<Excluded, "type"> : "errorTypeProperty"];
+declare type ExcludeArrs<Source, Excluded, ExcludedValues = Exclude<Values<Source>, Values<Excluded>>> = IsRepresentable<ExcludedValues> extends true ? Source : Const<[]>;
+export {};

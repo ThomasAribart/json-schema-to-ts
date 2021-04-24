@@ -31,12 +31,10 @@ while true; do
         [Nn]* )
           isOfficialRelease=false
 
-          tag+=$tag
-          "-beta-";
+          tag+="-beta-";
           uuid=$(uuidgen);
           hash=$(echo ${uuid} | tr '[:upper:]' '[:lower:]' | cut -d'-' -f 1);
-          tag+=$tag
-          $hash;
+          tag+=$hash
 
           echo ""
           echo -e "${WHITE}What's the branch name?${NEUTRAL}"
@@ -72,9 +70,6 @@ fi
 echo ""
 echo -e "${GREY}git pull${NEUTRAL}"
 git pull
-if [ $? = 1 ]; then
-  exit 1;
-fi
 
 # ---- TESTS ----
 
