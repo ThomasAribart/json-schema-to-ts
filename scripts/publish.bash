@@ -192,12 +192,6 @@ echo -e ""
 echo -e "${GREY}git push --tag${NEUTRAL}"
 git push --tag
 
-echo -e ""
-echo -e "${GREY}gh release create ${gitTag} --target ${branchName}${NEUTRAL}"
-if $isOfficialRelease; then
-  gh release create ${gitTag} --target ${branchName}; else
-  gh release create ${gitTag} --target ${branchName} --prerelease;
-fi
 
 echo ""
 echo -e "${SUCCESS}🎉  Project released successfully!${NEUTRAL}"
