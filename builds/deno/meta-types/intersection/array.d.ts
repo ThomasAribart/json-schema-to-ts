@@ -1,0 +1,27 @@
+import { Get } from "../../utils/index.d.ts";
+import { MetaType, Never, Arr, Error } from "../index.d.ts";
+import { Values } from "../array.d.ts";
+import { IntersectConst } from "./const.d.ts";
+import { IntersectEnum } from "./enum.d.ts";
+import { IntersectTuple } from "./tuple.d.ts";
+import { IntersectUnion } from "./union.d.ts";
+import { IntersectExclusion } from "./exclusion.d.ts";
+import { ClearIntersections, Intersect } from "./index.d.ts";
+export declare type ClearArrIntersections<A> = Arr<ClearIntersections<Values<A>>>;
+export declare type IntersectArr<A, B> = {
+    any: A;
+    never: Never;
+    const: IntersectConst<B, A>;
+    enum: IntersectEnum<B, A>;
+    primitive: Never;
+    array: IntersectArrs<A, B>;
+    tuple: IntersectTuple<B, A>;
+    object: Never;
+    union: IntersectUnion<B, A>;
+    exclusion: IntersectExclusion<B, A>;
+    intersection: Error<"Cannot intersect intersection">;
+    error: B;
+    errorTypeProperty: Error<"Missing type property">;
+}[Get<B, "type"> extends MetaType ? Get<B, "type"> : "errorTypeProperty"];
+declare type IntersectArrs<A, B, I = Intersect<Values<A>, Values<B>>> = I extends Never ? Never : Arr<I>;
+export {};
