@@ -12,7 +12,7 @@ echo -e "${WARNING}🙌  Nicely done! Time to release your work!${NEUTRAL}"
 sleep 1
 
 echo ""
-echo -e "${WHITE}What's the version of the new release?${NEUTRAL}"
+echo -e "${WHITE}What's the version of the new release?${NEUTRAL} (e.g. 1.8.0)"
 read -p "" version;
 tag=$version
 
@@ -31,10 +31,12 @@ while true; do
         [Nn]* )
           isOfficialRelease=false
 
-          tag+="-beta-";
-          uuid=$(uuidgen);
-          hash=$(echo ${uuid} | tr '[:upper:]' '[:lower:]' | cut -d'-' -f 1);
-          tag+=$hash
+          echo ""
+          echo -e "${WHITE}Index of the beta?${NEUTRAL} (e.g. 0, 1...)"
+          read -p "" betaIndex
+
+          tag+="-beta.";
+          tag+=betaIndex
 
           echo ""
           echo -e "${WHITE}What's the branch name?${NEUTRAL}"
