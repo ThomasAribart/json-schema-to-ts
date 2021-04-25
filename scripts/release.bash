@@ -187,12 +187,21 @@ echo -e "${GREY}npm login${NEUTRAL}"
 npm login
 
 echo -e ""
-echo -e "${GREY}npm publish --tag ${tag}${NEUTRAL}"
-npm publish
-if [ $? = 1 ]; then
-  git tag -d ${gitTag};
-  git reset HEAD^ --hard;
-  exit 1;
+echo -e "${GREY}npm publish${NEUTRAL}"
+if $isOfficialRelease; then
+  npm publish
+  if [ $? = 1 ]; then
+    git tag -d ${gitTag};
+    git reset HEAD^ --hard;
+    exit 1;
+  fi
+  else
+  npm publish --tag beta;
+  if [ $? = 1 ]; then
+    git tag -d ${gitTag};
+    git reset HEAD^ --hard;
+    exit 1;
+  fi
 fi
 
 echo ""
