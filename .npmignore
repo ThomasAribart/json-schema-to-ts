@@ -4,6 +4,8 @@ assets
 node_modules
 src
 tests
+scripts
+builds
 .gitignore
 babel.config.js
 tsconfig.json
