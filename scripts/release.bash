@@ -173,14 +173,27 @@ git commit -m "${gitTag} release"
 echo -e ""
 echo -e "${GREY}git tag -a ${gitTag} -m '${gitTag} release'${NEUTRAL}"
 git tag -a ${gitTag} -m "${gitTag} release"
+if [ $? = 1 ]; then
+  git reset HEAD^ --hard;
+  exit 1;
+fi
 
 echo ""
 echo -e "${WHITE}Publishing on npm${NEUTRAL}"
 sleep 1
 
 echo -e ""
+echo -e "${GREY}npm login${NEUTRAL}"
+npm login
+
+echo -e ""
 echo -e "${GREY}npm publish --tag ${tag}${NEUTRAL}"
 npm publish
+if [ $? = 1 ]; then
+  git tag -d ${gitTag};
+  git reset HEAD^ --hard;
+  exit 1;
+fi
 
 echo ""
 echo -e "${WHITE}Publishing to github${NEUTRAL}"
@@ -189,11 +202,16 @@ sleep 1
 echo -e ""
 echo -e "${GREY}git push${NEUTRAL}"
 git push
+if [ $? = 1 ]; then
+  exit 1;
+fi
 
 echo -e ""
 echo -e "${GREY}git push --tag${NEUTRAL}"
 git push --tag
-
+if [ $? = 1 ]; then
+  exit 1;
+fi
 
 echo ""
 echo -e "${SUCCESS}🎉  Project released successfully!${NEUTRAL}"
