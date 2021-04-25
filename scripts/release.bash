@@ -36,7 +36,7 @@ while true; do
           read -p "" betaIndex
 
           tag+="-beta.";
-          tag+=betaIndex
+          tag+=$betaIndex
 
           echo ""
           echo -e "${WHITE}What's the branch name?${NEUTRAL}"
