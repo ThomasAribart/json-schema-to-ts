@@ -137,8 +137,8 @@ echo -e "${WHITE}Building deno build...${NEUTRAL}"
 sleep 1
 
 echo -e ""
-echo -e "${GREY}node scripts/buildDeno.js lib builds/deno .d.ts${NEUTRAL}"
-node scripts/buildDeno.js lib builds/deno .d.ts
+echo -e "${GREY}yarn rollup -c${NEUTRAL}"
+yarn rollup -c
 if [ $? = 1 ]; then
   exit 1;
 fi
