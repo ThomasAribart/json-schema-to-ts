@@ -1,7 +1,7 @@
 import { A, L } from "ts-toolbelt";
 
 import { Arr, Tuple, Union, Error } from "../meta-types";
-import { Reverse, DoesExtend, Get, Prepend, IsObject } from "../utils";
+import { DoesExtend, Get, Prepend, IsObject } from "../utils";
 
 import { ParseSchema } from ".";
 
@@ -39,14 +39,14 @@ type ApplyBoundaries<
 > = {
   stop: {
     result: Max extends undefined
-      ? R | Tuple<Reverse<T>, false>
+      ? R | Tuple<L.Reverse<T>, false>
       : HasMax extends true
-      ? R | Tuple<Reverse<T>, false>
+      ? R | Tuple<L.Reverse<T>, false>
       : Max extends T["length"]
-      ? Tuple<Reverse<T>, false>
+      ? Tuple<L.Reverse<T>, false>
       : IsLongerThan<L.Tail<T>, Max> extends true
       ? never
-      : R | Tuple<Reverse<T>, false>;
+      : R | Tuple<L.Reverse<T>, false>;
     hasEncounteredMin: DoesExtend<Min, T["length"]>;
     hasEncounteredMax: HasMax extends true
       ? true
@@ -60,8 +60,8 @@ type ApplyBoundaries<
     Min,
     Max,
     T["length"] extends Max
-      ? Tuple<Reverse<T>, false>
-      : R | Tuple<Reverse<T>, false>,
+      ? Tuple<L.Reverse<T>, false>
+      : R | Tuple<L.Reverse<T>, false>,
     HasMin extends true ? true : DoesExtend<Min, T["length"]>,
     HasMax extends true ? true : DoesExtend<Max, T["length"]>,
     C
@@ -87,22 +87,24 @@ type ApplyAdditionalItems<R, A> = Get<R, "hasEncounteredMax"> extends true
     : Error<'"minItems" property is higher than allowed number of items'>
   : A extends true
   ? Get<R, "hasEncounteredMin"> extends true
-    ? Get<R, "result"> | Tuple<Reverse<A.Cast<Get<R, "completeTuple">, L.List>>>
+    ?
+        | Get<R, "result">
+        | Tuple<L.Reverse<A.Cast<Get<R, "completeTuple">, L.List>>>
     : // 🔧 TOIMPROVE: Not cast here
-      Tuple<Reverse<A.Cast<Get<R, "completeTuple">, L.List>>>
+      Tuple<L.Reverse<A.Cast<Get<R, "completeTuple">, L.List>>>
   : IsObject<A> extends true
   ? Get<R, "hasEncounteredMin"> extends true
     ?
         | Get<R, "result">
         | Tuple<
             // 🔧 TOIMPROVE: Not cast here
-            Reverse<A.Cast<Get<R, "completeTuple">, L.List>>,
+            L.Reverse<A.Cast<Get<R, "completeTuple">, L.List>>,
             true,
             ParseSchema<A>
           >
     : Tuple<
         // 🔧 TOIMPROVE: Not cast here
-        Reverse<A.Cast<Get<R, "completeTuple">, L.List>>,
+        L.Reverse<A.Cast<Get<R, "completeTuple">, L.List>>,
         true,
         ParseSchema<A>
       >

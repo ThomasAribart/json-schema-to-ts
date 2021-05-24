@@ -11,4 +11,3 @@ export { Prepend } from "./prepend";
 export { Prettify } from "./prettify";
 export { Replace } from "./replace";
 export { RequiredProps } from "./requiredProps";
-export { Reverse } from "./reverse";

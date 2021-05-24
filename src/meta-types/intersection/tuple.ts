@@ -1,6 +1,6 @@
 import { A, L } from "ts-toolbelt";
 
-import { Get, Prepend, Reverse, And } from "../../utils";
+import { Get, Prepend, And } from "../../utils";
 
 import { MetaType, Never, Tuple, Error } from "..";
 import { Values as ArrValues } from "../array";
@@ -21,7 +21,7 @@ export type ClearTupleIntersections<T, O = ClearIntersections<OpenProps<T>>> =
   >;
 
 type ClearTupleValuesIntersections<V extends L.List, R extends L.List = []> = {
-  stop: Reverse<R>;
+  stop: L.Reverse<R>;
   continue: ClearTupleValuesIntersections<
     L.Tail<V>,
     Prepend<ClearIntersections<L.Head<V>>, R>
@@ -63,7 +63,7 @@ type IntersectTupleToArray<
     >;
 
 type IntersectTupleToArrValues<V extends L.List, T, R extends L.List = []> = {
-  stop: Reverse<R>;
+  stop: L.Reverse<R>;
   continue: R extends L.List
     ? IntersectTupleToArrValues<
         L.Tail<V>,
@@ -106,7 +106,7 @@ type IntersectTupleValues<
   P2,
   R extends L.List = []
 > = {
-  stop: Reverse<R>;
+  stop: L.Reverse<R>;
   continue1: IntersectTupleValues<
     L.Tail<V1>,
     V2,

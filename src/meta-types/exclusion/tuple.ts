@@ -1,6 +1,6 @@
 import { A, B, L } from "ts-toolbelt";
 
-import { Get, And, Not, Prepend, Reverse } from "../../utils";
+import { Get, And, Not, Prepend } from "../../utils";
 
 import { MetaType, Never, Error } from "..";
 import { Const, Value as ConstValue } from "../const";
@@ -78,7 +78,7 @@ type CrossTupleValues<
   P2,
   R extends L.List = []
 > = {
-  stop: Reverse<R>;
+  stop: L.Reverse<R>;
   continue1: CrossTupleValues<
     L.Tail<V1>,
     [],
@@ -158,7 +158,7 @@ type RepresentableItems<C extends L.List, R extends L.List = []> = {
 }[C extends [any, ...L.List] ? "continue" : "stop"];
 
 type PropagateExclusion<C extends L.List, R extends L.List = []> = {
-  stop: Reverse<R>;
+  stop: L.Reverse<R>;
   continue: PropagateExclusion<L.Tail<C>, Prepend<Propagate<L.Head<C>>, R>>;
 }[C extends [any, ...L.List] ? "continue" : "stop"];
 
@@ -182,9 +182,9 @@ type OmittableItems<C extends L.List, R extends L.List = []> = {
 }[C extends [any, ...L.List] ? "continue" : "stop"];
 
 type RequiredTupleValues<C extends L.List, R extends L.List = []> = {
-  stop: Reverse<R>;
+  stop: L.Reverse<R>;
   continue: IsOmittable<L.Head<C>> extends true
-    ? Reverse<R>
+    ? L.Reverse<R>
     : RequiredTupleValues<L.Tail<C>, Prepend<SourceValue<L.Head<C>>, R>>;
 }[C extends [any, ...L.List] ? "continue" : "stop"];
 
@@ -195,6 +195,6 @@ type ExcludeConst<S, E, V = ConstValue<E>> = V extends L.List
   : S;
 
 type ExtractConstValues<V extends L.List, R extends L.List = []> = {
-  stop: Reverse<R>;
+  stop: L.Reverse<R>;
   continue: ExtractConstValues<L.Tail<V>, Prepend<Const<L.Head<V>>, R>>;
 }[V extends [any, ...L.List] ? "continue" : "stop"];

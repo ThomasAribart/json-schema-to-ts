@@ -1,7 +1,6 @@
 import { L } from "ts-toolbelt";
 
 import { Prepend } from "./prepend";
-import { Reverse } from "./reverse";
 
 /**
  * Filters out the values of a tuple `T` that don't extend type `F`
@@ -18,5 +17,5 @@ export type FilterExtending<T extends L.List, F, R extends L.List = []> = {
     F,
     L.Head<T> extends F ? Prepend<L.Head<T>, R> : R
   >;
-  stop: Reverse<R>;
+  stop: L.Reverse<R>;
 }[T extends [any, ...L.List] ? "continue" : "stop"];
