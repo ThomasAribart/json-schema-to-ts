@@ -1,5 +1,7 @@
+import { L } from "ts-toolbelt";
+
 import { Any, Intersection } from "../meta-types";
-import { Tail, Head, Get, HasKeyIn } from "../utils";
+import { Get, HasKeyIn } from "../utils";
 
 import { ParseSchema } from ".";
 import { MergeSubSchema } from "./utils";
@@ -14,11 +16,14 @@ export type ParseAllOfSchema<S> = RecurseOnAllOfSchema<
 
 type RecurseOnAllOfSchema<V, S, R> = {
   stop: R;
-  continue: V extends any[]
+  continue: V extends L.List
     ? RecurseOnAllOfSchema<
-        Tail<V>,
+        L.Tail<V>,
         S,
-        Intersection<ParseSchema<MergeSubSchema<Omit<S, "allOf">, Head<V>>>, R>
+        Intersection<
+          ParseSchema<MergeSubSchema<Omit<S, "allOf">, L.Head<V>>>,
+          R
+        >
       >
     : never;
-}[V extends [any, ...any[]] ? "continue" : "stop"];
+}[V extends [any, ...L.List] ? "continue" : "stop"];
