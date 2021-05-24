@@ -1,41 +1,26 @@
+import { L, A, B, U, O } from 'https://cdn.skypack.dev/ts-toolbelt@^6.15.5?dts';
 import { JSONSchema6Definition, JSONSchema6 } from 'https://cdn.skypack.dev/@types/json-schema@^7.0.6?dts';
-import { A, B, U } from 'https://cdn.skypack.dev/ts-toolbelt@^6.15.5?dts';
 
 declare type And<A, B> = A extends true ? B extends true ? true : false : false;
-
-declare type Head<T> = T extends any[] ? T[0] : never;
-
-declare type Tail<T> = T extends any[] ? ((...args: T) => void) extends (head: any, ...tail: infer R) => void ? R : T : never;
-
-declare type Prepend<E, T extends any[]> = ((element: E, ...tail: T) => void) extends (...tuple: infer R) => void ? R : never;
-
-declare type Reverse<T, R extends any[] = []> = {
-    stop: R;
-    continue: T extends any[] ? Reverse<Tail<T>, Prepend<Head<T>, R>> : never;
-}[T extends [any, ...any[]] ? "continue" : "stop"];
-
-declare type ConcatReversed<A, B extends any[]> = {
-    stop: B;
-    continue: ConcatReversed<Tail<A>, Prepend<Head<A>, B>>;
-}[A extends [any, ...any[]] ? "continue" : "stop"];
-declare type Concat<A, B extends any[]> = A extends any[] ? ConcatReversed<Reverse<A>, B> : never;
 
 declare type DoesExtend<A, B> = A extends B ? true : false;
 declare type ArrayKeys = keyof [];
 declare type IsObject<T> = T extends object ? ArrayKeys extends Extract<keyof T, ArrayKeys> ? false : true : false;
 declare type IsArray<T> = T extends object ? ArrayKeys extends Extract<keyof T, ArrayKeys> ? true : false : false;
 
+declare type Prepend<E, T extends L.List> = ((element: E, ...tail: T) => void) extends (...tuple: infer R) => void ? R : never;
+
 declare type Get<O, K, F = never> = K extends keyof O ? O[K] : F;
-declare type DeepGet<O, P, F = never> = {
-    continue: Head<P> extends keyof O ? DeepGet<O[Head<P>], Tail<P>, F> : F;
+declare type DeepGet<O, P extends L.List, F = never> = {
+    continue: L.Head<P> extends keyof O ? DeepGet<O[L.Head<P>], L.Tail<P>, F> : F;
     stop: O;
-}[P extends [any, ...any[]] ? "continue" : "stop"];
+}[P extends [any, ...L.List] ? "continue" : "stop"];
 
 declare type HasKeyIn<O, K> = Extract<keyof O, K> extends never ? false : true;
 
 declare type DeepMergeUnsafe<A, B> = IsObject<A> extends true ? IsObject<B> extends true ? {
     [K in keyof (A & B)]: K extends keyof B ? K extends keyof A ? DeepMergeUnsafe<A[K], B[K]> : B[K] : K extends keyof A ? A[K] : never;
-} : B : IsArray<A> extends true ? IsArray<B> extends true ? B extends any[] ? Concat<A, B> : never : B : B;
+} : B : IsArray<A> extends true ? IsArray<B> extends true ? B extends L.List ? L.Concat<A.Cast<A, L.List>, B> : never : B : B;
 declare type Merge<A, B> = IsObject<A> extends true ? IsObject<B> extends true ? {
     [K in keyof A | keyof B]: K extends keyof B ? B[K] : K extends keyof A ? A[K] : never;
 } : B : B;
@@ -52,10 +37,6 @@ declare type Prettify<T> = IsObject<T> extends true ? {
     [K in keyof T]: K extends keyof T ? T[K] : never;
 } : T;
 
-declare type DeepReadonly<O> = O extends object ? {
-    readonly [K in keyof O]: DeepReadonly<O[K]>;
-} : O;
-
 declare type RequiredProps<O extends Record<string | number | symbol, unknown>> = Exclude<{
     [K in keyof O]: undefined extends O[K] ? never : K;
 }[keyof O], undefined>;
@@ -65,10 +46,6 @@ declare type Replace<O extends Record<string | number | symbol, any>, P extends 
 }>, {
     [key in P & Opt]?: V;
 }>;
-
-declare type DeepWriteable<O> = O extends object ? {
-    -readonly [K in keyof O]: DeepWriteable<O[K]>;
-} : O;
 
 declare type JSONSchema6DefinitionWithoutInterface = JSONSchema6Definition extends infer S ? S extends JSONSchema6 ? Replace<S, "const" | "enum" | "not", unknown> : S : never;
 
@@ -324,53 +301,53 @@ declare type ExcludeFromTuple<S, E> = {
     errorMissingType: Error<"Missing type property in Exclusion excluded value">;
 }[Get<E, "type"> extends MetaType ? Get<E, "type"> : "errorMissingType"];
 declare type ExcludeArray<S, E> = ExcludeTuples<S, Tuple<[], true, Values$3<E>>>;
-declare type ExcludeTuples<S, E, C = CrossTupleValues<Values<S>, Values<E>, IsOpen<S>, IsOpen<E>, OpenProps<S>, OpenProps<E>>, R = RepresentableItems<C>, P = Exclude$1<OpenProps<S>, OpenProps<E>>, I = IsRepresentable<P>> = DoesTupleSizesMatch<S, E, C> extends true ? {
+declare type ExcludeTuples<S, E, C extends L.List = CrossTupleValues<A.Cast<Values<S>, L.List>, A.Cast<Values<E>, L.List>, IsOpen<S>, IsOpen<E>, OpenProps<S>, OpenProps<E>>, R extends L.List = RepresentableItems<C>, P = Exclude$1<OpenProps<S>, OpenProps<E>>, I = IsRepresentable<P>> = DoesTupleSizesMatch<S, E, C> extends true ? {
     moreThanTwo: S;
     onlyOne: Tuple<PropagateExclusion$1<C>, I extends true ? IsOpen<S> : false, P>;
     none: OmitOmittableItems<S, C>;
 }[And<IsOpen<S>, I> extends true ? "moreThanTwo" : GetTupleLength<R>] : S;
-declare type CrossTupleValues<V1, V2, O1, O2, P1, P2, R extends any[] = []> = {
-    stop: Reverse<R>;
-    continue1: CrossTupleValues<Tail<V1>, [], O1, O2, P1, P2, Prepend<CrossValue<Head<V1>, true, true, P2, O2, false>, R>>;
-    continue2: CrossTupleValues<[], Tail<V2>, O1, O2, P1, P2, Prepend<CrossValue<P1, O1, false, Head<V2>, true, true>, R>>;
-    continueBoth: CrossTupleValues<Tail<V1>, Tail<V2>, O1, O2, P1, P2, Prepend<CrossValue<Head<V1>, true, true, Head<V2>, true, true>, R>>;
-}[V1 extends [any, ...any[]] ? V2 extends [any, ...any[]] ? "continueBoth" : "continue1" : V2 extends [any, ...any[]] ? "continue2" : "stop"];
-declare type GetTupleLength<T> = A.Equals<T, []> extends B.True ? "none" : A.Equals<Tail<T>, []> extends B.True ? "onlyOne" : "moreThanTwo";
-declare type DoesTupleSizesMatch<S, E, C> = And<IsOpen<S>, Not<IsOpen<E>>> extends true ? false : And<IsExcludedSmallEnough$1<C>, IsExcludedBigEnough$1<C>>;
-declare type IsExcludedSmallEnough$1<C> = {
+declare type CrossTupleValues<V1 extends L.List, V2 extends L.List, O1, O2, P1, P2, R extends L.List = []> = {
+    stop: L.Reverse<R>;
+    continue1: CrossTupleValues<L.Tail<V1>, [], O1, O2, P1, P2, Prepend<CrossValue<L.Head<V1>, true, true, P2, O2, false>, R>>;
+    continue2: CrossTupleValues<[], L.Tail<V2>, O1, O2, P1, P2, Prepend<CrossValue<P1, O1, false, L.Head<V2>, true, true>, R>>;
+    continueBoth: CrossTupleValues<L.Tail<V1>, L.Tail<V2>, O1, O2, P1, P2, Prepend<CrossValue<L.Head<V1>, true, true, L.Head<V2>, true, true>, R>>;
+}[V1 extends [any, ...L.List] ? V2 extends [any, ...L.List] ? "continueBoth" : "continue1" : V2 extends [any, ...L.List] ? "continue2" : "stop"];
+declare type GetTupleLength<T extends L.List, R extends L.List = L.Tail<T>> = A.Equals<T, []> extends B.True ? "none" : A.Equals<R, []> extends B.True ? "onlyOne" : "moreThanTwo";
+declare type DoesTupleSizesMatch<S, E, C extends L.List> = And<IsOpen<S>, Not<IsOpen<E>>> extends true ? false : And<IsExcludedSmallEnough$1<C>, IsExcludedBigEnough$1<C>>;
+declare type IsExcludedSmallEnough$1<C extends L.List> = {
     stop: true;
-    continue: IsOutsideOfSourceScope<Head<C>> extends true ? false : IsExcludedSmallEnough$1<Tail<C>>;
-}[C extends [any, ...any[]] ? "continue" : "stop"];
-declare type IsExcludedBigEnough$1<C> = {
+    continue: IsOutsideOfSourceScope<L.Head<C>> extends true ? false : IsExcludedSmallEnough$1<L.Tail<C>>;
+}[C extends [any, ...L.List] ? "continue" : "stop"];
+declare type IsExcludedBigEnough$1<C extends L.List> = {
     stop: true;
-    continue: IsOutsideOfExcludedScope<Head<C>> extends true ? false : IsExcludedBigEnough$1<Tail<C>>;
-}[C extends [any, ...any[]] ? "continue" : "stop"];
-declare type RepresentableItems<C, R extends any[] = []> = {
+    continue: IsOutsideOfExcludedScope<L.Head<C>> extends true ? false : IsExcludedBigEnough$1<L.Tail<C>>;
+}[C extends [any, ...L.List] ? "continue" : "stop"];
+declare type RepresentableItems<C extends L.List, R extends L.List = []> = {
     stop: R;
-    continue: IsExclusionValueRepresentable<Head<C>> extends true ? RepresentableItems<Tail<C>, Prepend<Head<C>, R>> : RepresentableItems<Tail<C>, R>;
-}[C extends [any, ...any[]] ? "continue" : "stop"];
-declare type PropagateExclusion$1<C, R extends any[] = []> = {
-    stop: Reverse<R>;
-    continue: PropagateExclusion$1<Tail<C>, Prepend<Propagate<Head<C>>, R>>;
-}[C extends [any, ...any[]] ? "continue" : "stop"];
-declare type OmitOmittableItems<S, C, I = OmittableItems<C>> = {
+    continue: IsExclusionValueRepresentable<L.Head<C>> extends true ? RepresentableItems<L.Tail<C>, Prepend<L.Head<C>, R>> : RepresentableItems<L.Tail<C>, R>;
+}[C extends [any, ...L.List] ? "continue" : "stop"];
+declare type PropagateExclusion$1<C extends L.List, R extends L.List = []> = {
+    stop: L.Reverse<R>;
+    continue: PropagateExclusion$1<L.Tail<C>, Prepend<Propagate<L.Head<C>>, R>>;
+}[C extends [any, ...L.List] ? "continue" : "stop"];
+declare type OmitOmittableItems<S, C extends L.List, I extends L.List = OmittableItems<C>> = {
     moreThanTwo: S;
-    onlyOne: Tuple<RequiredTupleValues<S, C>, false, OpenProps<S>>;
+    onlyOne: Tuple<RequiredTupleValues<C>, false, OpenProps<S>>;
     none: Never;
 }[GetTupleLength<I>];
-declare type OmittableItems<C, R extends any[] = []> = {
+declare type OmittableItems<C extends L.List, R extends L.List = []> = {
     stop: R;
-    continue: IsOmittable<Head<C>> extends true ? OmittableItems<Tail<C>, Prepend<Head<C>, R>> : OmittableItems<Tail<C>, R>;
-}[C extends [any, ...any[]] ? "continue" : "stop"];
-declare type RequiredTupleValues<S, C, R extends any[] = []> = {
-    stop: Reverse<R>;
-    continue: IsOmittable<Head<C>> extends true ? Reverse<R> : RequiredTupleValues<Tail<S>, Tail<C>, Prepend<SourceValue<Head<C>>, R>>;
-}[C extends [any, ...any[]] ? "continue" : "stop"];
-declare type ExcludeConst$1<S, E, V = Value$3<E>> = IsArray<V> extends true ? Exclude$1<S, Tuple<ExtractConstValues<V>, false, Never>> : S;
-declare type ExtractConstValues<V, R extends any[] = []> = {
-    stop: Reverse<R>;
-    continue: ExtractConstValues<Tail<V>, Prepend<Const<Head<V>>, R>>;
-}[V extends [any, ...any[]] ? "continue" : "stop"];
+    continue: IsOmittable<L.Head<C>> extends true ? OmittableItems<L.Tail<C>, Prepend<L.Head<C>, R>> : OmittableItems<L.Tail<C>, R>;
+}[C extends [any, ...L.List] ? "continue" : "stop"];
+declare type RequiredTupleValues<C extends L.List, R extends L.List = []> = {
+    stop: L.Reverse<R>;
+    continue: IsOmittable<L.Head<C>> extends true ? L.Reverse<R> : RequiredTupleValues<L.Tail<C>, Prepend<SourceValue<L.Head<C>>, R>>;
+}[C extends [any, ...L.List] ? "continue" : "stop"];
+declare type ExcludeConst$1<S, E, V = Value$3<E>> = V extends L.List ? Exclude$1<S, Tuple<ExtractConstValues<V>, false, Never>> : S;
+declare type ExtractConstValues<V extends L.List, R extends L.List = []> = {
+    stop: L.Reverse<R>;
+    continue: ExtractConstValues<L.Tail<V>, Prepend<Const<L.Head<V>>, R>>;
+}[V extends [any, ...L.List] ? "continue" : "stop"];
 
 declare type ExcludeFromObject<S, E> = {
     any: Never;
@@ -527,11 +504,11 @@ declare type IntersectPrimitive<A, B> = {
     errorTypeProperty: Error<"Missing type property">;
 }[Get<B, "type"> extends MetaType ? Get<B, "type"> : "errorTypeProperty"];
 
-declare type ClearTupleIntersections<T, O = ClearIntersections<OpenProps<T>>> = Tuple<ClearTupleValuesIntersections<Values<T>>, O extends Never ? false : IsOpen<T>, O>;
-declare type ClearTupleValuesIntersections<V, R extends any[] = []> = {
-    stop: Reverse<R>;
-    continue: ClearTupleValuesIntersections<Tail<V>, Prepend<ClearIntersections<Head<V>>, R>>;
-}[V extends [any, ...any[]] ? "continue" : "stop"];
+declare type ClearTupleIntersections<T, O = ClearIntersections<OpenProps<T>>> = Tuple<ClearTupleValuesIntersections<A.Cast<Values<T>, L.List>>, O extends Never ? false : IsOpen<T>, O>;
+declare type ClearTupleValuesIntersections<V extends L.List, R extends L.List = []> = {
+    stop: L.Reverse<R>;
+    continue: ClearTupleValuesIntersections<L.Tail<V>, Prepend<ClearIntersections<L.Head<V>>, R>>;
+}[V extends [any, ...L.List] ? "continue" : "stop"];
 declare type IntersectTuple<A, B> = {
     any: A;
     never: Never;
@@ -547,22 +524,22 @@ declare type IntersectTuple<A, B> = {
     error: B;
     errorTypeProperty: Error<"Missing type property">;
 }[Get<B, "type"> extends MetaType ? Get<B, "type"> : "errorTypeProperty"];
-declare type IntersectTupleToArray<T, A, V = IntersectTupleToArrValues<Values<T>, Values$3<A>>, N = HasNeverValue<V>, O = Intersect<OpenProps<T>, Values$3<A>>> = N extends true ? Never : Tuple<V, IsOpen<T> extends true ? (O extends Never ? false : true) : false, O>;
-declare type IntersectTupleToArrValues<V, T, R = []> = {
-    stop: Reverse<R>;
-    continue: R extends any[] ? IntersectTupleToArrValues<Tail<V>, T, Prepend<Intersect<Head<V>, T>, R>> : never;
-}[V extends [any, ...any[]] ? "continue" : "stop"];
-declare type HasNeverValue<V, R = false> = {
+declare type IntersectTupleToArray<T, A, V extends L.List = IntersectTupleToArrValues<A.Cast<Values<T>, L.List>, Values$3<A>>, N = HasNeverValue<V>, O = Intersect<OpenProps<T>, Values$3<A>>> = N extends true ? Never : Tuple<V, IsOpen<T> extends true ? (O extends Never ? false : true) : false, O>;
+declare type IntersectTupleToArrValues<V extends L.List, T, R extends L.List = []> = {
+    stop: L.Reverse<R>;
+    continue: R extends L.List ? IntersectTupleToArrValues<L.Tail<V>, T, Prepend<Intersect<L.Head<V>, T>, R>> : never;
+}[V extends [any, ...L.List] ? "continue" : "stop"];
+declare type HasNeverValue<V extends L.List, R = false> = {
     stop: R;
-    continue: Head<V> extends Never ? true : HasNeverValue<Tail<V>>;
-}[V extends [any, ...any[]] ? "continue" : "stop"];
-declare type IntersectTuples<A, B, V = IntersectTupleValues<Values<A>, Values<B>, IsOpen<A>, IsOpen<B>, OpenProps<A>, OpenProps<B>>, N = HasNeverValue<V>, O = Intersect<OpenProps<A>, OpenProps<B>>> = N extends true ? Never : Tuple<V, O extends Never ? false : And<IsOpen<A>, IsOpen<B>>, O>;
-declare type IntersectTupleValues<V1, V2, O1, O2, P1, P2, R extends any[] = []> = {
-    stop: Reverse<R>;
-    continue1: IntersectTupleValues<Tail<V1>, V2, O1, O2, P1, P2, Prepend<O2 extends true ? Intersect<Head<V1>, P2> : Never, R>>;
-    continue2: IntersectTupleValues<V1, Tail<V2>, O1, O2, P1, P2, Prepend<O1 extends true ? Intersect<Head<V2>, P1> : Never, R>>;
-    continueBoth: IntersectTupleValues<Tail<V1>, Tail<V2>, O1, O2, P1, P2, Prepend<Intersect<Head<V1>, Head<V2>>, R>>;
-}[V1 extends [any, ...any[]] ? V2 extends [any, ...any[]] ? "continueBoth" : "continue1" : V2 extends [any, ...any[]] ? "continue2" : "stop"];
+    continue: L.Head<V> extends Never ? true : HasNeverValue<L.Tail<V>>;
+}[V extends [any, ...L.List] ? "continue" : "stop"];
+declare type IntersectTuples<A, B, V extends L.List = IntersectTupleValues<A.Cast<Values<A>, L.List>, A.Cast<Values<B>, L.List>, IsOpen<A>, IsOpen<B>, OpenProps<A>, OpenProps<B>>, N = HasNeverValue<V>, O = Intersect<OpenProps<A>, OpenProps<B>>> = N extends true ? Never : Tuple<V, O extends Never ? false : And<IsOpen<A>, IsOpen<B>>, O>;
+declare type IntersectTupleValues<V1 extends L.List, V2 extends L.List, O1, O2, P1, P2, R extends L.List = []> = {
+    stop: L.Reverse<R>;
+    continue1: IntersectTupleValues<L.Tail<V1>, V2, O1, O2, P1, P2, Prepend<O2 extends true ? Intersect<L.Head<V1>, P2> : Never, R>>;
+    continue2: IntersectTupleValues<V1, L.Tail<V2>, O1, O2, P1, P2, Prepend<O1 extends true ? Intersect<L.Head<V2>, P1> : Never, R>>;
+    continueBoth: IntersectTupleValues<L.Tail<V1>, L.Tail<V2>, O1, O2, P1, P2, Prepend<Intersect<L.Head<V1>, L.Head<V2>>, R>>;
+}[V1 extends [any, ...L.List] ? V2 extends [any, ...L.List] ? "continueBoth" : "continue1" : V2 extends [any, ...L.List] ? "continue2" : "stop"];
 
 declare type ClearArrIntersections<A> = Arr<ClearIntersections<Values$3<A>>>;
 declare type IntersectArr<A, B> = {
@@ -681,16 +658,16 @@ declare type Tuple<V, O = true, P = Any> = {
 declare type Values<T> = Get<T, "values">;
 declare type IsOpen<T> = Get<T, "isOpen">;
 declare type OpenProps<T> = Get<T, "openProps">;
-declare type ResolveTuple<T> = IsOpen<T> extends true ? Concat<RecurseOnTuple<Values<T>>, [...Resolve<OpenProps<T>>[]]> : RecurseOnTuple<Values<T>>;
-declare type RecurseOnTuple<V, R extends any[] = []> = {
-    stop: Reverse<R>;
-    continue: V extends any[] ? RecurseOnTuple<Tail<V>, Prepend<Resolve<Head<V>>, R>> : never;
-}[V extends [any, ...any[]] ? "continue" : "stop"];
+declare type ResolveTuple<T> = IsOpen<T> extends true ? L.Concat<RecurseOnTuple<Values<T>>, [...Resolve<OpenProps<T>>[]]> : RecurseOnTuple<Values<T>>;
+declare type RecurseOnTuple<V, R extends L.List = []> = {
+    stop: L.Reverse<R>;
+    continue: V extends L.List ? RecurseOnTuple<L.Tail<V>, Prepend<Resolve<L.Head<V>>, R>> : never;
+}[V extends [any, ...L.List] ? "continue" : "stop"];
 declare type IsTupleRepresentable<T> = AreAllTupleValuesRepresentable<Values<T>>;
 declare type AreAllTupleValuesRepresentable<V> = {
     stop: true;
-    continue: V extends any[] ? IsRepresentable<Head<V>> extends false ? false : AreAllTupleValuesRepresentable<Tail<V>> : never;
-}[V extends [any, ...any[]] ? "continue" : "stop"];
+    continue: V extends L.List ? IsRepresentable<L.Head<V>> extends false ? false : AreAllTupleValuesRepresentable<L.Tail<V>> : never;
+}[V extends [any, ...L.List] ? "continue" : "stop"];
 
 declare type MetaType = AnyType | NeverType | ConstType | EnumType | PrimitiveType | ArrType | TupleType | ObjectType | UnionType | IntersectionType | ExclusionType | ErrorType;
 declare type Resolve<T, D = Exclude<T, undefined>> = {
@@ -712,34 +689,34 @@ declare type ParseConstSchema<S> = HasKeyIn<S, "type"> extends true ? Intersecti
 
 declare type ParseEnumSchema<S> = HasKeyIn<S, "const" | "type"> extends true ? Intersection<Enum<DeepGet<S, ["enum", number]>>, ParseSchema<Omit<S, "enum">>> : Enum<DeepGet<S, ["enum", number]>>;
 
-declare type ParseMixedSchema<S> = Union<RecurseOnMixedSchema<Get<S, "type">, S>>;
-declare type RecurseOnMixedSchema<T, S, R = never> = {
+declare type ParseMixedSchema<S, T = Get<S, "type">> = T extends L.List ? Union<RecurseOnMixedSchema<T, S>> : Error<"Mixed schema 'type' property should be an array">;
+declare type RecurseOnMixedSchema<T extends L.List, S, R = never> = {
     stop: R;
-    continue: T extends any[] ? RecurseOnMixedSchema<Tail<T>, S, R | ParseSchema<DeepMergeUnsafe<S, {
-        type: Head<T>;
-    }>>> : never;
-}[T extends [any, ...any[]] ? "continue" : "stop"];
+    continue: RecurseOnMixedSchema<L.Tail<T>, S, R | ParseSchema<DeepMergeUnsafe<S, {
+        type: L.Head<T>;
+    }>>>;
+}[T extends [any, ...L.List] ? "continue" : "stop"];
 
-declare type ParseArrSchema<S> = "items" extends keyof S ? IsObject<S["items"]> extends true ? Arr<ParseSchema<S["items"]>> : S["items"] extends any[] ? Union<FromTreeTuple<ParseTuple<S["items"]>, S>> : Error<'Invalid value in "items" property'> : Arr;
-declare type ParseTuple<S, R extends any[] = []> = {
+declare type ParseArrSchema<S> = "items" extends keyof S ? IsObject<S["items"]> extends true ? Arr<ParseSchema<S["items"]>> : S["items"] extends L.List ? Union<FromTreeTuple<ParseTuple<A.Cast<S["items"], L.List>>, S>> : Error<'Invalid value in "items" property'> : Arr;
+declare type ParseTuple<S extends L.List, R extends L.List = []> = {
     stop: R;
-    continue: S extends any[] ? ParseTuple<Tail<S>, Prepend<ParseSchema<Head<S>>, R>> : never;
-}[S extends [any, ...any[]] ? "continue" : "stop"];
-declare type FromTreeTuple<T, S> = T extends any[] ? ApplyAdditionalItems<ApplyBoundaries<T, "minItems" extends keyof S ? S["minItems"] : 0, "maxItems" extends keyof S ? S["maxItems"] : undefined>, "additionalItems" extends keyof S ? S["additionalItems"] : true> : never;
-declare type ApplyBoundaries<T extends any[], Min, Max, R = never, HasMin extends boolean = false, HasMax extends boolean = false, C = T> = {
+    continue: ParseTuple<L.Tail<S>, Prepend<ParseSchema<L.Head<S>>, R>>;
+}[S extends [any, ...L.List] ? "continue" : "stop"];
+declare type FromTreeTuple<T extends L.List, S> = ApplyAdditionalItems<ApplyBoundaries<T, "minItems" extends keyof S ? S["minItems"] : 0, "maxItems" extends keyof S ? S["maxItems"] : undefined>, "additionalItems" extends keyof S ? S["additionalItems"] : true>;
+declare type ApplyBoundaries<T extends L.List, Min, Max, R = never, HasMin extends boolean = false, HasMax extends boolean = false, C = T> = {
     stop: {
-        result: Max extends undefined ? R | Tuple<Reverse<T>, false> : HasMax extends true ? R | Tuple<Reverse<T>, false> : Max extends T["length"] ? Tuple<Reverse<T>, false> : IsLongerThan<Tail<T>, Max> extends true ? never : R | Tuple<Reverse<T>, false>;
+        result: Max extends undefined ? R | Tuple<L.Reverse<T>, false> : HasMax extends true ? R | Tuple<L.Reverse<T>, false> : Max extends T["length"] ? Tuple<L.Reverse<T>, false> : IsLongerThan<L.Tail<T>, Max> extends true ? never : R | Tuple<L.Reverse<T>, false>;
         hasEncounteredMin: DoesExtend<Min, T["length"]>;
-        hasEncounteredMax: HasMax extends true ? true : Max extends T["length"] ? true : IsLongerThan<Tail<T>, Max>;
+        hasEncounteredMax: HasMax extends true ? true : Max extends T["length"] ? true : IsLongerThan<L.Tail<T>, Max>;
         completeTuple: C;
     };
-    continue: ApplyBoundaries<Tail<T>, Min, Max, T["length"] extends Max ? Tuple<Reverse<T>, false> : R | Tuple<Reverse<T>, false>, HasMin extends true ? true : DoesExtend<Min, T["length"]>, HasMax extends true ? true : DoesExtend<Max, T["length"]>, C>;
-}[Min extends T["length"] ? "stop" : T extends [any, ...any[]] ? "continue" : "stop"];
-declare type IsLongerThan<T extends any[], N, R = false> = {
-    continue: T["length"] extends N ? true : IsLongerThan<Tail<T>, N>;
+    continue: ApplyBoundaries<L.Tail<T>, Min, Max, T["length"] extends Max ? Tuple<L.Reverse<T>, false> : R | Tuple<L.Reverse<T>, false>, HasMin extends true ? true : DoesExtend<Min, T["length"]>, HasMax extends true ? true : DoesExtend<Max, T["length"]>, C>;
+}[Min extends T["length"] ? "stop" : T extends [any, ...L.List] ? "continue" : "stop"];
+declare type IsLongerThan<T extends L.List, N, R = false> = {
+    continue: T["length"] extends N ? true : IsLongerThan<L.Tail<T>, N>;
     stop: T["length"] extends N ? true : R;
-}[T extends [any, ...any[]] ? "continue" : "stop"];
-declare type ApplyAdditionalItems<R, A> = Get<R, "hasEncounteredMax"> extends true ? Get<R, "hasEncounteredMin"> extends true ? Get<R, "result"> : Error<'"minItems" property is lower than "maxItems"'> : A extends false ? Get<R, "hasEncounteredMin"> extends true ? Get<R, "result"> : Error<'"minItems" property is higher than allowed number of items'> : A extends true ? Get<R, "hasEncounteredMin"> extends true ? Get<R, "result"> | Tuple<Reverse<Get<R, "completeTuple">>> : Tuple<Reverse<Get<R, "completeTuple">>> : IsObject<A> extends true ? Get<R, "hasEncounteredMin"> extends true ? Get<R, "result"> | Tuple<Reverse<Get<R, "completeTuple">>, true, ParseSchema<A>> : Tuple<Reverse<Get<R, "completeTuple">>, true, ParseSchema<A>> : Error<'Invalid value in "additionalItems" property'>;
+}[T extends [any, ...L.List] ? "continue" : "stop"];
+declare type ApplyAdditionalItems<R, A> = Get<R, "hasEncounteredMax"> extends true ? Get<R, "hasEncounteredMin"> extends true ? Get<R, "result"> : Error<'"minItems" property is lower than "maxItems"'> : A extends false ? Get<R, "hasEncounteredMin"> extends true ? Get<R, "result"> : Error<'"minItems" property is higher than allowed number of items'> : A extends true ? Get<R, "hasEncounteredMin"> extends true ? Get<R, "result"> | Tuple<L.Reverse<A.Cast<Get<R, "completeTuple">, L.List>>> : Tuple<L.Reverse<A.Cast<Get<R, "completeTuple">, L.List>>> : IsObject<A> extends true ? Get<R, "hasEncounteredMin"> extends true ? Get<R, "result"> | Tuple<L.Reverse<A.Cast<Get<R, "completeTuple">, L.List>>, true, ParseSchema<A>> : Tuple<L.Reverse<A.Cast<Get<R, "completeTuple">, L.List>>, true, ParseSchema<A>> : Error<'Invalid value in "additionalItems" property'>;
 
 declare type ParseObjectSchema<S> = "properties" extends keyof S ? Object$1<{
     [key in keyof S["properties"]]: ParseSchema<S["properties"][key]>;
@@ -773,20 +750,20 @@ declare type MergeSubSchema<P, C> = Merge<P, Merge<{
 declare type ParseAnyOfSchema<S> = Union<RecurseOnAnyOfSchema<Get<S, "anyOf">, S>>;
 declare type RecurseOnAnyOfSchema<S, P, R = never> = {
     stop: R;
-    continue: S extends any[] ? RecurseOnAnyOfSchema<Tail<S>, P, R | (HasKeyIn<P, "enum" | "const" | "type"> extends true ? Intersection<ParseSchema<Omit<P, "anyOf">>, ParseSchema<MergeSubSchema<Omit<P, "anyOf">, Head<S>>>> : ParseSchema<Merge<Omit<P, "anyOf">, RemoveInvalidAdditionalItems<Head<S>>>>)> : never;
-}[S extends [any, ...any[]] ? "continue" : "stop"];
+    continue: S extends L.List ? RecurseOnAnyOfSchema<L.Tail<S>, P, R | (HasKeyIn<P, "enum" | "const" | "type"> extends true ? Intersection<ParseSchema<Omit<P, "anyOf">>, ParseSchema<MergeSubSchema<Omit<P, "anyOf">, L.Head<S>>>> : ParseSchema<Merge<Omit<P, "anyOf">, RemoveInvalidAdditionalItems<L.Head<S>>>>)> : never;
+}[S extends [any, ...L.List] ? "continue" : "stop"];
 
-declare type ParseOneOfSchema<S> = Union<RecurseOnOneOfSchema<Get<S, "oneOf">, S>>;
-declare type RecurseOnOneOfSchema<S, P, R = never> = {
+declare type ParseOneOfSchema<S, O = Get<S, "oneOf">> = O extends L.List ? Union<RecurseOnOneOfSchema<O, S>> : Error<"'oneOf' property should be an array">;
+declare type RecurseOnOneOfSchema<S extends L.List, P, R = never> = {
     stop: R;
-    continue: S extends any[] ? RecurseOnOneOfSchema<Tail<S>, P, R | (HasKeyIn<P, "enum" | "const" | "type" | "anyOf"> extends true ? Intersection<ParseSchema<Omit<P, "oneOf">>, ParseSchema<MergeSubSchema<Omit<P, "oneOf">, Head<S>>>> : ParseSchema<Merge<Omit<P, "oneOf">, RemoveInvalidAdditionalItems<Head<S>>>>)> : never;
-}[S extends [any, ...any[]] ? "continue" : "stop"];
+    continue: RecurseOnOneOfSchema<L.Tail<S>, P, R | (HasKeyIn<P, "enum" | "const" | "type" | "anyOf"> extends true ? Intersection<ParseSchema<Omit<P, "oneOf">>, ParseSchema<MergeSubSchema<Omit<P, "oneOf">, L.Head<S>>>> : ParseSchema<Merge<Omit<P, "oneOf">, RemoveInvalidAdditionalItems<L.Head<S>>>>)>;
+}[S extends [any, ...L.List] ? "continue" : "stop"];
 
 declare type ParseAllOfSchema<S> = RecurseOnAllOfSchema<Get<S, "allOf">, S, HasKeyIn<S, "enum" | "const" | "type" | "anyOf" | "oneOf"> extends true ? ParseSchema<Omit<S, "allOf">> : Any>;
 declare type RecurseOnAllOfSchema<V, S, R> = {
     stop: R;
-    continue: V extends any[] ? RecurseOnAllOfSchema<Tail<V>, S, Intersection<ParseSchema<MergeSubSchema<Omit<S, "allOf">, Head<V>>>, R>> : never;
-}[V extends [any, ...any[]] ? "continue" : "stop"];
+    continue: V extends L.List ? RecurseOnAllOfSchema<L.Tail<V>, S, Intersection<ParseSchema<MergeSubSchema<Omit<S, "allOf">, L.Head<V>>>, R>> : never;
+}[V extends [any, ...L.List] ? "continue" : "stop"];
 
 declare type AllTypes = Union<Primitive<null> | Primitive<boolean> | Primitive<number> | Primitive<string> | Arr<Any> | Object$1>;
 declare type ParseNotSchema<S, P = ParseSchema<Omit<S, "not">>, E = Exclusion<HasKeyIn<S, "enum" | "const" | "type" | "anyOf" | "oneOf" | "allOf"> extends true ? P : AllTypes, ParseSchema<MergeSubSchema<Omit<S, "not">, Get<S, "not">>>>> = IsRepresentable<E> extends true ? E : P;
@@ -814,7 +791,7 @@ declare type ParseSchema<S> = {
 }[InferSchemaType<S>];
 declare type InferSchemaType<S> = S extends true | string ? "any" : S extends false ? "never" : "if" extends keyof S ? "ifThenElse" : "not" extends keyof S ? "not" : "allOf" extends keyof S ? "allOf" : "oneOf" extends keyof S ? "oneOf" : "anyOf" extends keyof S ? "anyOf" : "enum" extends keyof S ? "enum" : "const" extends keyof S ? "const" : "type" extends keyof S ? S["type"] extends any[] ? "mixed" : S["type"] extends "null" ? "null" : S["type"] extends "boolean" ? "boolean" : S["type"] extends "integer" | "number" ? "number" : S["type"] extends "string" ? "string" : S["type"] extends "object" ? "object" : S["type"] extends "array" ? "array" : "never" : "any";
 
-declare type JSONSchema = JSONSchema6Definition | DeepReadonly<JSONSchema6DefinitionWithoutInterface>;
-declare type FromSchema<S extends JSONSchema> = Resolve<ParseSchema<DeepWriteable<S>>>;
+declare type JSONSchema = JSONSchema6Definition | boolean | O.Readonly<Exclude<JSONSchema6DefinitionWithoutInterface, boolean>, A.Key, "deep">;
+declare type FromSchema<S extends JSONSchema> = Resolve<ParseSchema<S extends object ? O.Writable<S, A.Key, "deep"> : S>>;
 
 export { FromSchema, JSONSchema };
