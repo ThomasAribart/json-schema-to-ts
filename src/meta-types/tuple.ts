@@ -1,6 +1,6 @@
 import { L } from "ts-toolbelt";
 
-import { Get, Prepend, Concat, Reverse } from "../utils";
+import { Get, Prepend, Reverse } from "../utils";
 
 import { Resolve, Any } from ".";
 import { IsRepresentable } from "./utils";
@@ -22,7 +22,7 @@ export type IsOpen<T> = Get<T, "isOpen">;
 export type OpenProps<T> = Get<T, "openProps">;
 
 export type ResolveTuple<T> = IsOpen<T> extends true
-  ? Concat<RecurseOnTuple<Values<T>>, [...Resolve<OpenProps<T>>[]]>
+  ? L.Concat<RecurseOnTuple<Values<T>>, [...Resolve<OpenProps<T>>[]]>
   : RecurseOnTuple<Values<T>>;
 
 type RecurseOnTuple<V, R extends L.List = []> = {
