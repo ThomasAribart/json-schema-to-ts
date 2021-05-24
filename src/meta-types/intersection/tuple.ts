@@ -1,4 +1,6 @@
-import { Get, Head, Tail, Prepend, Reverse, And } from "../../utils";
+import { A, L } from "ts-toolbelt";
+
+import { Get, Prepend, Reverse, And } from "../../utils";
 
 import { MetaType, Never, Tuple, Error } from "..";
 import { Values as ArrValues } from "../array";
@@ -10,22 +12,21 @@ import { DistributeIntersection } from "./union";
 import { IntersectExclusion } from "./exclusion";
 import { ClearIntersections, Intersect } from ".";
 
-export type ClearTupleIntersections<
-  T,
-  O = ClearIntersections<OpenProps<T>>
-> = Tuple<
-  ClearTupleValuesIntersections<Values<T>>,
-  O extends Never ? false : IsOpen<T>,
-  O
->;
+export type ClearTupleIntersections<T, O = ClearIntersections<OpenProps<T>>> =
+  Tuple<
+    // 🔧 TOIMPROVE: Not cast here
+    ClearTupleValuesIntersections<A.Cast<Values<T>, L.List>>,
+    O extends Never ? false : IsOpen<T>,
+    O
+  >;
 
-type ClearTupleValuesIntersections<V, R extends any[] = []> = {
+type ClearTupleValuesIntersections<V extends L.List, R extends L.List = []> = {
   stop: Reverse<R>;
   continue: ClearTupleValuesIntersections<
-    Tail<V>,
-    Prepend<ClearIntersections<Head<V>>, R>
+    L.Tail<V>,
+    Prepend<ClearIntersections<L.Head<V>>, R>
   >;
-}[V extends [any, ...any[]] ? "continue" : "stop"];
+}[V extends [any, ...L.List] ? "continue" : "stop"];
 
 export type IntersectTuple<A, B> = {
   any: A;
@@ -46,7 +47,11 @@ export type IntersectTuple<A, B> = {
 type IntersectTupleToArray<
   T,
   A,
-  V = IntersectTupleToArrValues<Values<T>, ArrValues<A>>,
+  V extends L.List = IntersectTupleToArrValues<
+    // 🔧 TOIMPROVE: Not cast here
+    A.Cast<Values<T>, L.List>,
+    ArrValues<A>
+  >,
   N = HasNeverValue<V>,
   O = Intersect<OpenProps<T>, ArrValues<A>>
 > = N extends true
@@ -57,24 +62,30 @@ type IntersectTupleToArray<
       O
     >;
 
-type IntersectTupleToArrValues<V, T, R = []> = {
+type IntersectTupleToArrValues<V extends L.List, T, R extends L.List = []> = {
   stop: Reverse<R>;
-  continue: R extends any[]
-    ? IntersectTupleToArrValues<Tail<V>, T, Prepend<Intersect<Head<V>, T>, R>>
+  continue: R extends L.List
+    ? IntersectTupleToArrValues<
+        L.Tail<V>,
+        T,
+        Prepend<Intersect<L.Head<V>, T>, R>
+      >
     : never;
-}[V extends [any, ...any[]] ? "continue" : "stop"];
+}[V extends [any, ...L.List] ? "continue" : "stop"];
 
-type HasNeverValue<V, R = false> = {
+type HasNeverValue<V extends L.List, R = false> = {
   stop: R;
-  continue: Head<V> extends Never ? true : HasNeverValue<Tail<V>>;
-}[V extends [any, ...any[]] ? "continue" : "stop"];
+  continue: L.Head<V> extends Never ? true : HasNeverValue<L.Tail<V>>;
+}[V extends [any, ...L.List] ? "continue" : "stop"];
 
 type IntersectTuples<
   A,
   B,
-  V = IntersectTupleValues<
-    Values<A>,
-    Values<B>,
+  V extends L.List = IntersectTupleValues<
+    // 🔧 TOIMPROVE: Not cast here
+    A.Cast<Values<A>, L.List>,
+    // 🔧 TOIMPROVE: Not cast here
+    A.Cast<Values<B>, L.List>,
     IsOpen<A>,
     IsOpen<B>,
     OpenProps<A>,
@@ -86,39 +97,47 @@ type IntersectTuples<
   ? Never
   : Tuple<V, O extends Never ? false : And<IsOpen<A>, IsOpen<B>>, O>;
 
-type IntersectTupleValues<V1, V2, O1, O2, P1, P2, R extends any[] = []> = {
+type IntersectTupleValues<
+  V1 extends L.List,
+  V2 extends L.List,
+  O1,
+  O2,
+  P1,
+  P2,
+  R extends L.List = []
+> = {
   stop: Reverse<R>;
   continue1: IntersectTupleValues<
-    Tail<V1>,
+    L.Tail<V1>,
     V2,
     O1,
     O2,
     P1,
     P2,
-    Prepend<O2 extends true ? Intersect<Head<V1>, P2> : Never, R>
+    Prepend<O2 extends true ? Intersect<L.Head<V1>, P2> : Never, R>
   >;
   continue2: IntersectTupleValues<
     V1,
-    Tail<V2>,
+    L.Tail<V2>,
     O1,
     O2,
     P1,
     P2,
-    Prepend<O1 extends true ? Intersect<Head<V2>, P1> : Never, R>
+    Prepend<O1 extends true ? Intersect<L.Head<V2>, P1> : Never, R>
   >;
   continueBoth: IntersectTupleValues<
-    Tail<V1>,
-    Tail<V2>,
+    L.Tail<V1>,
+    L.Tail<V2>,
     O1,
     O2,
     P1,
     P2,
-    Prepend<Intersect<Head<V1>, Head<V2>>, R>
+    Prepend<Intersect<L.Head<V1>, L.Head<V2>>, R>
   >;
-}[V1 extends [any, ...any[]]
-  ? V2 extends [any, ...any[]]
+}[V1 extends [any, ...L.List]
+  ? V2 extends [any, ...L.List]
     ? "continueBoth"
     : "continue1"
-  : V2 extends [any, ...any[]]
+  : V2 extends [any, ...L.List]
   ? "continue2"
   : "stop"];

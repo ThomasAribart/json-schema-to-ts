@@ -1,44 +1,35 @@
+import { A, L } from "ts-toolbelt";
+
 import { Arr, Tuple, Union, Error } from "../meta-types";
-import {
-  Head,
-  Tail,
-  Reverse,
-  DoesExtend,
-  Get,
-  Prepend,
-  IsObject,
-} from "../utils";
+import { Reverse, DoesExtend, Get, Prepend, IsObject } from "../utils";
 
 import { ParseSchema } from ".";
 
 export type ParseArrSchema<S> = "items" extends keyof S
   ? IsObject<S["items"]> extends true
     ? Arr<ParseSchema<S["items"]>>
-    : S["items"] extends any[]
-    ? Union<FromTreeTuple<ParseTuple<S["items"]>, S>>
+    : S["items"] extends L.List
+    ? // 🔧 TOIMPROVE: Not cast here
+      Union<FromTreeTuple<ParseTuple<A.Cast<S["items"], L.List>>, S>>
     : Error<'Invalid value in "items" property'>
   : Arr;
 
-export type ParseTuple<S, R extends any[] = []> = {
+export type ParseTuple<S extends L.List, R extends L.List = []> = {
   stop: R;
-  continue: S extends any[]
-    ? ParseTuple<Tail<S>, Prepend<ParseSchema<Head<S>>, R>>
-    : never;
-}[S extends [any, ...any[]] ? "continue" : "stop"];
+  continue: ParseTuple<L.Tail<S>, Prepend<ParseSchema<L.Head<S>>, R>>;
+}[S extends [any, ...L.List] ? "continue" : "stop"];
 
-type FromTreeTuple<T, S> = T extends any[]
-  ? ApplyAdditionalItems<
-      ApplyBoundaries<
-        T,
-        "minItems" extends keyof S ? S["minItems"] : 0,
-        "maxItems" extends keyof S ? S["maxItems"] : undefined
-      >,
-      "additionalItems" extends keyof S ? S["additionalItems"] : true
-    >
-  : never;
+type FromTreeTuple<T extends L.List, S> = ApplyAdditionalItems<
+  ApplyBoundaries<
+    T,
+    "minItems" extends keyof S ? S["minItems"] : 0,
+    "maxItems" extends keyof S ? S["maxItems"] : undefined
+  >,
+  "additionalItems" extends keyof S ? S["additionalItems"] : true
+>;
 
 type ApplyBoundaries<
-  T extends any[],
+  T extends L.List,
   Min,
   Max,
   R = never,
@@ -53,7 +44,7 @@ type ApplyBoundaries<
       ? R | Tuple<Reverse<T>, false>
       : Max extends T["length"]
       ? Tuple<Reverse<T>, false>
-      : IsLongerThan<Tail<T>, Max> extends true
+      : IsLongerThan<L.Tail<T>, Max> extends true
       ? never
       : R | Tuple<Reverse<T>, false>;
     hasEncounteredMin: DoesExtend<Min, T["length"]>;
@@ -61,11 +52,11 @@ type ApplyBoundaries<
       ? true
       : Max extends T["length"]
       ? true
-      : IsLongerThan<Tail<T>, Max>;
+      : IsLongerThan<L.Tail<T>, Max>;
     completeTuple: C;
   };
   continue: ApplyBoundaries<
-    Tail<T>,
+    L.Tail<T>,
     Min,
     Max,
     T["length"] extends Max
@@ -77,14 +68,14 @@ type ApplyBoundaries<
   >;
 }[Min extends T["length"]
   ? "stop"
-  : T extends [any, ...any[]]
+  : T extends [any, ...L.List]
   ? "continue"
   : "stop"];
 
-type IsLongerThan<T extends any[], N, R = false> = {
-  continue: T["length"] extends N ? true : IsLongerThan<Tail<T>, N>;
+type IsLongerThan<T extends L.List, N, R = false> = {
+  continue: T["length"] extends N ? true : IsLongerThan<L.Tail<T>, N>;
   stop: T["length"] extends N ? true : R;
-}[T extends [any, ...any[]] ? "continue" : "stop"];
+}[T extends [any, ...L.List] ? "continue" : "stop"];
 
 type ApplyAdditionalItems<R, A> = Get<R, "hasEncounteredMax"> extends true
   ? Get<R, "hasEncounteredMin"> extends true
@@ -96,12 +87,23 @@ type ApplyAdditionalItems<R, A> = Get<R, "hasEncounteredMax"> extends true
     : Error<'"minItems" property is higher than allowed number of items'>
   : A extends true
   ? Get<R, "hasEncounteredMin"> extends true
-    ? Get<R, "result"> | Tuple<Reverse<Get<R, "completeTuple">>>
-    : Tuple<Reverse<Get<R, "completeTuple">>>
+    ? Get<R, "result"> | Tuple<Reverse<A.Cast<Get<R, "completeTuple">, L.List>>>
+    : // 🔧 TOIMPROVE: Not cast here
+      Tuple<Reverse<A.Cast<Get<R, "completeTuple">, L.List>>>
   : IsObject<A> extends true
   ? Get<R, "hasEncounteredMin"> extends true
     ?
         | Get<R, "result">
-        | Tuple<Reverse<Get<R, "completeTuple">>, true, ParseSchema<A>>
-    : Tuple<Reverse<Get<R, "completeTuple">>, true, ParseSchema<A>>
+        | Tuple<
+            // 🔧 TOIMPROVE: Not cast here
+            Reverse<A.Cast<Get<R, "completeTuple">, L.List>>,
+            true,
+            ParseSchema<A>
+          >
+    : Tuple<
+        // 🔧 TOIMPROVE: Not cast here
+        Reverse<A.Cast<Get<R, "completeTuple">, L.List>>,
+        true,
+        ParseSchema<A>
+      >
   : Error<'Invalid value in "additionalItems" property'>;

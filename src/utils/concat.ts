@@ -1,5 +1,5 @@
-import { Head } from "./head";
-import { Tail } from "./tail";
+import { L } from "ts-toolbelt";
+
 import { Prepend } from "./prepend";
 import { Reverse } from "./reverse";
 
@@ -10,10 +10,10 @@ import { Reverse } from "./reverse";
  * @param B Tuple
  * @return Tuple
  */
-export type ConcatReversed<A, B extends any[]> = {
+export type ConcatReversed<A extends L.List, B extends L.List> = {
   stop: B;
-  continue: ConcatReversed<Tail<A>, Prepend<Head<A>, B>>;
-}[A extends [any, ...any[]] ? "continue" : "stop"];
+  continue: ConcatReversed<L.Tail<A>, Prepend<L.Head<A>, B>>;
+}[A extends [any, ...L.List] ? "continue" : "stop"];
 
 /**
  * Concatenate tuple `A` to tuple `B`
@@ -22,6 +22,7 @@ export type ConcatReversed<A, B extends any[]> = {
  * @param B Tuple
  * @return Tuple
  */
-export type Concat<A, B extends any[]> = A extends any[]
-  ? ConcatReversed<Reverse<A>, B>
-  : never;
+export type Concat<A extends L.List, B extends L.List> = ConcatReversed<
+  Reverse<A>,
+  B
+>;

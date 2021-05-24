@@ -1,5 +1,5 @@
-import { Head } from "./head";
-import { Tail } from "./tail";
+import { L } from "ts-toolbelt";
+
 import { Prepend } from "./prepend";
 
 /**
@@ -8,7 +8,7 @@ import { Prepend } from "./prepend";
  * @param T Tuple
  * @return Tuple
  */
-export type Reverse<T, R extends any[] = []> = {
+export type Reverse<T extends L.List, R extends L.List = []> = {
   stop: R;
-  continue: T extends any[] ? Reverse<Tail<T>, Prepend<Head<T>, R>> : never;
-}[T extends [any, ...any[]] ? "continue" : "stop"];
+  continue: Reverse<L.Tail<T>, Prepend<L.Head<T>, R>>;
+}[T extends [any, ...L.List] ? "continue" : "stop"];

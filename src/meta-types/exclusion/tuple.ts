@@ -1,15 +1,6 @@
-import { A, B } from "ts-toolbelt";
+import { A, B, L } from "ts-toolbelt";
 
-import {
-  Get,
-  And,
-  Not,
-  IsArray,
-  Head,
-  Tail,
-  Prepend,
-  Reverse,
-} from "../../utils";
+import { Get, And, Not, Prepend, Reverse } from "../../utils";
 
 import { MetaType, Never, Error } from "..";
 import { Const, Value as ConstValue } from "../const";
@@ -53,15 +44,17 @@ type ExcludeArray<S, E> = ExcludeTuples<S, Tuple<[], true, ArrayValues<E>>>;
 type ExcludeTuples<
   S,
   E,
-  C = CrossTupleValues<
-    Values<S>,
-    Values<E>,
+  C extends L.List = CrossTupleValues<
+    // 🔧 TOIMPROVE: Not cast here
+    A.Cast<Values<S>, L.List>,
+    // 🔧 TOIMPROVE: Not cast here
+    A.Cast<Values<E>, L.List>,
     IsOpen<S>,
     IsOpen<E>,
     OpenProps<S>,
     OpenProps<E>
   >,
-  R = RepresentableItems<C>,
+  R extends L.List = RepresentableItems<C>,
   P = Exclude<OpenProps<S>, OpenProps<E>>,
   I = IsRepresentable<P>
 > = DoesTupleSizesMatch<S, E, C> extends true
@@ -76,114 +69,132 @@ type ExcludeTuples<
     }[And<IsOpen<S>, I> extends true ? "moreThanTwo" : GetTupleLength<R>]
   : S;
 
-type CrossTupleValues<V1, V2, O1, O2, P1, P2, R extends any[] = []> = {
+type CrossTupleValues<
+  V1 extends L.List,
+  V2 extends L.List,
+  O1,
+  O2,
+  P1,
+  P2,
+  R extends L.List = []
+> = {
   stop: Reverse<R>;
   continue1: CrossTupleValues<
-    Tail<V1>,
+    L.Tail<V1>,
     [],
     O1,
     O2,
     P1,
     P2,
-    Prepend<CrossValue<Head<V1>, true, true, P2, O2, false>, R>
+    Prepend<CrossValue<L.Head<V1>, true, true, P2, O2, false>, R>
   >;
   continue2: CrossTupleValues<
     [],
-    Tail<V2>,
+    L.Tail<V2>,
     O1,
     O2,
     P1,
     P2,
-    Prepend<CrossValue<P1, O1, false, Head<V2>, true, true>, R>
+    Prepend<CrossValue<P1, O1, false, L.Head<V2>, true, true>, R>
   >;
   continueBoth: CrossTupleValues<
-    Tail<V1>,
-    Tail<V2>,
+    L.Tail<V1>,
+    L.Tail<V2>,
     O1,
     O2,
     P1,
     P2,
-    Prepend<CrossValue<Head<V1>, true, true, Head<V2>, true, true>, R>
+    Prepend<CrossValue<L.Head<V1>, true, true, L.Head<V2>, true, true>, R>
   >;
-}[V1 extends [any, ...any[]]
-  ? V2 extends [any, ...any[]]
+}[V1 extends [any, ...L.List]
+  ? V2 extends [any, ...L.List]
     ? "continueBoth"
     : "continue1"
-  : V2 extends [any, ...any[]]
+  : V2 extends [any, ...L.List]
   ? "continue2"
   : "stop"];
 
 // UTILS
 
-type GetTupleLength<T> = A.Equals<T, []> extends B.True
+type GetTupleLength<T extends L.List, R extends L.List = L.Tail<T>> = A.Equals<
+  T,
+  []
+> extends B.True
   ? "none"
-  : A.Equals<Tail<T>, []> extends B.True
+  : A.Equals<R, []> extends B.True
   ? "onlyOne"
   : "moreThanTwo";
 
 // SIZE CHECK
 
-type DoesTupleSizesMatch<S, E, C> = And<IsOpen<S>, Not<IsOpen<E>>> extends true
+type DoesTupleSizesMatch<S, E, C extends L.List> = And<
+  IsOpen<S>,
+  Not<IsOpen<E>>
+> extends true
   ? false
   : And<IsExcludedSmallEnough<C>, IsExcludedBigEnough<C>>;
 
-type IsExcludedSmallEnough<C> = {
+type IsExcludedSmallEnough<C extends L.List> = {
   stop: true;
-  continue: IsOutsideOfSourceScope<Head<C>> extends true
+  continue: IsOutsideOfSourceScope<L.Head<C>> extends true
     ? false
-    : IsExcludedSmallEnough<Tail<C>>;
-}[C extends [any, ...any[]] ? "continue" : "stop"];
+    : IsExcludedSmallEnough<L.Tail<C>>;
+}[C extends [any, ...L.List] ? "continue" : "stop"];
 
-type IsExcludedBigEnough<C> = {
+type IsExcludedBigEnough<C extends L.List> = {
   stop: true;
-  continue: IsOutsideOfExcludedScope<Head<C>> extends true
+  continue: IsOutsideOfExcludedScope<L.Head<C>> extends true
     ? false
-    : IsExcludedBigEnough<Tail<C>>;
-}[C extends [any, ...any[]] ? "continue" : "stop"];
+    : IsExcludedBigEnough<L.Tail<C>>;
+}[C extends [any, ...L.List] ? "continue" : "stop"];
 
 // PROPAGATION
 
-type RepresentableItems<C, R extends any[] = []> = {
+type RepresentableItems<C extends L.List, R extends L.List = []> = {
   stop: R;
-  continue: IsExclusionValueRepresentable<Head<C>> extends true
-    ? RepresentableItems<Tail<C>, Prepend<Head<C>, R>>
-    : RepresentableItems<Tail<C>, R>;
-}[C extends [any, ...any[]] ? "continue" : "stop"];
+  continue: IsExclusionValueRepresentable<L.Head<C>> extends true
+    ? RepresentableItems<L.Tail<C>, Prepend<L.Head<C>, R>>
+    : RepresentableItems<L.Tail<C>, R>;
+}[C extends [any, ...L.List] ? "continue" : "stop"];
 
-type PropagateExclusion<C, R extends any[] = []> = {
+type PropagateExclusion<C extends L.List, R extends L.List = []> = {
   stop: Reverse<R>;
-  continue: PropagateExclusion<Tail<C>, Prepend<Propagate<Head<C>>, R>>;
-}[C extends [any, ...any[]] ? "continue" : "stop"];
+  continue: PropagateExclusion<L.Tail<C>, Prepend<Propagate<L.Head<C>>, R>>;
+}[C extends [any, ...L.List] ? "continue" : "stop"];
 
 // OMITTABLE ITEMS
 
-type OmitOmittableItems<S, C, I = OmittableItems<C>> = {
+type OmitOmittableItems<
+  S,
+  C extends L.List,
+  I extends L.List = OmittableItems<C>
+> = {
   moreThanTwo: S;
-  onlyOne: Tuple<RequiredTupleValues<S, C>, false, OpenProps<S>>;
+  onlyOne: Tuple<RequiredTupleValues<C>, false, OpenProps<S>>;
   none: Never;
 }[GetTupleLength<I>];
 
-type OmittableItems<C, R extends any[] = []> = {
+type OmittableItems<C extends L.List, R extends L.List = []> = {
   stop: R;
-  continue: IsOmittable<Head<C>> extends true
-    ? OmittableItems<Tail<C>, Prepend<Head<C>, R>>
-    : OmittableItems<Tail<C>, R>;
-}[C extends [any, ...any[]] ? "continue" : "stop"];
+  continue: IsOmittable<L.Head<C>> extends true
+    ? OmittableItems<L.Tail<C>, Prepend<L.Head<C>, R>>
+    : OmittableItems<L.Tail<C>, R>;
+}[C extends [any, ...L.List] ? "continue" : "stop"];
 
-type RequiredTupleValues<S, C, R extends any[] = []> = {
+type RequiredTupleValues<C extends L.List, R extends L.List = []> = {
   stop: Reverse<R>;
-  continue: IsOmittable<Head<C>> extends true
+  continue: IsOmittable<L.Head<C>> extends true
     ? Reverse<R>
-    : RequiredTupleValues<Tail<S>, Tail<C>, Prepend<SourceValue<Head<C>>, R>>;
-}[C extends [any, ...any[]] ? "continue" : "stop"];
+    : RequiredTupleValues<L.Tail<C>, Prepend<SourceValue<L.Head<C>>, R>>;
+}[C extends [any, ...L.List] ? "continue" : "stop"];
 
 // CONST
 
-type ExcludeConst<S, E, V = ConstValue<E>> = IsArray<V> extends true
+type ExcludeConst<S, E, V = ConstValue<E>> = V extends L.List
   ? Exclude<S, Tuple<ExtractConstValues<V>, false, Never>>
   : S;
 
-type ExtractConstValues<V, R extends any[] = []> = {
+type ExtractConstValues<V extends L.List, R extends L.List = []> = {
   stop: Reverse<R>;
-  continue: ExtractConstValues<Tail<V>, Prepend<Const<Head<V>>, R>>;
-}[V extends [any, ...any[]] ? "continue" : "stop"];
+  continue: ExtractConstValues<L.Tail<V>, Prepend<Const<L.Head<V>>, R>>;
+}[V extends [any, ...L.List] ? "continue" : "stop"];

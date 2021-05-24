@@ -1,5 +1,5 @@
-import { Head } from "./head";
-import { Tail } from "./tail";
+import { L } from "ts-toolbelt";
+
 import { Prepend } from "./prepend";
 import { Reverse } from "./reverse";
 
@@ -12,11 +12,11 @@ import { Reverse } from "./reverse";
  * @param F Type
  * @return Tuple
  */
-export type FilterExtending<T, F, R extends any[] = []> = {
+export type FilterExtending<T extends L.List, F, R extends L.List = []> = {
   continue: FilterExtending<
-    Tail<T>,
+    L.Tail<T>,
     F,
-    Head<T> extends F ? Prepend<Head<T>, R> : R
+    L.Head<T> extends F ? Prepend<L.Head<T>, R> : R
   >;
   stop: Reverse<R>;
-}[T extends [any, ...any[]] ? "continue" : "stop"];
+}[T extends [any, ...L.List] ? "continue" : "stop"];

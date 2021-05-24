@@ -1,19 +1,19 @@
-import { Union } from "../meta-types";
-import { Get, Head, Tail, DeepMergeUnsafe } from "../utils";
+import { L } from "ts-toolbelt";
+
+import { Union, Error } from "../meta-types";
+import { Get, DeepMergeUnsafe } from "../utils";
 
 import { ParseSchema } from ".";
 
-export type ParseMixedSchema<S> = Union<
-  RecurseOnMixedSchema<Get<S, "type">, S>
->;
+export type ParseMixedSchema<S, T = Get<S, "type">> = T extends L.List
+  ? Union<RecurseOnMixedSchema<T, S>>
+  : Error<"Mixed schema 'type' property should be an array">;
 
-type RecurseOnMixedSchema<T, S, R = never> = {
+type RecurseOnMixedSchema<T extends L.List, S, R = never> = {
   stop: R;
-  continue: T extends any[]
-    ? RecurseOnMixedSchema<
-        Tail<T>,
-        S,
-        R | ParseSchema<DeepMergeUnsafe<S, { type: Head<T> }>>
-      >
-    : never;
-}[T extends [any, ...any[]] ? "continue" : "stop"];
+  continue: RecurseOnMixedSchema<
+    L.Tail<T>,
+    S,
+    R | ParseSchema<DeepMergeUnsafe<S, { type: L.Head<T> }>>
+  >;
+}[T extends [any, ...L.List] ? "continue" : "stop"];
