@@ -8,4 +8,3 @@ export { Not } from "./not";
 export { Or } from "./or";
 export { Prepend } from "./prepend";
 export { Prettify } from "./prettify";
-export { Replace } from "./replace";
