@@ -1,6 +1,6 @@
 import { L } from "ts-toolbelt";
 
-import { Get, Prepend } from "../utils";
+import { Get } from "../utils";
 
 import { Resolve, Any } from ".";
 import { IsRepresentable } from "./utils";
@@ -29,7 +29,7 @@ type RecurseOnTuple<V, R extends L.List = []> = {
   stop: L.Reverse<R>;
   // 🔧 TOIMPROVE: Not cast here
   continue: V extends L.List
-    ? RecurseOnTuple<L.Tail<V>, Prepend<Resolve<L.Head<V>>, R>>
+    ? RecurseOnTuple<L.Tail<V>, L.Prepend<R, Resolve<L.Head<V>>>>
     : never;
 }[V extends [any, ...L.List] ? "continue" : "stop"];
 

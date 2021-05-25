@@ -1,7 +1,7 @@
 import { A, L } from "ts-toolbelt";
 
 import { Arr, Tuple, Union, Error } from "../meta-types";
-import { DoesExtend, Get, Prepend, IsObject } from "../utils";
+import { DoesExtend, Get, IsObject } from "../utils";
 
 import { ParseSchema } from ".";
 
@@ -16,7 +16,7 @@ export type ParseArrSchema<S> = "items" extends keyof S
 
 export type ParseTuple<S extends L.List, R extends L.List = []> = {
   stop: R;
-  continue: ParseTuple<L.Tail<S>, Prepend<ParseSchema<L.Head<S>>, R>>;
+  continue: ParseTuple<L.Tail<S>, L.Prepend<R, ParseSchema<L.Head<S>>>>;
 }[S extends [any, ...L.List] ? "continue" : "stop"];
 
 type FromTreeTuple<T extends L.List, S> = ApplyAdditionalItems<

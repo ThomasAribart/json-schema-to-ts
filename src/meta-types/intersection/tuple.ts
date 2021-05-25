@@ -1,6 +1,6 @@
 import { A, L } from "ts-toolbelt";
 
-import { Get, Prepend, And } from "../../utils";
+import { Get, And } from "../../utils";
 
 import { MetaType, Never, Tuple, Error } from "..";
 import { Values as ArrValues } from "../array";
@@ -24,7 +24,7 @@ type ClearTupleValuesIntersections<V extends L.List, R extends L.List = []> = {
   stop: L.Reverse<R>;
   continue: ClearTupleValuesIntersections<
     L.Tail<V>,
-    Prepend<ClearIntersections<L.Head<V>>, R>
+    L.Prepend<R, ClearIntersections<L.Head<V>>>
   >;
 }[V extends [any, ...L.List] ? "continue" : "stop"];
 
@@ -68,7 +68,7 @@ type IntersectTupleToArrValues<V extends L.List, T, R extends L.List = []> = {
     ? IntersectTupleToArrValues<
         L.Tail<V>,
         T,
-        Prepend<Intersect<L.Head<V>, T>, R>
+        L.Prepend<R, Intersect<L.Head<V>, T>>
       >
     : never;
 }[V extends [any, ...L.List] ? "continue" : "stop"];
@@ -114,7 +114,7 @@ type IntersectTupleValues<
     O2,
     P1,
     P2,
-    Prepend<O2 extends true ? Intersect<L.Head<V1>, P2> : Never, R>
+    L.Prepend<R, O2 extends true ? Intersect<L.Head<V1>, P2> : Never>
   >;
   continue2: IntersectTupleValues<
     V1,
@@ -123,7 +123,7 @@ type IntersectTupleValues<
     O2,
     P1,
     P2,
-    Prepend<O1 extends true ? Intersect<L.Head<V2>, P1> : Never, R>
+    L.Prepend<R, O1 extends true ? Intersect<L.Head<V2>, P1> : Never>
   >;
   continueBoth: IntersectTupleValues<
     L.Tail<V1>,
@@ -132,7 +132,7 @@ type IntersectTupleValues<
     O2,
     P1,
     P2,
-    Prepend<Intersect<L.Head<V1>, L.Head<V2>>, R>
+    L.Prepend<R, Intersect<L.Head<V1>, L.Head<V2>>>
   >;
 }[V1 extends [any, ...L.List]
   ? V2 extends [any, ...L.List]
