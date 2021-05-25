@@ -1,6 +1,6 @@
+import { O } from "ts-toolbelt";
+
 import { DeepMergeUnsafe } from "./merge";
-import { OptionalProps } from "./optionalProps";
-import { RequiredProps } from "./requiredProps";
 
 /**
  * Set a specified value to an object property or properties
@@ -11,11 +11,11 @@ import { RequiredProps } from "./requiredProps";
  * @return Object
  */
 export type Replace<
-  O extends Record<string | number | symbol, any>,
+  O extends O.Object,
   P extends keyof O,
   V,
-  Req extends keyof O = RequiredProps<O>,
-  Opt extends keyof O = OptionalProps<O>
+  Req extends keyof O = O.RequiredKeys<O>,
+  Opt extends keyof O = O.OptionalKeys<O>
 > = DeepMergeUnsafe<
   DeepMergeUnsafe<Omit<O, P>, { [key in P & Req]: V }>,
   { [key in P & Opt]?: V }
