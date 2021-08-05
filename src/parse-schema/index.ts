@@ -14,10 +14,10 @@ import { ParseIfThenElseSchema } from "./ifThenElse";
 export type ParseSchema<S> = {
   any: Any;
   never: Never;
-  null: Primitive<null>;
-  boolean: Primitive<boolean>;
-  number: Primitive<number>;
-  string: Primitive<string>;
+  null: Primitive<null, S>;
+  boolean: Primitive<boolean, S>;
+  number: Primitive<number, S>;
+  string: Primitive<string, S>;
   mixed: ParseMixedSchema<S>;
   object: ParseObjectSchema<S>;
   array: ParseArrSchema<S>;
