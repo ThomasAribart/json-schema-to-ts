@@ -17,6 +17,7 @@ export type IntersectExclusion<A, B> = {
   const: Exclusion<Intersect<Value<A>, B>, Excluded<A>>;
   enum: Exclusion<Intersect<Value<A>, B>, Excluded<A>>;
   primitive: Exclusion<Intersect<Value<A>, B>, Excluded<A>>;
+  brandedPrimitive: Exclusion<Intersect<Value<A>, B>, Excluded<A>>;
   array: Exclusion<Intersect<Value<A>, B>, Excluded<A>>;
   tuple: Exclusion<Intersect<Value<A>, B>, Excluded<A>>;
   object: Exclusion<Intersect<Value<A>, B>, Excluded<A>>;

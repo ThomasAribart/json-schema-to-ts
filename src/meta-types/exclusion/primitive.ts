@@ -13,6 +13,7 @@ export type ExcludeFromPrimitive<A, B> = {
   const: A;
   enum: A;
   primitive: Value<A> extends Value<B> ? Never : A;
+  brandedPrimitive: Value<A> extends Value<B> ? Never : A;
   array: A;
   tuple: A;
   object: A;

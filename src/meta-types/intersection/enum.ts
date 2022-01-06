@@ -14,6 +14,7 @@ export type IntersectEnum<A, B> = {
   const: IntersectConst<B, A>;
   enum: FilterUnintersecting<A, B>;
   primitive: FilterUnintersecting<A, B>;
+  brandedPrimitive: FilterUnintersecting<A, B>;
   array: FilterUnintersecting<A, B>;
   tuple: FilterUnintersecting<A, B>;
   object: FilterUnintersecting<A, B>;

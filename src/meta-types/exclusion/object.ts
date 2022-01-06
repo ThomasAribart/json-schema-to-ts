@@ -28,6 +28,7 @@ export type ExcludeFromObject<S, E> = {
   const: ExcludeConst<S, E>;
   enum: ExcludeEnum<S, E>;
   primitive: S;
+  brandedPrimitive: S;
   array: S;
   tuple: S;
   object: ExcludeObjects<S, E>;

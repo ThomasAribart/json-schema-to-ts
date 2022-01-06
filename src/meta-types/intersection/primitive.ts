@@ -18,6 +18,11 @@ export type IntersectPrimitive<A, B> = {
     : Value<B> extends Value<A>
     ? B
     : Never;
+  brandedPrimitive: Value<A> extends Value<B>
+    ? A
+    : Value<B> extends Value<A>
+    ? B
+    : Never;
   array: Never;
   tuple: Never;
   object: Never;

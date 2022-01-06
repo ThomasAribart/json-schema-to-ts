@@ -18,6 +18,7 @@ export type ExcludeFromArray<Source, Excluded> = {
   const: Source;
   enum: Source;
   primitive: Source;
+  brandedPrimitive: Source;
   array: ExcludeArrs<Source, Excluded>;
   tuple: And<
     DoesExtend<A.Equals<TupleValues<Excluded>, []>, B.True>,

@@ -16,6 +16,7 @@ export type ExcludeFromConst<Source, Excluded> = {
   const: CheckNotExtendsResolved<Source, Excluded>;
   enum: CheckNotExtendsResolved<Source, Excluded>;
   primitive: CheckNotExtendsResolved<Source, Excluded>;
+  brandedPrimitive: CheckNotExtendsResolved<Source, Excluded>;
   array: CheckNotExtendsResolved<Source, Excluded>;
   tuple: CheckNotExtendsResolved<Source, Excluded>;
   object: ExcludeObject<Source, Excluded>;

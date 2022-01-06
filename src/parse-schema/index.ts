@@ -1,4 +1,4 @@
-import { Primitive, Any, Never } from "../meta-types";
+import { Primitive, BrandedPrimitive, Any, Never } from "../meta-types";
 
 import { ParseConstSchema } from "./const";
 import { ParseEnumSchema } from "./enum";
@@ -11,6 +11,8 @@ import { ParseAllOfSchema } from "./allOf";
 import { ParseNotSchema } from "./not";
 import { ParseIfThenElseSchema } from "./ifThenElse";
 
+import { Get } from '../utils/get'
+
 export type ParseSchema<S> = {
   any: Any;
   never: Never;
@@ -18,6 +20,7 @@ export type ParseSchema<S> = {
   boolean: Primitive<boolean>;
   number: Primitive<number>;
   string: Primitive<string>;
+  brandedString: BrandedPrimitive<string,Get<S,"x-brand">>
   mixed: ParseMixedSchema<S>;
   object: ParseObjectSchema<S>;
   array: ParseArrSchema<S>;
@@ -58,7 +61,7 @@ type InferSchemaType<S> = S extends true | string
     : S["type"] extends "integer" | "number"
     ? "number"
     : S["type"] extends "string"
-    ? "string"
+    ? ( "x-brand" extends keyof S ? 'brandedString' : "string")
     : S["type"] extends "object"
     ? "object"
     : S["type"] extends "array"

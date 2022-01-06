@@ -12,6 +12,7 @@ export type ExcludeFromAny<Source, Excluded> = {
   const: Source;
   enum: Source;
   primitive: Source;
+  brandedPrimitive: Source;
   array: Source;
   tuple: Source;
   object: Source;

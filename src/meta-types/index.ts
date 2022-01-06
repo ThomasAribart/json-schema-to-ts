@@ -4,7 +4,7 @@ import { Any, AnyType, ResolveAny } from "./any";
 import { Never, NeverType, ResolveNever } from "./never";
 import { Const, ConstType, ResolveConst } from "./const";
 import { Enum, EnumType, ResolveEnum } from "./enum";
-import { Primitive, PrimitiveType, ResolvePrimitive } from "./primitive";
+import { Primitive, BrandedPrimitive, PrimitiveType, BrandedPrimitiveType, ResolvePrimitive, ResolveBrandedPrimitive } from "./primitive";
 import { Arr, ArrType, ResolveArr } from "./array";
 import { Tuple, TupleType, ResolveTuple } from "./tuple";
 import { Object, ObjectType, ResolveObject } from "./object";
@@ -23,6 +23,7 @@ export type MetaType =
   | ConstType
   | EnumType
   | PrimitiveType
+  | BrandedPrimitiveType
   | ArrType
   | TupleType
   | ObjectType
@@ -37,6 +38,7 @@ export type Resolve<T, D = Exclude<T, undefined>> = {
   const: ResolveConst<D>;
   enum: ResolveEnum<D>;
   primitive: ResolvePrimitive<D>;
+  brandedPrimitive: ResolveBrandedPrimitive<D>;
   array: ResolveArr<D>;
   tuple: ResolveTuple<D>;
   object: ResolveObject<D>;
@@ -52,6 +54,7 @@ export {
   Const,
   Enum,
   Primitive,
+  BrandedPrimitive,
   Arr,
   Tuple,
   Object,

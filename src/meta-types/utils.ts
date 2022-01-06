@@ -14,6 +14,7 @@ export type IsRepresentable<A> = {
   const: true;
   enum: IsEnumRepresentable<A>;
   primitive: true;
+  brandedPrimitive: true;
   array: true; // Empty array will represent any array
   tuple: IsTupleRepresentable<A>;
   object: IsObjectRepresentable<A>;

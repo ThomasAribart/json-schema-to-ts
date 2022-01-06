@@ -18,6 +18,7 @@ export type ExcludeFromEnum<Source, Excluded> = {
   const: FilterExcluded<Source, Excluded>;
   enum: FilterExcluded<Source, Excluded>;
   primitive: FilterExcluded<Source, Excluded>;
+  brandedPrimitive: FilterExcluded<Source, Excluded>;
   array: FilterExcluded<Source, Excluded>;
   tuple: FilterExcluded<Source, Excluded>;
   object: FilterExcluded<Source, Excluded>;

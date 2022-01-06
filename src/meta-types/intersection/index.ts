@@ -35,6 +35,7 @@ export type ClearIntersections<T> = {
   const: T;
   enum: T;
   primitive: T;
+  brandedPrimitive: T;
   array: ClearArrIntersections<T>;
   tuple: ClearTupleIntersections<T>;
   object: ClearObjectIntersections<T>;
@@ -54,6 +55,7 @@ export type Intersect<A, B> = {
   const: IntersectConst<A, B>;
   enum: IntersectEnum<A, B>;
   primitive: IntersectPrimitive<A, B>;
+  brandedPrimitive: IntersectPrimitive<A, B>;
   array: IntersectArr<A, B>;
   tuple: IntersectTuple<A, B>;
   object: IntersectObject<A, B>;

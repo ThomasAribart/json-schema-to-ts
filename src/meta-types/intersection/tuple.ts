@@ -34,6 +34,7 @@ export type IntersectTuple<A, B> = {
   const: IntersectConst<B, A>;
   enum: IntersectEnum<B, A>;
   primitive: Never;
+  brandedPrimitive: Never;
   array: IntersectTupleToArray<A, B>;
   tuple: IntersectTuples<A, B>;
   object: Never;
