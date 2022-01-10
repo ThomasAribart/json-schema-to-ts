@@ -1,4 +1,4 @@
-import { A, B } from "ts-toolbelt";
+import { A } from "ts-toolbelt";
 
 import { DoesExtend, Or, Not, Get, DeepMergeUnsafe } from "../utils";
 
@@ -68,7 +68,7 @@ type IsObjectValueRepresentable<O, K> = K extends keyof Values<O>
   : false;
 
 export type IsObjectRepresentable<O> = Or<
-  DoesExtend<A.Equals<Required<O>, never>, B.True>,
+  DoesExtend<A.Equals<Required<O>, never>, 1>,
   Not<
     DoesExtend<
       false,

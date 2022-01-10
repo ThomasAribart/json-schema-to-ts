@@ -1,4 +1,4 @@
-import { A, B, U } from "ts-toolbelt";
+import { A, U } from "ts-toolbelt";
 
 import { Get, And, Or, Not, DoesExtend, IsObject } from "../../utils";
 
@@ -71,9 +71,9 @@ type CrossObjectValues<S, E> = {
 
 // UTILS
 
-type GetUnionLength<Union> = A.Equals<Union, never> extends B.True
+type GetUnionLength<Union> = A.Equals<Union, never> extends 1
   ? "none"
-  : A.Equals<U.Pop<Union>, never> extends B.True
+  : A.Equals<U.Pop<Union>, never> extends 1
   ? "onlyOne"
   : "moreThanTwo";
 

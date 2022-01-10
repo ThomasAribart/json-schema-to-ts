@@ -1,4 +1,4 @@
-import { A, B, U } from "ts-toolbelt";
+import { A, U } from "ts-toolbelt";
 
 import { Get } from "../../utils";
 
@@ -47,7 +47,7 @@ export type ExcludeEnum<
   Source,
   ExcludedEnum,
   ExcludedEnumValues = Values<ExcludedEnum>
-> = A.Equals<ExcludedEnumValues, never> extends B.True
+> = A.Equals<ExcludedEnumValues, never> extends 1
   ? Source
   : ExcludeEnumValue<Source, U.Last<ExcludedEnumValues>, ExcludedEnumValues>;
 

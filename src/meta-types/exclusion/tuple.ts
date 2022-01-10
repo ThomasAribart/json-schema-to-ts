@@ -1,4 +1,4 @@
-import { A, B, L } from "ts-toolbelt";
+import { A, L } from "ts-toolbelt";
 
 import { Get, And, Not } from "../../utils";
 
@@ -119,9 +119,9 @@ type CrossTupleValues<
 type GetTupleLength<T extends L.List, R extends L.List = L.Tail<T>> = A.Equals<
   T,
   []
-> extends B.True
+> extends 1
   ? "none"
-  : A.Equals<R, []> extends B.True
+  : A.Equals<R, []> extends 1
   ? "onlyOne"
   : "moreThanTwo";
 
