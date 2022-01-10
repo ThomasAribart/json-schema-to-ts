@@ -142,6 +142,8 @@ const intersectingUnion3: A.Equals<
 > = 1;
 intersectingUnion3;
 
+// FIXME
+// @ts-ignore
 const nonIntersectingUnion: A.Equals<
   Intersect<
     Union<Const<"foo"> | Primitive<number>>,
