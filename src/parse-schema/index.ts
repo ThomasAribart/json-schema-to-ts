@@ -10,6 +10,9 @@ import { ParseOneOfSchema } from "./oneOf";
 import { ParseAllOfSchema } from "./allOf";
 import { ParseNotSchema } from "./not";
 import { ParseIfThenElseSchema } from "./ifThenElse";
+import { ParseNullableSchema } from './nullable';
+
+import { Get } from '../utils/get'
 
 export type ParseSchema<S> = {
   any: Any;
@@ -27,6 +30,7 @@ export type ParseSchema<S> = {
   oneOf: ParseOneOfSchema<S>;
   allOf: ParseAllOfSchema<S>;
   not: ParseNotSchema<S>;
+  nullable: ParseNullableSchema<S>;
   ifThenElse: ParseIfThenElseSchema<S>;
 }[InferSchemaType<S>];
 
@@ -48,6 +52,8 @@ type InferSchemaType<S> = S extends true | string
   ? "enum"
   : "const" extends keyof S
   ? "const"
+  : Get<S, "nullable", null> extends true
+  ? "nullable"
   : "type" extends keyof S
   ? S["type"] extends any[]
     ? "mixed"
