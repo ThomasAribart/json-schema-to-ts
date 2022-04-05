@@ -34,4 +34,10 @@ describe("Nullable schemas", () => {
     nullableStringInstance = null;
     expect(ajv.validate(nullableStringSchema, nullableStringInstance)).toBe(true);
   });
+
+  it("nullable rejects non-string", () => {
+    // @ts-expect-error
+    nullableStringInstance = {};
+    expect(ajv.validate(nullableStringSchema, nullableStringInstance)).toBe(false);
+  });
 });
