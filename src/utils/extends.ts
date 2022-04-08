@@ -20,15 +20,3 @@ export type IsObject<T> = T extends object
     ? false
     : true
   : false;
-
-/**
- * Returns `true` if type is array, `false` if not (excludes objects)
- *
- * @param T Type
- * @return Boolean
- */
-export type IsArray<T> = T extends object
-  ? ArrayKeys extends Extract<keyof T, ArrayKeys>
-    ? true
-    : false
-  : false;
