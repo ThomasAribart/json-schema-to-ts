@@ -11,7 +11,7 @@
   "dependencies": {
     "@types/json-schema": "^7.0.9",
     "ts-toolbelt": "^9.6.0",
-    "ts-algebra": "1.0.0"
+    "ts-algebra": "^1.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.17.5",
