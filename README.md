@@ -415,8 +415,6 @@ type Cat = FromSchema<typeof catSchema>;
 const invalidCat: Cat = { name: "Garfield" };
 ```
 
-> This may be revised soon now that `not` exclusions are now possible
-
 ### AllOf
 
 ```typescript
@@ -451,6 +449,8 @@ type Address = FromSchema<typeof addressSchema>;
 
 ### Not
 
+Exclusions require heavy computations, that can sometimes be aborted by Typescript and end up in `any` inferred types. For this reason, they are not activated by default: You can opt-in with the `parseNotKeyword` option.
+
 ```typescript
 const tupleSchema = {
   type: "array",
@@ -461,7 +461,7 @@ const tupleSchema = {
   },
 } as const;
 
-type Tuple = FromSchema<typeof tupleSchema>;
+type Tuple = FromSchema<typeof tupleSchema, { parseNotKeyword: true }>;
 // => [] | [1, 2]
 ```
 
@@ -472,7 +472,10 @@ const primitiveTypeSchema = {
   },
 } as const;
 
-type PrimitiveType = FromSchema<typeof primitiveTypeSchema>;
+type PrimitiveType = FromSchema<
+  typeof primitiveTypeSchema,
+  { parseNotKeyword: true }
+>;
 // => null | boolean | number | string
 ```
 
@@ -492,7 +495,7 @@ const petSchema = {
   additionalProperties: false,
 } as const;
 
-type Pet = FromSchema<typeof petSchema>;
+type Pet = FromSchema<typeof petSchema, { parseNotKeyword: true }>;
 // => { animal: "cat" | "dog" }
 ```
 
@@ -511,7 +514,7 @@ const petSchema = {
   additionalProperties: false,
 } as const;
 
-type Pet = FromSchema<typeof petSchema>;
+type Pet = FromSchema<typeof petSchema, { parseNotKeyword: true }>;
 // => { animal: "cat" | "dog", color: "black" | "brown" | "white" }
 ```
 
@@ -523,7 +526,7 @@ const oddNumberSchema = {
   not: { multipleOf: 2 },
 } as const;
 
-type OddNumber = FromSchema<typeof oddNumberSchema>;
+type OddNumber = FromSchema<typeof oddNumberSchema, { parseNotKeyword: true }>;
 // => should and will resolve to "number"
 
 const incorrectSchema = {
@@ -531,7 +534,7 @@ const incorrectSchema = {
   not: { bogus: "option" },
 } as const;
 
-type Incorrect = FromSchema<typeof incorrectSchema>;
+type Incorrect = FromSchema<typeof incorrectSchema, { parseNotKeyword: true }>;
 // => should resolve to "never" but will still resolve to "number"
 ```
 
@@ -545,11 +548,16 @@ const goodLanguageSchema = {
   },
 } as const;
 
-type GoodLanguage = FromSchema<typeof goodLanguageSchema>;
+type GoodLanguage = FromSchema<
+  typeof goodLanguageSchema,
+  { parseNotKeyword: true }
+>;
 // => string
 ```
 
 ### If/Then/Else
+
+For the same reason as the `Not` keyword, conditions parsing is not activated by default: You can opt-in with the `parseIfThenElseKeywords` option.
 
 ```typescript
 const petSchema = {
@@ -576,9 +584,16 @@ const petSchema = {
   },
 } as const;
 
-type Pet = FromSchema<typeof petSchema>;
-// => { animal: "dog"; dogBreed: DogBreed }
-// | { animal: "cat"; catBreed: CatBreed }
+type Pet = FromSchema<typeof petSchema, { parseIfThenElseKeywords: true }>;
+// => {
+//  animal: "dog";
+//  dogBreed: DogBreed;
+//  catBreed?: CatBreed | undefined
+// } | {
+//  animal: "cat" | "dog";
+//  catBreed: CatBreed;
+//  dogBreed?: DogBreed | undefined
+// }
 ```
 
 > `FromSchema` computes the resulting type as `(If ∩ Then) ∪ (¬If ∩ Else)`. While correct in theory, remember that the `not` keyword is not perfectly assimilated, which may become an issue in some complex schemas.
@@ -591,107 +606,7 @@ I'll soon be looking into it. Meanwhile, feel free to [open an issue](https://gi
 
 ## Frequently Asked Questions
 
-### Does `json-schema-to-ts` work on _.json_ file schemas ?
-
-Sadly, no 😭
-
-`FromSchema` is based on type computations. By design, it only works on "good enough" material, i.e. _narrow_ types (`{ type: "string" }`) and NOT _widened_ ones (`{ type: string }` which can also represent `{ type: "number" }`). However, JSON imports are **widened by default**. This is native TS behavior, there's no changing that.
-
-If you really want use _.json_ files, you can start by [upvoting this feature request to implement _.json_ imports `as const`](https://github.com/microsoft/TypeScript/issues/32063) on the official repo 🙂 AND you can always cast imported schemas as their narrow types:
-
-```json
-// dog.json
-{
-  "type": "object",
-  "properties": {
-    "name": { "type": "string" },
-    "age": { "type": "integer" },
-    "hobbies": { "type": "array", "items": { "type": "string" } },
-    "favoriteFood": { "enum": ["pizza", "taco", "fries"] }
-  },
-  "required": ["name", "age"]
-}
-```
-
-```typescript
-import { FromSchema } from "json-schema-to-ts";
-
-import dogRawSchema from "./dog.json";
-
-const dogSchema = dogRawSchema as {
-  type: "object";
-  properties: {
-    name: { type: "string" };
-    age: { type: "integer" };
-    hobbies: { type: "array"; items: { type: "string" } };
-    favoriteFood: { enum: ["pizza", "taco", "fries"] };
-  };
-  required: ["name", "age"];
-};
-
-type Dog = FromSchema<typeof dogSchema>;
-// => Will work 🙌
-```
-
-It is technically code duplication, BUT TS will throw an errow if the narrow and widened types don't sufficiently overlap, which allows for partial type safety (roughly, everything but the object "leafs"). In particular, this will work well on object properties names, as object keys are not widened by default.
-
-```typescript
-import { FromSchema } from "json-schema-to-ts";
-
-import dogRawSchema from "./dog.json";
-
-const dogSchema = dogoRawSchema as {
-  type: "object";
-  properties: {
-    name: { type: "number" }; // "number" instead of "string" will go undetected...
-    years: { type: "integer" }; // ...but "years" instead of "age" will not 🙌
-    hobbies: { type: "array"; items: { type: "string" } };
-    favoriteFood: { const: "pizza" }; // ..."const" instead of "enum" as well 🙌
-  };
-  required: ["name", "age"];
-};
-```
-
-### Can I assign `JSONSchema` to my schema and use `FromSchema` at the same time ?
-
-`json-schema-to-ts` exports a `JSONSchema` type to help you write schemas:
-
-```typescript
-import { FromSchema, JSONSchema } from "json-schema-to-ts";
-
-const dogSchema: JSONSchema = { ... } as const;
-
-type Dog = FromSchema<typeof dogSchema>;
-```
-
-For the same reason, this example will **not** work 🙅‍♂️
-
-`FromSchema` is based on type computations. By design, it only works on "good enough" material, i.e. _narrow_ types (`{ type: "string" }`) and NOT _widened_ ones (`{ type: string }` which can also represent `{ type: "number" }`). For the compiler, assigning `JSONSchema` to your schema "blurs" its type to pretty much the **widest possible schema type** 😅 That's why in this example, `Dog` will be equal to the `never` type.
-
-So there is a sort of Heiseinberg's uncertainty principle at play here: You can either use `FromSchema` or `JSONSchema`, but not both at the same time.
-
-The correct way to use them is the following:
-
-- Define a schema with the `as const` statement
-- Assign the `JSONSchema` type to it (allowing autocompletion and precise error highlighting)
-- Write the schema
-- Remove the type assignment
-- Use `FromSchema` 🙌
-
-### Will `json-schema-to-ts` impact the performances of my IDE/compiler ?
-
-Long story short: no.
-
-In your IDE, as long as you don't define all your schemas in the same file (which you shouldn't do anyway), file opening and type infering is still fast enough for you not to hardly notice anything, even on large schemas (200+ lines).
-
-The same holds true for compilation. As far as I know (please, feel free to open an issue if you find otherwise), `json-schema-to-ts` has little to no impact on the TS compilation time.
-
-### I get a `type instantiation is excessively deep and potentially infinite` error, what should I do ?
-
-Since Typescript 4.0 (which was unfortunately released after `json-schema-to-ts` 😅), the TS compiler raises this error when detecting long type computations, and potential infinite loops.
-
-`FromSchema` goes through some pretty wild type recursions, so this is can be an issue on large schemas, particularly when using intersections (`allOf`) and exclusions (`not`, `else`).
-
-I am working on simplifying the type computations. But for the moment, I don't have any better solution to give you other than ignoring the error with a `@ts-ignore` comment. This should not block the type computation, so the inferred type should still be valid.
-
-If you find that it's not the case, please, feel free to open an issue.
+- [Does `json-schema-to-ts` work on _.json_ file schemas?](./documentation/FAQs/does-json-schema-to-ts-work-on-json-file-schemas.md)
+- [Can I assign `JSONSchema` to my schema and use `FromSchema` at the same time?](./documentation/FAQs/can-i-assign-jsonschema-to-my-schema-and-use-fromschema-at-the-same-time.md)
+- [Will `json-schema-to-ts` impact the performances of my IDE/compiler?](./documentation/FAQs/will-json-schema-to-ts-impact-the-performances-of-my-ide-compiler.md)
+- [I get a `type instantiation is excessively deep and potentially infinite` error, what should I do?](./documentation/FAQs/i-get-a-type-instantiation-is-excessively-deep-and-potentially-infinite-error-what-should-i-do.md)

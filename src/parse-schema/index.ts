@@ -1,67 +1,60 @@
-import { Primitive, Any, Never } from "../meta-types";
+import { M } from "ts-algebra";
 
-import { ParseConstSchema } from "./const";
-import { ParseEnumSchema } from "./enum";
-import { ParseMixedSchema } from "./mixed";
-import { ParseArrSchema } from "./array";
-import { ParseObjectSchema } from "./object";
-import { ParseAnyOfSchema } from "./anyOf";
-import { ParseOneOfSchema } from "./oneOf";
-import { ParseAllOfSchema } from "./allOf";
-import { ParseNotSchema } from "./not";
-import { ParseIfThenElseSchema } from "./ifThenElse";
+import { JSONSchema7 } from "../definitions";
+import { And, DoesExtend } from "../utils";
 
-export type ParseSchema<S> = {
-  any: Any;
-  never: Never;
-  null: Primitive<null>;
-  boolean: Primitive<boolean>;
-  number: Primitive<number>;
-  string: Primitive<string>;
-  mixed: ParseMixedSchema<S>;
-  object: ParseObjectSchema<S>;
-  array: ParseArrSchema<S>;
-  const: ParseConstSchema<S>;
-  enum: ParseEnumSchema<S>;
-  anyOf: ParseAnyOfSchema<S>;
-  oneOf: ParseOneOfSchema<S>;
-  allOf: ParseAllOfSchema<S>;
-  not: ParseNotSchema<S>;
-  ifThenElse: ParseIfThenElseSchema<S>;
-}[InferSchemaType<S>];
+import { ConstSchema, ParseConstSchema } from "./const";
+import { EnumSchema, ParseEnumSchema } from "./enum";
+import { ParseSingleTypeSchema, SingleTypeSchema } from "./singleType";
+import { MultipleTypesSchema, ParseMultipleTypesSchema } from "./multipleTypes";
+import { AnyOfSchema, ParseAnyOfSchema } from "./anyOf";
+import { OneOfSchema, ParseOneOfSchema } from "./oneOf";
+import { AllOfSchema, ParseAllOfSchema } from "./allOf";
+import { ParseNotSchema, NotSchema } from "./not";
+import { ParseIfThenElseSchema, IfThenElseSchema } from "./ifThenElse";
 
-type InferSchemaType<S> = S extends true | string
-  ? "any"
+export type ParseSchemaOptions = {
+  parseNotKeyword: boolean;
+  parseIfThenElseKeywords: boolean;
+};
+
+export type ParseSchema<
+  S extends JSONSchema7,
+  O extends ParseSchemaOptions
+> = JSONSchema7 extends S
+  ? M.Any
+  : S extends true | string
+  ? M.Any
   : S extends false
-  ? "never"
-  : "if" extends keyof S
-  ? "ifThenElse"
-  : "not" extends keyof S
-  ? "not"
-  : "allOf" extends keyof S
-  ? "allOf"
-  : "oneOf" extends keyof S
-  ? "oneOf"
-  : "anyOf" extends keyof S
-  ? "anyOf"
-  : "enum" extends keyof S
-  ? "enum"
-  : "const" extends keyof S
-  ? "const"
-  : "type" extends keyof S
-  ? S["type"] extends any[]
-    ? "mixed"
-    : S["type"] extends "null"
-    ? "null"
-    : S["type"] extends "boolean"
-    ? "boolean"
-    : S["type"] extends "integer" | "number"
-    ? "number"
-    : S["type"] extends "string"
-    ? "string"
-    : S["type"] extends "object"
-    ? "object"
-    : S["type"] extends "array"
-    ? "array"
-    : "never"
-  : "any";
+  ? M.Never
+  : And<
+      DoesExtend<O["parseIfThenElseKeywords"], true>,
+      DoesExtend<S, IfThenElseSchema>
+    > extends true
+  ? // TOIMPROVE: Not cast here (rather use a ParseNonIfThenElseSchema twice)
+    S extends IfThenElseSchema
+    ? ParseIfThenElseSchema<S, O>
+    : never
+  : And<
+      DoesExtend<O["parseNotKeyword"], true>,
+      DoesExtend<S, NotSchema>
+    > extends true
+  ? // TOIMPROVE: Not cast here (rather use a ParseNonNotSchema twice)
+    S extends NotSchema
+    ? ParseNotSchema<S, O>
+    : never
+  : S extends AllOfSchema
+  ? ParseAllOfSchema<S, O>
+  : S extends OneOfSchema
+  ? ParseOneOfSchema<S, O>
+  : S extends AnyOfSchema
+  ? ParseAnyOfSchema<S, O>
+  : S extends EnumSchema
+  ? ParseEnumSchema<S, O>
+  : S extends ConstSchema
+  ? ParseConstSchema<S, O>
+  : S extends MultipleTypesSchema
+  ? ParseMultipleTypesSchema<S, O>
+  : S extends SingleTypeSchema
+  ? ParseSingleTypeSchema<S, O>
+  : M.Any;

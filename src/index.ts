@@ -1,27 +1,46 @@
-import { A, O } from "ts-toolbelt";
-import { JSONSchema6Definition } from "json-schema";
+import { M } from "ts-algebra";
+import { O } from "ts-toolbelt";
 
-import { JSONSchema6DefinitionWithoutInterface } from "./definitions";
-import { Resolve } from "./meta-types";
-import { ParseSchema } from "./parse-schema";
+import type {
+  JSONSchema7 as $JSONSchema7,
+  FromSchemaOptions,
+  FromSchemaDefaultOptions,
+} from "./definitions";
+import type { ParseSchema } from "./parse-schema";
+import type { Readonly, Writable } from "./utils";
+
+export { FromSchemaOptions, FromSchemaDefaultOptions } from "./definitions";
 
 /**
- * Unwided JSON schema (e.g. defined with the `as const` statement)
+ * Unwidened V7 JSON schema (e.g. defined with the `as const` statement)
  */
-export type JSONSchema =
-  | JSONSchema6Definition
-  | boolean
-  | O.Readonly<
-      Exclude<JSONSchema6DefinitionWithoutInterface, boolean>,
-      A.Key,
-      "deep"
-    >;
+export type JSONSchema7 =
+  | $JSONSchema7
+  | Readonly<Extract<$JSONSchema7, O.Object>>;
+
+/**
+ * Unwidened JSON schema (e.g. defined with the `as const` statement)
+ */
+export type JSONSchema = JSONSchema7;
 
 /**
  * Given a JSON schema defined with the `as const` statement, infers the type of valid instances
  *
  * @param S JSON schema
  */
-export type FromSchema<S extends JSONSchema> = Resolve<
-  ParseSchema<S extends object ? O.Writable<S, A.Key, "deep"> : S>
+export type FromSchema<
+  S extends JSONSchema7,
+  O extends FromSchemaOptions = FromSchemaDefaultOptions
+> = M.$Resolve<
+  ParseSchema<
+    S extends O.Object ? Writable<S> : S,
+    {
+      parseNotKeyword: O["parseNotKeyword"] extends boolean
+        ? O["parseNotKeyword"]
+        : FromSchemaDefaultOptions["parseNotKeyword"];
+      parseIfThenElseKeywords: O["parseIfThenElseKeywords"] extends boolean
+        ? O["parseIfThenElseKeywords"]
+        : FromSchemaDefaultOptions["parseIfThenElseKeywords"];
+    }
+  >
 >;
