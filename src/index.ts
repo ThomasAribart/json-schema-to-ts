@@ -9,12 +9,19 @@ import type {
 import type { ParseSchema } from "./parse-schema";
 import type { Readonly, Writable } from "./utils";
 
+export { FromSchemaOptions, FromSchemaDefaultOptions } from "./definitions";
+
 /**
- * Unwided JSON schema (e.g. defined with the `as const` statement)
+ * Unwidened V7 JSON schema (e.g. defined with the `as const` statement)
  */
 export type JSONSchema7 =
   | $JSONSchema7
   | Readonly<Extract<$JSONSchema7, O.Object>>;
+
+/**
+ * Unwidened JSON schema (e.g. defined with the `as const` statement)
+ */
+export type JSONSchema = JSONSchema7;
 
 /**
  * Given a JSON schema defined with the `as const` statement, infers the type of valid instances
