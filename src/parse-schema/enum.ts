@@ -1,11 +1,18 @@
-import { Enum, Intersection } from "../meta-types";
-import { DeepGet, HasKeyIn } from "../utils";
+import { M } from "ts-algebra";
 
-import { ParseSchema } from ".";
+import { JSONSchema7 } from "../definitions";
+import { HasKeyIn } from "../utils";
 
-export type ParseEnumSchema<S> = HasKeyIn<S, "const" | "type"> extends true
-  ? Intersection<
-      Enum<DeepGet<S, ["enum", number]>>,
-      ParseSchema<Omit<S, "enum">>
-    >
-  : Enum<DeepGet<S, ["enum", number]>>;
+import { ParseSchema, ParseSchemaOptions } from "./index";
+
+export type EnumSchema = JSONSchema7 & { enum: unknown[] };
+
+export type ParseEnumSchema<
+  S extends EnumSchema,
+  O extends ParseSchemaOptions
+  // TOIMPROVE: Directly use ParseConstSchema, ParseMultipleTypeSchema etc...
+> = HasKeyIn<S, "const" | "type"> extends true
+  ? M.$Intersect<ParseEnum<S>, ParseSchema<Omit<S, "enum">, O>>
+  : ParseEnum<S>;
+
+type ParseEnum<S extends EnumSchema> = M.Enum<S["enum"][number]>;

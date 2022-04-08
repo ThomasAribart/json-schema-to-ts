@@ -1,31 +1,40 @@
+import { M } from "ts-algebra";
 import { L } from "ts-toolbelt";
 
-import { Intersection, Union } from "../meta-types";
-import { Get, HasKeyIn, Merge } from "../utils";
+import { JSONSchema7 } from "../definitions";
+import { HasKeyIn, Merge } from "../utils";
 
-import { ParseSchema } from ".";
+import { ParseSchema, ParseSchemaOptions } from "./index";
 import { MergeSubSchema, RemoveInvalidAdditionalItems } from "./utils";
 
-export type ParseAnyOfSchema<S> = Union<
-  RecurseOnAnyOfSchema<Get<S, "anyOf">, S>
->;
+export type AnyOfSchema = JSONSchema7 & { anyOf: JSONSchema7[] };
 
-type RecurseOnAnyOfSchema<S, P, R = never> = {
+export type ParseAnyOfSchema<
+  S extends AnyOfSchema,
+  O extends ParseSchemaOptions
+> = M.$Union<RecurseOnAnyOfSchema<S["anyOf"], S, O>>;
+
+type RecurseOnAnyOfSchema<
+  S extends JSONSchema7[],
+  P extends AnyOfSchema,
+  O extends ParseSchemaOptions,
+  R extends any = never
+> = {
   stop: R;
-  // 🔧 TOIMPROVE: Not cast here
-  continue: S extends L.List
-    ? RecurseOnAnyOfSchema<
-        L.Tail<S>,
-        P,
-        | R
-        | (HasKeyIn<P, "enum" | "const" | "type"> extends true
-            ? Intersection<
-                ParseSchema<Omit<P, "anyOf">>,
-                ParseSchema<MergeSubSchema<Omit<P, "anyOf">, L.Head<S>>>
-              >
-            : ParseSchema<
-                Merge<Omit<P, "anyOf">, RemoveInvalidAdditionalItems<L.Head<S>>>
-              >)
-      >
-    : never;
-}[S extends [any, ...L.List] ? "continue" : "stop"];
+  continue: RecurseOnAnyOfSchema<
+    L.Tail<S>,
+    P,
+    O,
+    | R
+    // TOIMPROVE: Directly use ParseEnumSchema, ParseConstSchema etc...
+    | (HasKeyIn<P, "enum" | "const" | "type"> extends true
+        ? M.$Intersect<
+            ParseSchema<Omit<P, "anyOf">, O>,
+            ParseSchema<MergeSubSchema<Omit<P, "anyOf">, L.Head<S>>, O>
+          >
+        : ParseSchema<
+            Merge<Omit<P, "anyOf">, RemoveInvalidAdditionalItems<L.Head<S>>>,
+            O
+          >)
+  >;
+}[S extends [any, ...any[]] ? "continue" : "stop"];
