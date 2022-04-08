@@ -415,8 +415,6 @@ type Cat = FromSchema<typeof catSchema>;
 const invalidCat: Cat = { name: "Garfield" };
 ```
 
-> This may be revised soon now that `not` exclusions are now possible
-
 ### AllOf
 
 ```typescript
@@ -451,6 +449,8 @@ type Address = FromSchema<typeof addressSchema>;
 
 ### Not
 
+Exclusions require heavy computations, that can sometimes be aborted by Typescript and end up in `any` inferred types. For this reason, they are not activated by default: You can opt-in with the `parseNotKeyword` option.
+
 ```typescript
 const tupleSchema = {
   type: "array",
@@ -461,7 +461,7 @@ const tupleSchema = {
   },
 } as const;
 
-type Tuple = FromSchema<typeof tupleSchema>;
+type Tuple = FromSchema<typeof tupleSchema, { parseNotKeyword: true }>;
 // => [] | [1, 2]
 ```
 
@@ -472,7 +472,10 @@ const primitiveTypeSchema = {
   },
 } as const;
 
-type PrimitiveType = FromSchema<typeof primitiveTypeSchema>;
+type PrimitiveType = FromSchema<
+  typeof primitiveTypeSchema,
+  { parseNotKeyword: true }
+>;
 // => null | boolean | number | string
 ```
 
@@ -492,7 +495,7 @@ const petSchema = {
   additionalProperties: false,
 } as const;
 
-type Pet = FromSchema<typeof petSchema>;
+type Pet = FromSchema<typeof petSchema, { parseNotKeyword: true }>;
 // => { animal: "cat" | "dog" }
 ```
 
@@ -511,7 +514,7 @@ const petSchema = {
   additionalProperties: false,
 } as const;
 
-type Pet = FromSchema<typeof petSchema>;
+type Pet = FromSchema<typeof petSchema, { parseNotKeyword: true }>;
 // => { animal: "cat" | "dog", color: "black" | "brown" | "white" }
 ```
 
@@ -523,7 +526,7 @@ const oddNumberSchema = {
   not: { multipleOf: 2 },
 } as const;
 
-type OddNumber = FromSchema<typeof oddNumberSchema>;
+type OddNumber = FromSchema<typeof oddNumberSchema, { parseNotKeyword: true }>;
 // => should and will resolve to "number"
 
 const incorrectSchema = {
@@ -531,7 +534,7 @@ const incorrectSchema = {
   not: { bogus: "option" },
 } as const;
 
-type Incorrect = FromSchema<typeof incorrectSchema>;
+type Incorrect = FromSchema<typeof incorrectSchema, { parseNotKeyword: true }>;
 // => should resolve to "never" but will still resolve to "number"
 ```
 
@@ -545,11 +548,16 @@ const goodLanguageSchema = {
   },
 } as const;
 
-type GoodLanguage = FromSchema<typeof goodLanguageSchema>;
+type GoodLanguage = FromSchema<
+  typeof goodLanguageSchema,
+  { parseNotKeyword: true }
+>;
 // => string
 ```
 
 ### If/Then/Else
+
+For the same reason as the `Not` keyword, conditions parsing is not activated by default: You can opt-in with the `parseIfThenElseKeywords` option.
 
 ```typescript
 const petSchema = {
@@ -576,9 +584,16 @@ const petSchema = {
   },
 } as const;
 
-type Pet = FromSchema<typeof petSchema>;
-// => { animal: "dog"; dogBreed: DogBreed }
-// | { animal: "cat"; catBreed: CatBreed }
+type Pet = FromSchema<typeof petSchema, { parseIfThenElseKeywords: true }>;
+// => {
+//  animal: "dog";
+//  dogBreed: DogBreed;
+//  catBreed?: CatBreed | undefined
+// } | {
+//  animal: "cat" | "dog";
+//  catBreed: CatBreed;
+//  dogBreed?: DogBreed | undefined
+// }
 ```
 
 > `FromSchema` computes the resulting type as `(If ∩ Then) ∪ (¬If ∩ Else)`. While correct in theory, remember that the `not` keyword is not perfectly assimilated, which may become an issue in some complex schemas.
