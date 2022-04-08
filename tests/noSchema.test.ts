@@ -1,10 +1,35 @@
-import Ajv from "ajv";
-
+import { JSONSchema7 } from "definitions";
 import { FromSchema } from "index";
 
-var ajv = new Ajv();
+import { ajv } from "./ajv";
 
 describe("No schema", () => {
+  describe("Empty", () => {
+    const emptySchema = {} as JSONSchema7;
+    type Any = FromSchema<typeof emptySchema>;
+    let anyInstance: Any;
+
+    it("accepts any value", () => {
+      anyInstance = null;
+      expect(ajv.validate(emptySchema, anyInstance)).toBe(true);
+
+      anyInstance = true;
+      expect(ajv.validate(emptySchema, anyInstance)).toBe(true);
+
+      anyInstance = "string";
+      expect(ajv.validate(emptySchema, anyInstance)).toBe(true);
+
+      anyInstance = 42;
+      expect(ajv.validate(emptySchema, anyInstance)).toBe(true);
+
+      anyInstance = { foo: "bar" };
+      expect(ajv.validate(emptySchema, anyInstance)).toBe(true);
+
+      anyInstance = ["foo", "bar"];
+      expect(ajv.validate(emptySchema, anyInstance)).toBe(true);
+    });
+  });
+
   describe("True", () => {
     type Unknown = FromSchema<true>;
     let anyInstance: Unknown;

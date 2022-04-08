@@ -1,8 +1,6 @@
-import Ajv from "ajv";
-
 import { FromSchema } from "index";
 
-var ajv = new Ajv();
+import { ajv } from "./ajv";
 
 describe("Enum schemas", () => {
   describe("Empty enum", () => {

@@ -1,8 +1,6 @@
-import Ajv from "ajv";
-
 import { FromSchema } from "index";
 
-var ajv = new Ajv();
+import { ajv } from "./ajv";
 
 describe("Integer schemas", () => {
   const integerSchema = { type: "integer" } as const;

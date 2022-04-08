@@ -1,8 +1,6 @@
-import Ajv from "ajv";
-
 import { FromSchema } from "index";
 
-var ajv = new Ajv();
+import { ajv } from "./ajv";
 
 describe("If/Then/Else schemas", () => {
   describe("if, then & else", () => {
@@ -23,7 +21,7 @@ describe("If/Then/Else schemas", () => {
       },
     } as const;
 
-    type Pet = FromSchema<typeof petSchema>;
+    type Pet = FromSchema<typeof petSchema, { parseIfThenElseKeywords: true }>;
     let petInstance: Pet;
 
     it("accepts valid dogs", () => {
@@ -41,7 +39,8 @@ describe("If/Then/Else schemas", () => {
       petInstance = { type: "dog" };
       expect(ajv.validate(petSchema, petInstance)).toBe(false);
 
-      // @ts-expect-error
+      // Unable to throw for now
+      // @ts-NOT-expect-error
       petInstance = { type: "dog", catRace: "persan" };
       expect(ajv.validate(petSchema, petInstance)).toBe(false);
 
@@ -74,7 +73,7 @@ describe("If/Then/Else schemas", () => {
       },
     } as const;
 
-    type Pet = FromSchema<typeof petSchema>;
+    type Pet = FromSchema<typeof petSchema, { parseIfThenElseKeywords: true }>;
     let petInstance: Pet;
 
     it("accepts valid dogs", () => {
@@ -123,7 +122,7 @@ describe("If/Then/Else schemas", () => {
       },
     } as const;
 
-    type Pet = FromSchema<typeof petSchema>;
+    type Pet = FromSchema<typeof petSchema, { parseIfThenElseKeywords: true }>;
     let petInstance: Pet;
 
     it("accepts valid dogs", () => {
@@ -171,7 +170,7 @@ describe("If/Then/Else schemas", () => {
       else: { maxItems: 1 },
     } as const;
 
-    type Pet = FromSchema<typeof petSchema>;
+    type Pet = FromSchema<typeof petSchema, { parseIfThenElseKeywords: true }>;
     let petInstance: Pet;
 
     it("rejects invalid dog instances", () => {
@@ -198,7 +197,7 @@ describe("If/Then/Else schemas", () => {
       then: { items: [{ const: "dog" }], additionalItems: false },
     } as const;
 
-    type Pet = FromSchema<typeof petSchema>;
+    type Pet = FromSchema<typeof petSchema, { parseIfThenElseKeywords: true }>;
     let petInstance: Pet;
 
     it("rejects invalid dog instances", () => {

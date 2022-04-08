@@ -1,8 +1,6 @@
-import Ajv from "ajv";
-
 import { FromSchema } from "index";
 
-var ajv = new Ajv();
+import { ajv } from "./ajv";
 
 describe("AllOf schemas", () => {
   describe("Boolean and True", () => {
@@ -190,10 +188,13 @@ describe("AllOf schemas", () => {
       it("accepts objects matching parent, #1 and #2", () => {
         objectInstance = { num: 42, bool: true, other: false };
         expect(ajv.validate(objectSchema, objectInstance)).toBe(true);
+
+        objectInstance = { num: 42, str: undefined };
+        expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
       });
 
       it("rejects objects not matching #1", () => {
-        // Impossible to raise error at the moment...
+        // @ts-expect-error
         objectInstance = { num: 42, str: "str" };
         expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
 
