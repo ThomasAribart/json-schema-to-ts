@@ -1,21 +1,20 @@
 import { M } from "ts-algebra";
-import { A, O } from "ts-toolbelt";
+import { O } from "ts-toolbelt";
 
-import {
+import type {
   JSONSchema7 as $JSONSchema7,
   FromSchemaOptions,
   FromSchemaDefaultOptions,
 } from "./definitions";
-import { ParseSchema } from "./parse-schema";
-
-export { FromSchemaOptions, FromSchemaDefaultOptions } from "./definitions";
+import type { ParseSchema } from "./parse-schema";
+import type { Readonly, Writable } from "./utils";
 
 /**
  * Unwided JSON schema (e.g. defined with the `as const` statement)
  */
 export type JSONSchema7 =
   | $JSONSchema7
-  | O.Readonly<Extract<$JSONSchema7, O.Object>, A.Key, "deep">;
+  | Readonly<Extract<$JSONSchema7, O.Object>>;
 
 /**
  * Given a JSON schema defined with the `as const` statement, infers the type of valid instances
@@ -27,7 +26,7 @@ export type FromSchema<
   O extends FromSchemaOptions = FromSchemaDefaultOptions
 > = M.$Resolve<
   ParseSchema<
-    S extends O.Object ? O.Writable<S, A.Key, "deep"> : S,
+    S extends O.Object ? Writable<S> : S,
     {
       parseNotKeyword: O["parseNotKeyword"] extends boolean
         ? O["parseNotKeyword"]

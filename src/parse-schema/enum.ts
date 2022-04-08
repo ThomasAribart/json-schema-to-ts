@@ -1,4 +1,5 @@
 import { M } from "ts-algebra";
+import { A } from "ts-toolbelt";
 
 import { JSONSchema7 } from "../definitions";
 import { HasKeyIn } from "../utils";
@@ -15,4 +16,4 @@ export type ParseEnumSchema<
   ? M.$Intersect<ParseEnum<S>, ParseSchema<Omit<S, "enum">, O>>
   : ParseEnum<S>;
 
-type ParseEnum<S extends EnumSchema> = M.Enum<S["enum"][number]>;
+type ParseEnum<S extends EnumSchema> = M.Enum<A.Compute<S["enum"][number]>>;
