@@ -1,8 +1,8 @@
 import { M } from 'https://cdn.skypack.dev/ts-algebra@^1.0.1?dts';
-import { O, L, A } from 'https://cdn.skypack.dev/ts-toolbelt@^9.6.0?dts';
 import { JSONSchema7 as JSONSchema7$2, JSONSchema7TypeName } from 'https://cdn.skypack.dev/@types/json-schema@^7.0.9?dts';
+import { O, L, A } from 'https://cdn.skypack.dev/ts-toolbelt@^9.6.0?dts';
 
-declare type JSONSchema7$1 = boolean | (Omit<JSONSchema7$2, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions"> & {
+declare type JSONSchema7$1 = boolean | (Omit<JSONSchema7$2, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions" | "examples"> & {
     const?: unknown;
     enum?: unknown;
     items?: JSONSchema7$1 | JSONSchema7$1[];
@@ -25,6 +25,7 @@ declare type JSONSchema7$1 = boolean | (Omit<JSONSchema7$2, "const" | "enum" | "
     definitions?: {
         [key: string]: JSONSchema7$1;
     };
+    examples?: unknown[];
 });
 
 declare type FromSchemaOptions = {
@@ -235,7 +236,7 @@ declare type ParseSchemaOptions = {
 };
 declare type ParseSchema<S extends JSONSchema7$1, O extends ParseSchemaOptions> = JSONSchema7$1 extends S ? M.Any : S extends true | string ? M.Any : S extends false ? M.Never : And<DoesExtend<O["parseIfThenElseKeywords"], true>, DoesExtend<S, IfThenElseSchema>> extends true ? S extends IfThenElseSchema ? ParseIfThenElseSchema<S, O> : never : And<DoesExtend<O["parseNotKeyword"], true>, DoesExtend<S, NotSchema>> extends true ? S extends NotSchema ? ParseNotSchema<S, O> : never : S extends AllOfSchema ? ParseAllOfSchema<S, O> : S extends OneOfSchema ? ParseOneOfSchema<S, O> : S extends AnyOfSchema ? ParseAnyOfSchema<S, O> : S extends EnumSchema ? ParseEnumSchema<S, O> : S extends ConstSchema ? ParseConstSchema<S, O> : S extends MultipleTypesSchema ? ParseMultipleTypesSchema<S, O> : S extends SingleTypeSchema ? ParseSingleTypeSchema<S, O> : M.Any;
 
-declare type JSONSchema7 = JSONSchema7$1 | Readonly<Extract<JSONSchema7$1, O.Object>>;
+declare type JSONSchema7 = JSONSchema7$1 | Readonly<JSONSchema7$1>;
 declare type JSONSchema = JSONSchema7;
 declare type FromSchema<S extends JSONSchema7, O extends FromSchemaOptions = FromSchemaDefaultOptions> = M.$Resolve<ParseSchema<S extends O.Object ? Writable<S> : S, {
     parseNotKeyword: O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : FromSchemaDefaultOptions["parseNotKeyword"];
