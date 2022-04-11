@@ -2,11 +2,15 @@
   "name": "json-schema-to-ts",
   "version": "2.0.1",
   "description": "Infer typescript types from your JSON schemas!",
-  "main": "lib/index.d.ts",
+  "main": "lib/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "release": "bash scripts/release.bash",
-    "test": "tsc --noEmit && jest --verbose",
-    "type": "tsc --noEmit"
+    "test": "yarn test:type && yarn test:unit",
+    "test:type": "tsc --noEmit",
+    "test:unit": "jest --verbose",
+    "build": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
     "@types/json-schema": "^7.0.9",

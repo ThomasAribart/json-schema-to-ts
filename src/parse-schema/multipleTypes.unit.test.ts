@@ -1,6 +1,6 @@
 import { FromSchema } from "index";
 
-import { ajv } from "./ajv";
+import { ajv } from "./ajv.util.test";
 
 describe("Mixed types schemas", () => {
   describe("Primitives", () => {

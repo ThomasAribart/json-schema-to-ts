@@ -1,58 +1,60 @@
 import { FromSchema } from "index";
 
-import { ajv } from "./ajv";
+import { ajv } from "./ajv.util.test";
 
-describe("AllOf schemas", () => {
-  describe("Boolean and True", () => {
-    const trueSchema = {
-      allOf: [{ type: "boolean" }, { const: true }],
+describe("AnyOf schemas", () => {
+  describe("Boolean or String", () => {
+    const anyOfSchema = {
+      anyOf: [{ type: "boolean" }, { type: "string" }],
     } as const;
 
-    type True = FromSchema<typeof trueSchema>;
-    let trueInstance: True;
+    type StringBoolOrNumber = FromSchema<typeof anyOfSchema>;
+    let boolOrStringInstance: StringBoolOrNumber;
 
-    it("accepts true", () => {
-      trueInstance = true;
-      expect(ajv.validate(trueSchema, trueInstance)).toBe(true);
+    it("accepts boolean or string value", () => {
+      boolOrStringInstance = "string";
+      expect(ajv.validate(anyOfSchema, boolOrStringInstance)).toBe(true);
+
+      boolOrStringInstance = true;
+      expect(ajv.validate(anyOfSchema, boolOrStringInstance)).toBe(true);
     });
 
     it("rejects other values", () => {
       // @ts-expect-error
-      trueInstance = false;
-      expect(ajv.validate(trueSchema, trueInstance)).toBe(false);
-
-      // @ts-expect-error
-      trueInstance = "string";
-      expect(ajv.validate(trueSchema, trueInstance)).toBe(false);
+      boolOrStringInstance = 42;
+      expect(ajv.validate(anyOfSchema, boolOrStringInstance)).toBe(false);
     });
   });
 
-  describe("Along OneOf", () => {
-    const appleSchema = {
-      oneOf: [{ const: "apples" }, { const: 42 }],
-      allOf: [{ type: "string" }, { enum: ["apples", "tomatoes"] }],
+  describe("Along Enum", () => {
+    const enumSchema = {
+      enum: ["apples", 42],
+      anyOf: [{ type: "boolean" }, { type: "string" }, { type: "number" }],
     } as const;
 
-    type Apple = FromSchema<typeof appleSchema>;
-    let appleInstance: Apple;
+    type Enum = FromSchema<typeof enumSchema>;
+    let enumInstance: Enum;
 
-    it("accepts valid string", () => {
-      appleInstance = "apples";
-      expect(ajv.validate(appleSchema, appleInstance)).toBe(true);
+    it("accepts enum values", () => {
+      enumInstance = "apples";
+      expect(ajv.validate(enumSchema, enumInstance)).toBe(true);
+
+      enumInstance = 42;
+      expect(ajv.validate(enumSchema, enumInstance)).toBe(true);
     });
 
     it("rejects other values", () => {
       // @ts-expect-error
-      appleInstance = "tomatoes";
-      expect(ajv.validate(appleSchema, appleInstance)).toBe(false);
+      enumInstance = "tomatoes";
+      expect(ajv.validate(enumSchema, enumInstance)).toBe(false);
 
       // @ts-expect-error
-      appleInstance = 43;
-      expect(ajv.validate(appleSchema, appleInstance)).toBe(false);
+      enumInstance = 43;
+      expect(ajv.validate(enumSchema, enumInstance)).toBe(false);
 
       // @ts-expect-error
-      appleInstance = true;
-      expect(ajv.validate(appleSchema, appleInstance)).toBe(false);
+      enumInstance = true;
+      expect(ajv.validate(enumSchema, enumInstance)).toBe(false);
     });
   });
 
@@ -62,7 +64,7 @@ describe("AllOf schemas", () => {
         type: "object",
         properties: { bool: { type: "boolean" } },
         required: ["bool"],
-        allOf: [
+        anyOf: [
           { properties: { num: { type: "number" } }, required: ["num"] },
           { properties: { str: { type: "string" } } },
         ],
@@ -71,42 +73,33 @@ describe("AllOf schemas", () => {
       type FactoredObj = FromSchema<typeof objectSchema>;
       let objectInstance: FactoredObj;
 
-      it("accepts objects matching parent, #1 and #2", () => {
+      it("accepts objects matching #1", () => {
         objectInstance = { bool: true, num: 42 };
         expect(ajv.validate(objectSchema, objectInstance)).toBe(true);
+      });
 
-        objectInstance = {
-          bool: true,
-          num: 42,
-          str: "string",
-          other: ["any", "value"],
-        };
+      it("accepts objects matching #2", () => {
+        objectInstance = { bool: true };
+        expect(ajv.validate(objectSchema, objectInstance)).toBe(true);
+
+        objectInstance = { bool: true, str: "string" };
+        expect(ajv.validate(objectSchema, objectInstance)).toBe(true);
+
+        objectInstance = { bool: true, num: "not a number" };
         expect(ajv.validate(objectSchema, objectInstance)).toBe(true);
       });
 
-      it("rejects objects not matching parent", () => {
-        // @ts-expect-error
-        objectInstance = { num: 42, str: "string" };
+      it("rejects objects matching neither", () => {
+        // @ts-expect-error: Bool should be boolean
+        objectInstance = { bool: "true" };
         expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
 
-        // @ts-expect-error
-        objectInstance = { bool: "not a boolean", num: 42, str: "string" };
-        expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
-      });
-
-      it("rejects objects not matching #1", () => {
-        // @ts-expect-error
-        objectInstance = { bool: true, str: "string" };
+        // @ts-expect-error: Bool is required
+        objectInstance = { num: 42 };
         expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
 
-        // @ts-expect-error
-        objectInstance = { bool: true, str: "str", num: "not a number" };
-        expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
-      });
-
-      it("rejects objects not matching #2", () => {
-        // @ts-expect-error
-        objectInstance = { bool: true, num: 42, str: ["not", "a", "str"] };
+        // @ts-expect-error: Bool is required
+        objectInstance = { str: "string" };
         expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
       });
     });
@@ -116,7 +109,7 @@ describe("AllOf schemas", () => {
         type: "object",
         properties: { str: { type: "string" } },
         required: ["str"],
-        allOf: [{ additionalProperties: { type: "boolean" } }],
+        anyOf: [{ additionalProperties: { type: "boolean" } }],
       } as const;
 
       type FactoredObj = FromSchema<typeof objectSchema>;
@@ -139,7 +132,7 @@ describe("AllOf schemas", () => {
       const objectSchema = {
         type: "object",
         properties: { bool: { type: "boolean" } },
-        allOf: [
+        anyOf: [
           {
             properties: { num: { type: "number" } },
             required: ["num"],
@@ -152,19 +145,17 @@ describe("AllOf schemas", () => {
       type FactoredObj = FromSchema<typeof objectSchema>;
       let objectInstance: FactoredObj;
 
-      it("accepts objects matching parent, #1 and #2", () => {
+      it("accepts objects matching #1", () => {
         objectInstance = { num: 42 };
         expect(ajv.validate(objectSchema, objectInstance)).toBe(true);
       });
 
-      it("rejects objects not matching closed #1", () => {
-        // @ts-expect-error
+      it("accepts objects matching #2", () => {
         objectInstance = {};
-        expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
+        expect(ajv.validate(objectSchema, objectInstance)).toBe(true);
 
-        // @ts-expect-error
         objectInstance = { bool: true, str: "string" };
-        expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
+        expect(ajv.validate(objectSchema, objectInstance)).toBe(true);
       });
     });
 
@@ -172,72 +163,42 @@ describe("AllOf schemas", () => {
       const objectSchema = {
         type: "object",
         properties: { bool: { type: "boolean" } },
-        allOf: [
+        anyOf: [
           {
             properties: { num: { type: "number" } },
             required: ["num"],
-            additionalProperties: { type: "boolean" },
+            additionalProperties: false,
           },
-          { properties: { str: { type: "string" } } },
-        ],
-      } as const;
-
-      type FactoredObj = FromSchema<typeof objectSchema>;
-      let objectInstance: FactoredObj;
-
-      it("accepts objects matching parent, #1 and #2", () => {
-        objectInstance = { num: 42, bool: true, other: false };
-        expect(ajv.validate(objectSchema, objectInstance)).toBe(true);
-
-        objectInstance = { num: 42, str: undefined };
-        expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
-      });
-
-      it("rejects objects not matching #1", () => {
-        // @ts-expect-error
-        objectInstance = { num: 42, str: "str" };
-        expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
-
-        // @ts-expect-error
-        objectInstance = { bool: true, str: "string" };
-        expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
-      });
-    });
-
-    describe("Closed (3) to open object", () => {
-      const objectSchema = {
-        type: "object",
-        allOf: [
           {
             properties: { str: { type: "string" } },
-            required: ["str"],
-            additionalProperties: { type: "boolean" },
+            additionalProperties: false,
           },
-          { additionalProperties: { type: "string" } },
         ],
       } as const;
 
       type FactoredObj = FromSchema<typeof objectSchema>;
       let objectInstance: FactoredObj;
 
-      it("accepts objects matching #1 and #2", () => {
+      it("accepts objects matching #1", () => {
+        objectInstance = { num: 42 };
+        expect(ajv.validate(objectSchema, objectInstance)).toBe(true);
+      });
+
+      it("accepts objects matching #2", () => {
+        objectInstance = {};
+        expect(ajv.validate(objectSchema, objectInstance)).toBe(true);
+
         objectInstance = { str: "string" };
         expect(ajv.validate(objectSchema, objectInstance)).toBe(true);
       });
 
-      it("rejects objects not matching #1", () => {
+      it("rejects objects matching neither", () => {
         // @ts-expect-error
-        objectInstance = {};
+        objectInstance = { num: 42, bool: true };
         expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
 
         // @ts-expect-error
-        objectInstance = { str: "string", other: "not boolean" };
-        expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
-      });
-
-      it("rejects objects not matching #2", () => {
-        // @ts-expect-error
-        objectInstance = { other: true };
+        objectInstance = { str: "string", bool: true };
         expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
       });
     });
@@ -246,7 +207,7 @@ describe("AllOf schemas", () => {
       const objectSchema = {
         type: "object",
         properties: { bool: { type: "boolean" } },
-        allOf: [
+        anyOf: [
           {
             properties: { num: { type: "number" } },
             required: ["num"],
@@ -276,7 +237,7 @@ describe("AllOf schemas", () => {
       const objectSchema = {
         type: "object",
         properties: { bool: { type: "boolean" } },
-        allOf: [
+        anyOf: [
           {
             properties: { num: { type: "number" }, bool: { type: "string" } },
             required: ["num"],
@@ -302,47 +263,11 @@ describe("AllOf schemas", () => {
       });
     });
 
-    describe("Closed to open object (impossible 3)", () => {
-      const objectSchema = {
-        type: "object",
-        properties: { bool: { type: "boolean" } },
-        allOf: [
-          {
-            properties: { num: { type: "number" } },
-            required: ["num"],
-            additionalProperties: false,
-          },
-          {
-            properties: { str: { type: "string" } },
-            additionalProperties: false,
-          },
-        ],
-      } as const;
-
-      type FactoredObj = FromSchema<typeof objectSchema>;
-      let objectInstance: FactoredObj;
-
-      it("rejects objects not matching #1", () => {
-        // @ts-expect-error
-        objectInstance = { str: "string" };
-        expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
-      });
-
-      it("rejects objects not matching #2", () => {
-        // @ts-expect-error
-        objectInstance = { num: 42 };
-        expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
-      });
-    });
-
     describe("Open (1) to closed object", () => {
       const objectSchema = {
         type: "object",
         properties: { bool: { type: "boolean" } },
-        allOf: [
-          { properties: { str: { type: "string" } } },
-          { properties: { num: { type: "number" } } },
-        ],
+        anyOf: [{ properties: { str: { type: "string" } } }],
         required: ["bool"],
         additionalProperties: false,
       } as const;
@@ -366,11 +291,11 @@ describe("AllOf schemas", () => {
       });
     });
 
-    describe("Open to closed object (impossible 1)", () => {
+    describe("Open (2) to closed object", () => {
       const objectSchema = {
         type: "object",
         properties: { bool: { type: "boolean" } },
-        allOf: [
+        anyOf: [
           { properties: { str: { type: "string" } }, required: ["str"] },
           { properties: { num: { type: "number" } } },
         ],
@@ -380,42 +305,40 @@ describe("AllOf schemas", () => {
       type FactoredObj = FromSchema<typeof objectSchema>;
       let objectInstance: FactoredObj;
 
-      it("rejects objects matching parent as #1 requires 'str' property", () => {
-        // @ts-expect-error
+      it("accepts objects matching #2", () => {
         objectInstance = {};
-        expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
+        expect(ajv.validate(objectSchema, objectInstance)).toBe(true);
 
-        // @ts-expect-error
         objectInstance = { bool: true };
-        expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
+        expect(ajv.validate(objectSchema, objectInstance)).toBe(true);
       });
 
       it("rejects objects matching #1 as parent is closed", () => {
-        // @ts-expect-error
+        // @ts-expect-error: "str" is not allowed as additionalProperty
         objectInstance = { str: "string" };
         expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
 
-        // @ts-expect-error
+        // @ts-expect-error: event with bool present
         objectInstance = { bool: true, str: "string" };
         expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
       });
 
-      it("rejects objects matching #2 as parent is closed", () => {
-        // @ts-expect-error
+      it("rejects objects matching neither", () => {
+        // @ts-expect-error: "num" is not allowed as additionalProperty
         objectInstance = { num: 42 };
         expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
 
-        // @ts-expect-error
+        // @ts-expect-error: event with bool present
         objectInstance = { bool: true, num: 42 };
         expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
       });
     });
 
-    describe("Open to closed object (impossible 2)", () => {
+    describe("Open to closed object (impossible)", () => {
       const objectSchema = {
         type: "object",
         properties: { bool: { type: "boolean" } },
-        allOf: [{ properties: { str: { type: "string" } }, required: ["str"] }],
+        anyOf: [{ properties: { str: { type: "string" } }, required: ["str"] }],
         required: ["bool"],
         additionalProperties: false,
       } as const;
@@ -423,7 +346,7 @@ describe("AllOf schemas", () => {
       type FactoredObj = FromSchema<typeof objectSchema>;
       let objectInstance: FactoredObj;
 
-      it('rejects object having "str" child schema as parent is closed', () => {
+      it('rejects object having "str" property as parent is closed', () => {
         // @ts-expect-error
         objectInstance = { bool: true, str: "str" };
         expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
@@ -442,11 +365,11 @@ describe("AllOf schemas", () => {
       });
     });
 
-    describe("Open to closed object (impossible 3)", () => {
+    describe("Closed to closed object (impossible)", () => {
       const objectSchema = {
         type: "object",
         properties: { bool: { type: "boolean" } },
-        allOf: [
+        anyOf: [
           {
             properties: { str: { type: "string" } },
             additionalProperties: false,
@@ -484,32 +407,42 @@ describe("AllOf schemas", () => {
       const tupleSchema = {
         type: "array",
         items: [{ type: "string" }],
-        allOf: [
-          { items: [{ const: "apple" }, { type: "number" }] },
-          { items: [{ enum: ["apple", "banana"] }, { type: "boolean" }] },
+        anyOf: [
+          { items: [{ const: "num" }, { type: "number" }] },
+          { items: [{ const: "bool" }, { type: "boolean" }] },
         ],
       } as const;
 
       type Tuple = FromSchema<typeof tupleSchema>;
       let tupleInstance: Tuple;
 
-      it("accepts valid tuples", () => {
-        tupleInstance = [];
+      it("accepts tuples matching #1", () => {
+        tupleInstance = ["num"];
         expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
 
-        tupleInstance = ["apple"];
+        tupleInstance = ["num", 42];
         expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
       });
 
-      it("rejects tuples matching only #1", () => {
-        // @ts-expect-error
-        tupleInstance = ["apple", 42];
+      it("accepts tuples matching #2", () => {
+        tupleInstance = ["bool"];
+        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
+
+        tupleInstance = ["bool", true];
+        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
+      });
+
+      it("rejects tuples matching neither", () => {
+        // @ts-expect-error: First item should be "num"/"bool"
+        tupleInstance = ["not num/bool"];
         expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
-      });
 
-      it("rejects tuples matching only #2", () => {
-        // @ts-expect-error
-        tupleInstance = ["apple", true];
+        // @ts-expect-error: Second item should be number
+        tupleInstance = ["num", true];
+        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
+
+        // @ts-expect-error: Second item should be bool
+        tupleInstance = ["bool", 42];
         expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
       });
     });
@@ -519,32 +452,31 @@ describe("AllOf schemas", () => {
         type: "array",
         items: [{ type: "string" }],
         additionalItems: { type: "boolean" },
-        allOf: [
-          { items: [{ const: "apple" }] },
-          { items: [{ enum: ["apple", "banana"] }, { type: "boolean" }] },
+        anyOf: [
+          { items: [{ const: "num" }, { type: "number" }] },
+          { items: [{ const: "bool" }, { type: "boolean" }] },
         ],
       } as const;
 
       type Tuple = FromSchema<typeof tupleSchema>;
       let tupleInstance: Tuple;
 
-      it("accepts valid tuples", () => {
-        tupleInstance = [];
-        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
-
-        tupleInstance = ["apple"];
-        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
-
-        tupleInstance = ["apple", true];
-        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
-
-        tupleInstance = ["apple", true, false];
+      it("accepts tuples matching #1", () => {
+        tupleInstance = ["num"];
         expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
       });
 
-      it("rejects invalid tuples", () => {
-        // @ts-expect-error
-        tupleInstance = ["apple", 42];
+      it("accepts tuples matching #2", () => {
+        tupleInstance = ["bool"];
+        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
+
+        tupleInstance = ["bool", true];
+        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
+      });
+
+      it("rejects tuples not matching parent", () => {
+        // @ts-expect-error: Second item cannot exist (should be bool AND number)
+        tupleInstance = ["num", 42];
         expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
       });
     });
@@ -554,8 +486,11 @@ describe("AllOf schemas", () => {
         type: "array",
         items: [{ type: "string" }],
         additionalItems: { type: "boolean" },
-        allOf: [
-          { items: [{ type: "string" }], additionalItems: { type: "number" } },
+        anyOf: [
+          {
+            items: [{ type: "string" }],
+            additionalItems: { type: "number" },
+          },
         ],
       } as const;
 
@@ -582,27 +517,35 @@ describe("AllOf schemas", () => {
       const tupleSchema = {
         type: "array",
         items: [{ type: "string" }],
-        allOf: [
+        anyOf: [
           { items: [{ const: "stop" }], additionalItems: false },
-          { items: [{ enum: ["stop", "continue"] }] },
+          { items: [{ const: "continue" }] },
         ],
       } as const;
 
       type Tuple = FromSchema<typeof tupleSchema>;
       let tupleInstance: Tuple;
 
-      it("accepts tuples matching #1 AND #2", () => {
+      it("accepts tuples matching #1", () => {
         tupleInstance = ["stop"];
         expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
       });
 
-      it("rejects tuples matching only #2", () => {
-        // @ts-expect-error
+      it("accepts tuples matching #2", () => {
         tupleInstance = ["continue"];
+        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
+
+        tupleInstance = ["continue", { any: "value" }];
+        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
+      });
+
+      it("rejects tuples matching neither", () => {
+        // @ts-expect-error: First item should be "stop"/"continue"
+        tupleInstance = ["invalid value"];
         expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
 
-        // @ts-expect-error
-        tupleInstance = ["continue", { any: "value" }];
+        // @ts-expect-error: Second item is denied
+        tupleInstance = ["stop", { any: "value" }];
         expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
       });
     });
@@ -611,14 +554,15 @@ describe("AllOf schemas", () => {
       const tupleSchema = {
         type: "array",
         items: [{ type: "string" }],
-        allOf: [
+        anyOf: [
           {
-            items: [{ const: "continue" }, { type: "number" }],
+            items: [{ const: "num" }, { type: "number" }],
             additionalItems: false,
             minItems: 2,
           },
           {
-            items: [{ anyOf: [{ const: "stop" }, { const: "continue" }] }],
+            items: [{ const: "bool" }, { type: "boolean" }],
+            additionalItems: false,
             minItems: 1,
           },
         ],
@@ -627,18 +571,26 @@ describe("AllOf schemas", () => {
       type FactoredTuple = FromSchema<typeof tupleSchema>;
       let tupleInstance: FactoredTuple;
 
-      it("accepts tuples matching #1 AND #2", () => {
-        tupleInstance = ["continue", 42];
+      it("accepts tuples matching #1", () => {
+        tupleInstance = ["num", 42];
         expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
       });
 
-      it("rejects tuples not matching #2", () => {
-        // @ts-expect-error
-        tupleInstance = ["continue"];
+      it("accepts tuples matching #2", () => {
+        tupleInstance = ["bool"];
+        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
+
+        tupleInstance = ["bool", true];
+        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
+      });
+
+      it("rejects tuples matching neither", () => {
+        // @ts-expect-error: Third item is denied
+        tupleInstance = ["num", 42, "additional item"];
         expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
 
-        // @ts-expect-error
-        tupleInstance = ["continue", 42, false];
+        // @ts-expect-error: Third item is denied
+        tupleInstance = ["bool", true, "additional item"];
         expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
       });
     });
@@ -648,7 +600,7 @@ describe("AllOf schemas", () => {
         type: "array",
         items: [{ type: "number" }, { type: "number" }],
         minItems: 2,
-        allOf: [{ items: [{ type: "number" }], additionalItems: false }],
+        anyOf: [{ items: [{ type: "number" }], additionalItems: false }],
       } as const;
 
       type FactoredTuple = FromSchema<typeof tupleSchema>;
@@ -672,10 +624,10 @@ describe("AllOf schemas", () => {
         type: "array",
         items: [{ type: "string" }, { type: "boolean" }],
         minItems: 2,
-        allOf: [
+        anyOf: [
           {
-            items: [{ type: "string" }],
-            additionalItems: { type: "number" },
+            items: [{ type: "string" }, { type: "number" }],
+            additionalItems: false,
           },
         ],
       } as const;
@@ -702,9 +654,9 @@ describe("AllOf schemas", () => {
         items: [{ type: "string" }],
         minItems: 1,
         additionalItems: false,
-        allOf: [
+        anyOf: [
           { items: [{ const: "apple" }] },
-          { items: [{ enum: ["apple", "tomato", "banana"] }] },
+          { items: [{ enum: ["tomato", "banana"] }] },
         ],
       } as const;
 
@@ -714,17 +666,15 @@ describe("AllOf schemas", () => {
       it("accepts valid tuple", () => {
         tupleInstance = ["apple"];
         expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
+
+        tupleInstance = ["tomato"];
+        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
+
+        tupleInstance = ["banana"];
+        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
       });
 
       it("rejects invalid tuple", () => {
-        // @ts-expect-error: Doesn't match #2
-        tupleInstance = ["tomato"];
-        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
-
-        // @ts-expect-error: Doesn't match #2
-        tupleInstance = ["banana"];
-        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
-
         // @ts-expect-error: One item is required by parent
         tupleInstance = [];
         expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
@@ -738,10 +688,43 @@ describe("AllOf schemas", () => {
     describe("Open (2) to closed tuple", () => {
       const tupleSchema = {
         type: "array",
+        items: [{ type: "string" }],
+        additionalItems: false,
+        anyOf: [
+          { items: [{ const: "several" }, { const: "items" }], minItems: 2 },
+          { items: [{ const: "only one" }] },
+        ],
+      } as const;
+
+      type FactoredTuple = FromSchema<typeof tupleSchema>;
+      let tupleInstance: FactoredTuple;
+
+      it("accepts tuples matching #2", () => {
+        tupleInstance = [];
+        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
+
+        tupleInstance = ["only one"];
+        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
+      });
+
+      it("rejects tuples matching #1 as parent is closed", () => {
+        // @ts-expect-error: Second item is not allowed as additionalProperty
+        tupleInstance = ["several", "items"];
+        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
+
+        // @ts-expect-error: second item is missing
+        tupleInstance = ["several"];
+        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
+      });
+    });
+
+    describe("Open (3) to closed tuple", () => {
+      const tupleSchema = {
+        type: "array",
         items: [{ type: "string" }, { type: "boolean" }],
         minItems: 2,
         additionalItems: false,
-        allOf: [{ items: [{ const: "can have additionalItems" }] }],
+        anyOf: [{ items: [{ const: "can have additionalItems" }] }],
       } as const;
 
       type FactoredTuple = FromSchema<typeof tupleSchema>;
@@ -769,7 +752,7 @@ describe("AllOf schemas", () => {
         items: [{ type: "string" }, { type: "boolean" }],
         minItems: 2,
         additionalItems: false,
-        allOf: [
+        anyOf: [
           { items: [{ type: "string" }], additionalItems: { type: "number" } },
         ],
       } as const;
@@ -800,7 +783,7 @@ describe("AllOf schemas", () => {
       const tupleSchema = {
         type: "array",
         items: [{ type: "string" }],
-        allOf: [{ additionalItems: { type: "boolean" } }],
+        anyOf: [{ additionalItems: { type: "boolean" } }],
       } as const;
 
       type FactoredTuple = FromSchema<typeof tupleSchema>;
@@ -816,68 +799,45 @@ describe("AllOf schemas", () => {
     });
 
     describe("Min/max items", () => {
-      const tupleSchema = {
+      const factoredTupleSchema = {
         type: "array",
         items: [{ type: "string" }, { type: "number" }, { type: "boolean" }],
-        allOf: [{ minItems: 1 }, { maxItems: 2 }],
+        anyOf: [{ minItems: 3 }, { maxItems: 1 }],
       } as const;
 
-      type FactoredTuple = FromSchema<typeof tupleSchema>;
-      let tupleInstance: FactoredTuple;
+      type FactoredTuple = FromSchema<typeof factoredTupleSchema>;
+      let factoredTupleInstance: FactoredTuple;
 
-      it("accepts tuples with 1 or 2 items", () => {
-        tupleInstance = ["0"];
-        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
+      it("accepts tuples with <= 1 items", () => {
+        factoredTupleInstance = [];
+        expect(ajv.validate(factoredTupleSchema, factoredTupleInstance)).toBe(
+          true
+        );
 
-        tupleInstance = ["0", 1];
-        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(true);
+        factoredTupleInstance = ["0"];
+        expect(ajv.validate(factoredTupleSchema, factoredTupleInstance)).toBe(
+          true
+        );
       });
 
-      it("rejects tuples of other lengths", () => {
-        // @ts-expect-error
-        tupleInstance = [];
-        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
+      it("accepts tuples with >= 3 items", () => {
+        factoredTupleInstance = ["0", 1, true];
+        expect(ajv.validate(factoredTupleSchema, factoredTupleInstance)).toBe(
+          true
+        );
 
-        // @ts-expect-error
-        tupleInstance = ["0", 1, true];
-        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
-
-        // @ts-expect-error
-        tupleInstance = ["0", 1, true, { any: "value" }];
-        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
+        factoredTupleInstance = ["0", 1, true, "any"];
+        expect(ajv.validate(factoredTupleSchema, factoredTupleInstance)).toBe(
+          true
+        );
       });
-    });
 
-    describe("Min/max items (impossible)", () => {
-      const tupleSchema = {
-        type: "array",
-        items: [{ type: "string" }, { type: "number" }, { type: "boolean" }],
-        allOf: [{ minItems: 3 }, { maxItems: 1 }],
-      } as const;
-
-      type FactoredTuple = FromSchema<typeof tupleSchema>;
-      let tupleInstance: FactoredTuple;
-
-      it("rejects tuples of any length", () => {
-        // @ts-expect-error
-        tupleInstance = [];
-        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
-
-        // @ts-expect-error
-        tupleInstance = ["0"];
-        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
-
-        // @ts-expect-error
-        tupleInstance = ["0", 1];
-        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
-
-        // @ts-expect-error
-        tupleInstance = ["0", 1, true];
-        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
-
-        // @ts-expect-error
-        tupleInstance = ["0", 1, true, { any: "value" }];
-        expect(ajv.validate(tupleSchema, tupleInstance)).toBe(false);
+      it("rejects tuples with 2 items", () => {
+        // @ts-expect-error: Tuples should not have 2 items
+        factoredTupleInstance = ["0", 1];
+        expect(ajv.validate(factoredTupleSchema, factoredTupleInstance)).toBe(
+          false
+        );
       });
     });
   });
