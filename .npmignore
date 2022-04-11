@@ -3,10 +3,15 @@
 assets
 node_modules
 src
-tests
 scripts
 builds
 .gitignore
-babel.config.js
 tsconfig.json
+tsconfig.build.json
+rollup.config.js
+babel.config.js
+jest.config.js
 yarn.lock
+README.md
+LICENSE
+documentation
