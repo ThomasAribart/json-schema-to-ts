@@ -2,12 +2,20 @@ import { A } from "ts-toolbelt";
 
 import { FromSchema } from "index";
 
+enum DogBreed {
+  poodle = "poodle",
+}
+
+enum CatBreed {
+  persan = "persan",
+}
+
 const petSchema = {
   type: "object",
   properties: {
     animal: { enum: ["cat", "dog"] },
-    dogBreed: { enum: ["poodle"] },
-    catBreed: { enum: ["persan"] },
+    dogBreed: { enum: Object.values(DogBreed) },
+    catBreed: { enum: Object.values(CatBreed) },
   },
   required: ["animal"],
   additionalProperties: false,
@@ -32,14 +40,14 @@ type ReceivedPet = FromSchema<
 >;
 type ExpectedPet =
   | {
-      catBreed?: "persan" | undefined;
       animal: "dog";
-      dogBreed: "poodle";
+      dogBreed: DogBreed;
+      catBreed?: CatBreed | undefined;
     }
   | {
-      dogBreed?: "poodle" | undefined;
-      animal: "cat" | "dog";
-      catBreed: "persan";
+      animal: "cat";
+      catBreed: CatBreed;
+      dogBreed?: DogBreed | undefined;
     };
 
 type AssertPet = A.Equals<ReceivedPet, ExpectedPet>;
