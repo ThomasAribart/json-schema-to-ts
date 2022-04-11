@@ -226,9 +226,9 @@ declare type IfThenElseSchema = JSONSchema7$1 & {
 };
 declare type ParseIfThenElseSchema<S extends IfThenElseSchema, O extends ParseSchemaOptions, R extends JSONSchema7$1 = Omit<S, "if" | "then" | "else">, I extends JSONSchema7$1 = MergeSubSchema<R, S["if"]>, T extends any = S extends {
     then: JSONSchema7$1;
-} ? M.$Intersect<ParseSchema<I, O>, ParseSchema<MergeSubSchema<R, S["then"]>, O>> : ParseSchema<I, O>, E = M.$Exclude<S extends {
+} ? M.$Intersect<ParseSchema<I, O>, ParseSchema<MergeSubSchema<R, S["then"]>, O>> : ParseSchema<I, O>, E = S extends {
     else: JSONSchema7$1;
-} ? ParseSchema<MergeSubSchema<R, S["else"]>, O> : ParseSchema<R, O>, ParseSchema<I, O>>> = HasKeyIn<S, "enum" | "const" | "type" | "anyOf" | "oneOf" | "allOf" | "not"> extends true ? M.$Intersect<M.$Union<T | E>, ParseSchema<R, O>> : M.$Union<T | E>;
+} ? M.$Intersect<M.$Exclude<ParseSchema<R, O>, ParseSchema<I, O>>, ParseSchema<MergeSubSchema<R, S["else"]>, O>> : M.$Exclude<ParseSchema<R, O>, ParseSchema<I, O>>> = HasKeyIn<S, "enum" | "const" | "type" | "anyOf" | "oneOf" | "allOf" | "not"> extends true ? M.$Intersect<M.$Union<T | E>, ParseSchema<R, O>> : M.$Union<T | E>;
 
 declare type ParseSchemaOptions = {
     parseNotKeyword: boolean;
