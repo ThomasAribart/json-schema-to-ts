@@ -39,8 +39,7 @@ describe("If/Then/Else schemas", () => {
       petInstance = { type: "dog" };
       expect(ajv.validate(petSchema, petInstance)).toBe(false);
 
-      // Unable to throw for now
-      // @ts-NOT-expect-error
+      // @ts-expect-error
       petInstance = { type: "dog", catRace: "persan" };
       expect(ajv.validate(petSchema, petInstance)).toBe(false);
 

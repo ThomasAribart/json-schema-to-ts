@@ -24,12 +24,12 @@ export type ParseIfThenElseSchema<
       >
     : ParseSchema<I, O>,
   // TOIMPROVE: Stating that E extends any causes infinite loop error
-  E = M.$Exclude<
-    S extends { else: JSONSchema7 }
-      ? ParseSchema<MergeSubSchema<R, S["else"]>, O>
-      : ParseSchema<R, O>,
-    ParseSchema<I, O>
-  >
+  E = S extends { else: JSONSchema7 }
+    ? M.$Intersect<
+        M.$Exclude<ParseSchema<R, O>, ParseSchema<I, O>>,
+        ParseSchema<MergeSubSchema<R, S["else"]>, O>
+      >
+    : M.$Exclude<ParseSchema<R, O>, ParseSchema<I, O>>
   // TOIMPROVE: Directly use ParseAllOfSchema, ParseOneOfSchema etc...
 > = HasKeyIn<
   S,

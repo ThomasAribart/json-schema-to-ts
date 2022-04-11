@@ -568,7 +568,6 @@ const petSchema = {
     catBreed: { enum: Object.values(CatBreed) },
   },
   required: ["animal"],
-  additionalProperties: false,
   if: {
     properties: {
       animal: { const: "dog" },
@@ -582,6 +581,7 @@ const petSchema = {
     required: ["catBreed"],
     not: { required: ["dogBreed"] },
   },
+  additionalProperties: false,
 } as const;
 
 type Pet = FromSchema<typeof petSchema, { parseIfThenElseKeywords: true }>;
@@ -590,7 +590,7 @@ type Pet = FromSchema<typeof petSchema, { parseIfThenElseKeywords: true }>;
 //  dogBreed: DogBreed;
 //  catBreed?: CatBreed | undefined
 // } | {
-//  animal: "cat" | "dog";
+//  animal: "cat";
 //  catBreed: CatBreed;
 //  dogBreed?: DogBreed | undefined
 // }
