@@ -14,9 +14,7 @@ export { FromSchemaOptions, FromSchemaDefaultOptions } from "./definitions";
 /**
  * Unwidened V7 JSON schema (e.g. defined with the `as const` statement)
  */
-export type JSONSchema7 =
-  | $JSONSchema7
-  | Readonly<Extract<$JSONSchema7, O.Object>>;
+export type JSONSchema7 = $JSONSchema7 | Readonly<$JSONSchema7>;
 
 /**
  * Unwidened JSON schema (e.g. defined with the `as const` statement)

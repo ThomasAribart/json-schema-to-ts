@@ -22,6 +22,7 @@ export type JSONSchema7 =
       | "oneOf"
       | "not"
       | "definitions"
+      | "examples"
     > & {
       const?: unknown;
       enum?: unknown;
@@ -43,4 +44,9 @@ export type JSONSchema7 =
       oneOf?: JSONSchema7[];
       not?: JSONSchema7;
       definitions?: { [key: string]: JSONSchema7 };
+      // Required to avoid applying Readonly to Array interface, which results in invalid type (Array is treated as Object):
+      // https://github.com/ThomasAribart/json-schema-to-ts/issues/48
+      // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/0e40d820c92ec6457854fa6726bbff2ffea4e7dd/types/json-schema/index.d.ts#L590
+      // https://github.com/microsoft/TypeScript/issues/3496#issuecomment-128553540
+      examples?: unknown[];
     });
