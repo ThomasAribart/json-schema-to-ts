@@ -124,6 +124,7 @@ type Address = FromSchema<typeof addressSchema>;
   - [Const](#const)
   - [Enums](#enums)
   - [Primitive types](#primitive-types)
+  - [Nullable](#nullable)
   - [Arrays](#arrays)
   - [Tuples](#tuples)
   - [Objects](#objects)
@@ -210,6 +211,18 @@ type PrimitiveTypes = FromSchema<typeof primitiveTypesSchema>;
 ```
 
 > For more complex types, refinment keywords like `required` or `additionalItems` will apply 🙌
+
+### Nullable
+
+```typescript
+const nullableSchema = {
+  type: "string",
+  nullable: true,
+} as const;
+
+type Nullable = FromSchema<typeof nullableSchema>;
+// => string | null
+```
 
 ### Arrays
 
