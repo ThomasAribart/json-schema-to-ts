@@ -12,6 +12,7 @@ import { OneOfSchema, ParseOneOfSchema } from "./oneOf";
 import { AllOfSchema, ParseAllOfSchema } from "./allOf";
 import { ParseNotSchema, NotSchema } from "./not";
 import { ParseIfThenElseSchema, IfThenElseSchema } from "./ifThenElse";
+import { NullableSchema, ParseNullableSchema } from "./nullable";
 
 export type ParseSchemaOptions = {
   parseNotKeyword: boolean;
@@ -27,6 +28,8 @@ export type ParseSchema<
   ? M.Any
   : S extends false
   ? M.Never
+  : S extends NullableSchema
+  ? ParseNullableSchema<S, O>
   : And<
       DoesExtend<O["parseIfThenElseKeywords"], true>,
       DoesExtend<S, IfThenElseSchema>

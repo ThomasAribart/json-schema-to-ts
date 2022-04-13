@@ -43,6 +43,7 @@ export type JSONSchema7 =
       anyOf?: JSONSchema7[];
       oneOf?: JSONSchema7[];
       not?: JSONSchema7;
+      nullable?: boolean;
       definitions?: { [key: string]: JSONSchema7 };
       // Required to avoid applying Readonly to Array interface, which results in invalid type (Array is treated as Object):
       // https://github.com/ThomasAribart/json-schema-to-ts/issues/48
