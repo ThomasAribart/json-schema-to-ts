@@ -22,6 +22,7 @@ declare type JSONSchema7$1 = boolean | (Omit<JSONSchema7$2, "const" | "enum" | "
     anyOf?: JSONSchema7$1[];
     oneOf?: JSONSchema7$1[];
     not?: JSONSchema7$1;
+    nullable?: boolean;
     definitions?: {
         [key: string]: JSONSchema7$1;
     };
@@ -230,11 +231,19 @@ declare type ParseIfThenElseSchema<S extends IfThenElseSchema, O extends ParseSc
     else: JSONSchema7$1;
 } ? M.$Intersect<M.$Exclude<ParseSchema<R, O>, ParseSchema<I, O>>, ParseSchema<MergeSubSchema<R, S["else"]>, O>> : M.$Exclude<ParseSchema<R, O>, ParseSchema<I, O>>> = HasKeyIn<S, "enum" | "const" | "type" | "anyOf" | "oneOf" | "allOf" | "not"> extends true ? M.$Intersect<M.$Union<T | E>, ParseSchema<R, O>> : M.$Union<T | E>;
 
+declare type NullableSchema = JSONSchema7$1 & {
+    nullable: boolean;
+};
+
+declare type ParseNullableSchema<S extends NullableSchema, O extends ParseSchemaOptions, R extends any = HasKeyIn<S, "enum" | "const" | "type" | "anyOf" | "oneOf" | "allOf" | "not" | "if"> extends true ? ParseSchema<Omit<S, "nullable">, O> : M.Any> = S extends {
+    nullable: true;
+} ? M.$Union<M.Primitive<null> | R> : R;
+
 declare type ParseSchemaOptions = {
     parseNotKeyword: boolean;
     parseIfThenElseKeywords: boolean;
 };
-declare type ParseSchema<S extends JSONSchema7$1, O extends ParseSchemaOptions> = JSONSchema7$1 extends S ? M.Any : S extends true | string ? M.Any : S extends false ? M.Never : And<DoesExtend<O["parseIfThenElseKeywords"], true>, DoesExtend<S, IfThenElseSchema>> extends true ? S extends IfThenElseSchema ? ParseIfThenElseSchema<S, O> : never : And<DoesExtend<O["parseNotKeyword"], true>, DoesExtend<S, NotSchema>> extends true ? S extends NotSchema ? ParseNotSchema<S, O> : never : S extends AllOfSchema ? ParseAllOfSchema<S, O> : S extends OneOfSchema ? ParseOneOfSchema<S, O> : S extends AnyOfSchema ? ParseAnyOfSchema<S, O> : S extends EnumSchema ? ParseEnumSchema<S, O> : S extends ConstSchema ? ParseConstSchema<S, O> : S extends MultipleTypesSchema ? ParseMultipleTypesSchema<S, O> : S extends SingleTypeSchema ? ParseSingleTypeSchema<S, O> : M.Any;
+declare type ParseSchema<S extends JSONSchema7$1, O extends ParseSchemaOptions> = JSONSchema7$1 extends S ? M.Any : S extends true | string ? M.Any : S extends false ? M.Never : S extends NullableSchema ? ParseNullableSchema<S, O> : And<DoesExtend<O["parseIfThenElseKeywords"], true>, DoesExtend<S, IfThenElseSchema>> extends true ? S extends IfThenElseSchema ? ParseIfThenElseSchema<S, O> : never : And<DoesExtend<O["parseNotKeyword"], true>, DoesExtend<S, NotSchema>> extends true ? S extends NotSchema ? ParseNotSchema<S, O> : never : S extends AllOfSchema ? ParseAllOfSchema<S, O> : S extends OneOfSchema ? ParseOneOfSchema<S, O> : S extends AnyOfSchema ? ParseAnyOfSchema<S, O> : S extends EnumSchema ? ParseEnumSchema<S, O> : S extends ConstSchema ? ParseConstSchema<S, O> : S extends MultipleTypesSchema ? ParseMultipleTypesSchema<S, O> : S extends SingleTypeSchema ? ParseSingleTypeSchema<S, O> : M.Any;
 
 declare type JSONSchema7 = JSONSchema7$1 | Readonly<JSONSchema7$1>;
 declare type JSONSchema = JSONSchema7;
