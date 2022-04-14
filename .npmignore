@@ -12,6 +12,5 @@ rollup.config.js
 babel.config.js
 jest.config.js
 yarn.lock
-README.md
 LICENSE
 documentation

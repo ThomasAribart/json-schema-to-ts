@@ -134,7 +134,7 @@ type Address = FromSchema<typeof addressSchema>;
   - [OneOf](#oneof)
   - [Not](#not)
   - [If/Then/Else](#ifthenelse)
-- [Definitions](#definitions)
+  - [Definitions](#definitions)
 - [FAQ](#frequently-asked-questions)
 
 ## Installation
@@ -611,11 +611,51 @@ type Pet = FromSchema<typeof petSchema, { parseIfThenElseKeywords: true }>;
 
 > `FromSchema` computes the resulting type as `(If ∩ Then) ∪ (¬If ∩ Else)`. While correct in theory, remember that the `not` keyword is not perfectly assimilated, which may become an issue in some complex schemas.
 
-## Definitions
+### Definitions
 
-Since the introduction of [template literal types](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html) with Typescript 4.1, the `definitions` keyword seems implementable in `json-schema-to-ts`.
+```typescript
+const personSchema = {
+  type: "object",
+  properties: {
+    firstName: { $ref: "#/$defs/name" },
+    lastName: { $ref: "#/$defs/name" },
+  },
+  required: ["firstName", "lastName"],
+  additionalProperties: false,
+  $defs: {
+    name: { type: "string" },
+  },
+} as const;
 
-I'll soon be looking into it. Meanwhile, feel free to [open an issue](https://github.com/ThomasAribart/json-schema-to-ts/issues) 🤗
+type Person = FromSchema<typeof personSchema>;
+// => {
+//  firstName: string;
+//  lastName: string;
+// }
+```
+
+You can specify a different definitions path with the `definitionsPath` option:
+
+```typescript
+const personSchema = {
+  type: "object",
+  properties: {
+    firstName: { $ref: "#/definitions/name" },
+    lastName: { $ref: "#/definitions/name" },
+  },
+  required: ["firstName", "lastName"],
+  additionalProperties: false,
+  definitions: {
+    name: { type: "string" },
+  },
+} as const;
+
+type Person = FromSchema<
+  typeof personSchema,
+  { definitionsPath: "definitions" }
+>;
+// => Will work 🙌
+```
 
 ## Frequently Asked Questions
 
