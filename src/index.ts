@@ -7,6 +7,7 @@ import type {
   FromSchemaDefaultOptions,
 } from "./definitions";
 import type { ParseSchema } from "./parse-schema";
+import type { ParseOptions } from "./parse-options";
 import type { Readonly, Writable } from "./utils";
 
 export { FromSchemaOptions, FromSchemaDefaultOptions } from "./definitions";
@@ -27,18 +28,7 @@ export type JSONSchema = JSONSchema7;
  * @param S JSON schema
  */
 export type FromSchema<
-  S extends JSONSchema7,
-  O extends FromSchemaOptions = FromSchemaDefaultOptions
-> = M.$Resolve<
-  ParseSchema<
-    S extends O.Object ? Writable<S> : S,
-    {
-      parseNotKeyword: O["parseNotKeyword"] extends boolean
-        ? O["parseNotKeyword"]
-        : FromSchemaDefaultOptions["parseNotKeyword"];
-      parseIfThenElseKeywords: O["parseIfThenElseKeywords"] extends boolean
-        ? O["parseIfThenElseKeywords"]
-        : FromSchemaDefaultOptions["parseIfThenElseKeywords"];
-    }
-  >
->;
+  S extends JSONSchema,
+  O extends FromSchemaOptions = FromSchemaDefaultOptions,
+  W extends $JSONSchema7 = S extends O.Object ? Writable<S> : S
+> = M.$Resolve<ParseSchema<W, ParseOptions<W, O>>>;
