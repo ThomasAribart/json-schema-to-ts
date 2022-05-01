@@ -2,6 +2,7 @@ import {
   JSONSchema7,
   FromSchemaOptions,
   FromSchemaDefaultOptions,
+  DeserializationPattern,
 } from "./definitions";
 import { ParseSchemaOptions } from "./parse-schema";
 
@@ -18,6 +19,9 @@ export type ParseOptions<
     definitionsPath: O["definitionsPath"] extends string
       ? O["definitionsPath"]
       : FromSchemaDefaultOptions["definitionsPath"];
+    deserialize: O["deserialize"] extends DeserializationPattern[] | false
+      ? O["deserialize"]
+      : FromSchemaDefaultOptions["deserialize"];
   }
 > = N & {
   definitions: S extends Record<
