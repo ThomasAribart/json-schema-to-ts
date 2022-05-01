@@ -135,6 +135,7 @@ type Address = FromSchema<typeof addressSchema>;
   - [Not](#not)
   - [If/Then/Else](#ifthenelse)
   - [Definitions](#definitions)
+- [Deserialization](#deserialization)
 - [FAQ](#frequently-asked-questions)
 
 ## Installation
@@ -655,6 +656,58 @@ type Person = FromSchema<
   { definitionsPath: "definitions" }
 >;
 // => Will work 🙌
+```
+
+## Deserialization
+
+You can specify deserialization patterns with the `deserialize` option:
+
+```typescript
+const userSchema = {
+  type: "object",
+  properties: {
+    name: { type: "string" },
+    email: {
+      type: "string",
+      format: "email",
+    },
+    birthDate: {
+      type: "string",
+      format: "date-time",
+    },
+  },
+  required: ["name", "email", "birthDate"],
+  additionalProperties: false,
+} as const;
+
+type Email = string & { brand: "email" };
+
+type ReceivedUser = FromSchema<
+  typeof userSchema,
+  {
+    deserialize: [
+      {
+        pattern: {
+          type: "string";
+          format: "email";
+        };
+        output: Email;
+      },
+      {
+        pattern: {
+          type: "string";
+          format: "date-time";
+        };
+        output: Date;
+      }
+    ];
+  }
+>;
+// => {
+//  name: string;
+//  email: Email;
+//  birthDate: Date;
+// }
 ```
 
 ## Frequently Asked Questions
