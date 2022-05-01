@@ -18,7 +18,7 @@ type RecurseOnAnyOfSchema<
   S extends JSONSchema7[],
   P extends AnyOfSchema,
   O extends ParseSchemaOptions,
-  R extends any = never
+  R = never
 > = {
   stop: R;
   continue: RecurseOnAnyOfSchema<

@@ -17,13 +17,12 @@ export type ParseIfThenElseSchema<
   O extends ParseSchemaOptions,
   R extends JSONSchema7 = Omit<S, "if" | "then" | "else">,
   I extends JSONSchema7 = MergeSubSchema<R, S["if"]>,
-  T extends any = S extends { then: JSONSchema7 }
+  T = S extends { then: JSONSchema7 }
     ? M.$Intersect<
         ParseSchema<I, O>,
         ParseSchema<MergeSubSchema<R, S["then"]>, O>
       >
     : ParseSchema<I, O>,
-  // TOIMPROVE: Stating that E extends any causes infinite loop error
   E = S extends { else: JSONSchema7 }
     ? M.$Intersect<
         M.$Exclude<ParseSchema<R, O>, ParseSchema<I, O>>,
