@@ -17,7 +17,7 @@ type RecurseOnMixedSchema<
   S extends JSONSchema7TypeName[],
   P extends MultipleTypesSchema,
   O extends ParseSchemaOptions,
-  R extends any = never
+  R = never
 > = {
   stop: R;
   continue: RecurseOnMixedSchema<

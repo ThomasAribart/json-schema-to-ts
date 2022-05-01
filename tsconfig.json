@@ -1,19 +1,19 @@
 {
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "baseUrl": "src",
-    "declaration": true,
+    "target": "es2017",
     "lib": ["es2017"],
+    "baseUrl": "src",
+    "outDir": "lib",
+    "strict": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "paths": { "*": ["./*"] },
+    "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "outDir": "lib",
-    "paths": { "*": ["./*"] },
     "removeComments": true,
-    "resolveJsonModule": true,
-    "sourceMap": true,
-    "strictNullChecks": true,
-    "target": "es2017"
+    "resolveJsonModule": true
   },
   "exclude": ["builds", "lib"]
 }

@@ -22,8 +22,7 @@ type AllTypes = M.Union<
 export type ParseNotSchema<
   S extends NotSchema,
   O extends ParseSchemaOptions,
-  P extends any = ParseSchema<Omit<S, "not">, O>,
-  // TOIMPROVE: Stating that E extends any causes infinite loop error
+  P = ParseSchema<Omit<S, "not">, O>,
   E = M.$Exclude<
     // TOIMPROVE: Directly use ParseAllOfSchema, ParseOneOfSchema etc...
     HasKeyIn<

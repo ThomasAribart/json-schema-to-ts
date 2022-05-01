@@ -12,5 +12,4 @@ rollup.config.js
 babel.config.js
 jest.config.js
 yarn.lock
-LICENSE
 documentation

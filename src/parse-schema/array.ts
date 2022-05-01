@@ -51,7 +51,7 @@ type ApplyBoundaries<
   T extends any[],
   Min extends number,
   Max extends number | undefined,
-  R extends any = never,
+  R = never,
   HasMin extends boolean = false,
   HasMax extends boolean = false,
   C extends any[] = T

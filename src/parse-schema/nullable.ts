@@ -10,7 +10,7 @@ import { ParseSchema, ParseSchemaOptions } from "./index";
 export type ParseNullableSchema<
   S extends NullableSchema,
   O extends ParseSchemaOptions,
-  R extends any = HasKeyIn<
+  R = HasKeyIn<
     // TOIMPROVE: Directly use ParseIfThenElseSchema, ParseNotSchema etc...
     S,
     "enum" | "const" | "type" | "anyOf" | "oneOf" | "allOf" | "not" | "if"
