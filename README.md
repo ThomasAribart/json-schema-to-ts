@@ -396,7 +396,7 @@ type Factored = FromSchema<typeof factoredSchema>;
 
 ### OneOf
 
-For the moment, `FromSchema` will use the `oneOf` keyword in the same way as `anyOf`:
+`FromSchema` will parse the `oneOf` keyword in the same way as `anyOf`:
 
 ```typescript
 const catSchema = {
@@ -682,7 +682,7 @@ const userSchema = {
 
 type Email = string & { brand: "email" };
 
-type ReceivedUser = FromSchema<
+type User = FromSchema<
   typeof userSchema,
   {
     deserialize: [
