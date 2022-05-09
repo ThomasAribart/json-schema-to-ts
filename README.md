@@ -641,7 +641,7 @@ type User = FromSchema<typeof userSchema>;
 
 ### References
 
-Unlink run-time validator classes like [AJV](https://github.com/ajv-validator/ajv), TS types cannot withhold internal states. Thus, they cannot keep any identified schemas in memory.
+Unlike run-time validator classes like [AJV](https://github.com/ajv-validator/ajv), TS types cannot withhold internal states. Thus, they cannot keep any identified schemas in memory.
 
 But you can hydrate them via the `references` option:
 
