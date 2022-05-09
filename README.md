@@ -82,7 +82,7 @@ If you prefer to stick to them and can define your schemas in TS instead of JSON
 - ✅ **Schema validation** `FromSchema` raises TS errors on invalid schemas, based on [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/json-schema)'s definitions
 - ✨ **No impact on compiled code**: `json-schema-to-ts` only operates in type space. And after all, what's lighter than a dev-dependency?
 - 🍸 **DRYness**: Less code means less embarrassing typos
-- 🤝 **Consistency**: See that `string` that you used instead of an `enum`? Or this `additionalProperties` you confused with `additionalItems`? Or forgot entirely? Well, `json-schema-to-ts` does!
+- 🤝 **Real-time consistency**: See that `string` that you used instead of an `enum`? Or this `additionalProperties` you confused with `additionalItems`? Or forgot entirely? Well, `json-schema-to-ts` does!
 - 🔧 **Reliability**: `FromSchema` is extensively tested against [AJV](https://github.com/ajv-validator/ajv), and covers all the use cases that can be handled by TS for now\*
 - 🏋️‍♂️ **Help on complex schemas**: Get complex schemas right first time with instantaneous typing feedbacks! For instance, it's not obvious the following schema can never be validated:
 
@@ -135,6 +135,7 @@ type Address = FromSchema<typeof addressSchema>;
   - [Not](#not)
   - [If/Then/Else](#ifthenelse)
   - [Definitions](#definitions)
+  - [References](#references)
 - [Deserialization](#deserialization)
 - [FAQ](#frequently-asked-questions)
 
@@ -610,52 +611,74 @@ type Pet = FromSchema<typeof petSchema, { parseIfThenElseKeywords: true }>;
 // }
 ```
 
-> `FromSchema` computes the resulting type as `(If ∩ Then) ∪ (¬If ∩ Else)`. While correct in theory, remember that the `not` keyword is not perfectly assimilated, which may become an issue in some complex schemas.
+> ☝️ `FromSchema` computes the resulting type as `(If ∩ Then) ∪ (¬If ∩ Else)`. While correct in theory, remember that the `not` keyword is not perfectly assimilated, which may become an issue in some complex schemas.
 
 ### Definitions
 
 ```typescript
-const personSchema = {
+const userSchema = {
   type: "object",
   properties: {
-    firstName: { $ref: "#/$defs/name" },
-    lastName: { $ref: "#/$defs/name" },
+    name: { $ref: "#/$defs/name" },
+    age: { $ref: "#/$defs/age" },
   },
-  required: ["firstName", "lastName"],
+  required: ["name", "age"],
   additionalProperties: false,
   $defs: {
     name: { type: "string" },
+    age: { type: "integer" },
   },
 } as const;
 
-type Person = FromSchema<typeof personSchema>;
+type User = FromSchema<typeof userSchema>;
 // => {
-//  firstName: string;
-//  lastName: string;
+//  name: string;
+//  age: number;
 // }
 ```
 
-You can specify a different definitions path with the `definitionsPath` option:
+> ☝️ Wether in definitions or references, `FromSchema` will not work on recursive schemas for now.
+
+### References
+
+Unlink run-time validator classes like [AJV](https://github.com/ajv-validator/ajv), TS types cannot withhold internal states. Thus, they cannot keep any identified schemas in memory.
+
+But you can hydrate them via the `references` option:
 
 ```typescript
-const personSchema = {
+const userSchema = {
+  $id: "http://example.com/schemas/user.json",
   type: "object",
   properties: {
-    firstName: { $ref: "#/definitions/name" },
-    lastName: { $ref: "#/definitions/name" },
-  },
-  required: ["firstName", "lastName"],
-  additionalProperties: false,
-  definitions: {
     name: { type: "string" },
+    age: { type: "integer" },
+  },
+  required: ["name", "age"],
+  additionalProperties: false,
+} as const;
+
+const usersSchema = {
+  type: "array",
+  items: {
+    $ref: "http://example.com/schemas/user.json",
   },
 } as const;
 
-type Person = FromSchema<
-  typeof personSchema,
-  { definitionsPath: "definitions" }
+type Users = FromSchema<
+  typeof usersSchema,
+  { references: [typeof userSchema] }
 >;
-// => Will work 🙌
+// => {
+//  name: string;
+//  age: string;
+// }[]
+
+const anotherUsersSchema = {
+  $id: "http://example.com/schemas/users.json",
+  type: "array",
+  items: { $ref: "user.json" },
+} as const;
+// => Will work as well 🙌
 ```
 
 ## Deserialization

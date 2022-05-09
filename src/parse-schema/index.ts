@@ -14,13 +14,13 @@ import { AllOfSchema, ParseAllOfSchema } from "./allOf";
 import { ParseNotSchema, NotSchema } from "./not";
 import { ParseIfThenElseSchema, IfThenElseSchema } from "./ifThenElse";
 import { NullableSchema, ParseNullableSchema } from "./nullable";
-import { DefinitionSchema, ParseDefinitionSchema } from "./definition";
+import { ReferenceSchema, ParseReferenceSchema } from "./references";
 
 export type ParseSchemaOptions = {
   parseNotKeyword: boolean;
   parseIfThenElseKeywords: boolean;
-  definitionsPath: string;
-  definitions: Record<string, JSONSchema7>;
+  rootSchema: JSONSchema7;
+  references: Record<string, JSONSchema7>;
   deserialize: DeserializationPattern[] | false;
 };
 
@@ -35,8 +35,8 @@ export type ParseSchema<
     ? M.Never
     : S extends NullableSchema
     ? ParseNullableSchema<S, O>
-    : S extends DefinitionSchema<O>
-    ? ParseDefinitionSchema<S, O>
+    : S extends ReferenceSchema
+    ? ParseReferenceSchema<S, O>
     : And<
         DoesExtend<O["parseIfThenElseKeywords"], true>,
         DoesExtend<S, IfThenElseSchema>

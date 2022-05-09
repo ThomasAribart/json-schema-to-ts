@@ -6,6 +6,6 @@ import { O } from "ts-toolbelt";
  * @param T Type
  * @return Type
  */
-export type Readonly<T> = T extends O.Object
-  ? { readonly [P in keyof T]: Readonly<T[P]> }
+export type DeepReadonly<T> = T extends O.Object
+  ? { readonly [P in keyof T]: DeepReadonly<T[P]> }
   : T;
