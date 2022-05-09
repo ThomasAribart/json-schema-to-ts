@@ -3,6 +3,7 @@ import { O } from "ts-toolbelt";
 
 import type {
   JSONSchema7 as $JSONSchema7,
+  JSONSchema7Reference as $JSONSchema7Reference,
   FromSchemaOptions,
   FromSchemaDefaultOptions,
 } from "./definitions";
@@ -20,6 +21,13 @@ export {
  * Unwidened V7 JSON schema (e.g. defined with the `as const` statement)
  */
 export type JSONSchema7 = $JSONSchema7 | Readonly<$JSONSchema7>;
+
+/**
+ * Unwidened V7 JSON schema reference (e.g. defined with the `as const` statement)
+ */
+export type JSONSchema7Reference =
+  | $JSONSchema7Reference
+  | Readonly<$JSONSchema7Reference>;
 
 /**
  * Unwidened JSON schema (e.g. defined with the `as const` statement)

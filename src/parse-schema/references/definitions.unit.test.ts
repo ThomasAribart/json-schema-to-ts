@@ -1,6 +1,6 @@
 import { FromSchema } from "index";
 
-import { ajv } from "./ajv.util.test";
+import { ajv } from "../ajv.util.test";
 
 describe("Definitions", () => {
   describe("Default case", () => {
@@ -13,7 +13,9 @@ describe("Definitions", () => {
       required: ["firstName", "lastName"],
       additionalProperties: false,
       $defs: {
-        name: { type: "string" },
+        name: {
+          type: "string",
+        },
       },
     } as const;
 
@@ -32,24 +34,26 @@ describe("Definitions", () => {
     });
   });
 
-  describe("Custom definitions path", () => {
+  describe("Nested path", () => {
     const personSchema = {
       type: "object",
       properties: {
-        firstName: { $ref: "#/definitions/name" },
-        lastName: { $ref: "#/definitions/name" },
+        firstName: { $ref: "#/definitions/user/properties/name" },
+        lastName: { $ref: "#/definitions/user/properties/name" },
       },
       required: ["firstName", "lastName"],
       additionalProperties: false,
       definitions: {
-        name: { type: "string" },
+        user: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+          },
+        },
       },
     } as const;
 
-    type Person = FromSchema<
-      typeof personSchema,
-      { definitionsPath: "definitions" }
-    >;
+    type Person = FromSchema<typeof personSchema>;
 
     let personInstance: Person;
 

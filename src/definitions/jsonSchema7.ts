@@ -51,3 +51,5 @@ export type JSONSchema7 =
       // https://github.com/microsoft/TypeScript/issues/3496#issuecomment-128553540
       examples?: unknown[];
     });
+
+export type JSONSchema7Reference = JSONSchema7 & { $id: string };

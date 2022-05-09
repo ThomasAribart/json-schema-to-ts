@@ -4,4 +4,4 @@
  * @param T Type
  * @return Type
  */
-export type Writable<T> = { -readonly [P in keyof T]: Writable<T[P]> };
+export type DeepWritable<T> = { -readonly [P in keyof T]: DeepWritable<T[P]> };
