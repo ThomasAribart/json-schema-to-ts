@@ -1,6 +1,6 @@
 import { M } from 'https://cdn.skypack.dev/ts-algebra@^1.1.1?dts';
 import { JSONSchema7 as JSONSchema7$2, JSONSchema7TypeName } from 'https://cdn.skypack.dev/@types/json-schema@^7.0.9?dts';
-import { O as O$1, L, A } from 'https://cdn.skypack.dev/ts-toolbelt@^9.6.0?dts';
+import { L, O, A, S } from 'https://cdn.skypack.dev/ts-toolbelt@^9.6.0?dts';
 
 declare type DeserializationPattern = {
     pattern: unknown;
@@ -33,17 +33,20 @@ declare type JSONSchema7$1 = boolean | (Omit<JSONSchema7$2, "const" | "enum" | "
     };
     examples?: unknown[];
 });
+declare type JSONSchema7Reference$1 = JSONSchema7$1 & {
+    $id: string;
+};
 
 declare type FromSchemaOptions = {
     parseNotKeyword?: boolean;
     parseIfThenElseKeywords?: boolean;
-    definitionsPath?: string;
+    references?: JSONSchema7Reference[] | false;
     deserialize?: DeserializationPattern[] | false;
 };
 declare type FromSchemaDefaultOptions = {
     parseNotKeyword: false;
     parseIfThenElseKeywords: false;
-    definitionsPath: "$defs";
+    references: false;
     deserialize: false;
 };
 
@@ -53,18 +56,23 @@ declare type DoesExtend<A, B> = A extends B ? true : false;
 declare type ArrayKeys = keyof [];
 declare type IsObject<T> = T extends object ? ArrayKeys extends Extract<keyof T, ArrayKeys> ? false : true : false;
 
+declare type DeepGet<O, P extends string[], D = undefined> = {
+    stop: O;
+    continue: L.Head<P> extends keyof O ? DeepGet<O[L.Head<P>], L.Tail<P>, D> : D;
+}[P extends [any, ...any[]] ? "continue" : "stop"];
+
 declare type HasKeyIn<O, K> = Extract<keyof O, K> extends never ? false : true;
 
 declare type Merge<A, B> = IsObject<A> extends true ? IsObject<B> extends true ? {
     [K in keyof A | keyof B]: K extends keyof B ? B[K] : K extends keyof A ? A[K] : never;
 } : B : B;
 
-declare type Readonly<T> = T extends O$1.Object ? {
-    readonly [P in keyof T]: Readonly<T[P]>;
+declare type DeepReadonly<T> = T extends O.Object ? {
+    readonly [P in keyof T]: DeepReadonly<T[P]>;
 } : T;
 
-declare type Writable<T> = {
-    -readonly [P in keyof T]: Writable<T[P]>;
+declare type DeepWritable<T> = {
+    -readonly [P in keyof T]: DeepWritable<T[P]>;
 };
 
 declare type DeserializeSchema<S extends JSONSchema7$1, O extends Omit<ParseSchemaOptions, "deserialize"> & {
@@ -256,33 +264,54 @@ declare type ParseNullableSchema<S extends NullableSchema, O extends ParseSchema
     nullable: true;
 } ? M.$Union<M.Primitive<null> | R> : R;
 
-declare type DefinitionSchema<O extends ParseSchemaOptions> = JSONSchema7$1 & {
-    $ref: `#/${O["definitionsPath"]}/${string}`;
+declare type ParseReference<S extends JSONSchema7$1, O extends ParseSchemaOptions, P extends string | undefined, R extends JSONSchema7$1, C extends JSONSchema7$1 = P extends string ? DeepGet<S, L.Tail<S.Split<P, "/">>, false> : S> = M.$Intersect<ParseSchema<C, O>, ParseSchema<MergeSubSchema<C, R>, O>>;
+
+declare type ParseDefinitionSchema<S extends ReferenceSchema, O extends ParseSchemaOptions, P extends string> = ParseReference<O["rootSchema"], O, P, Omit<S, "$ref">>;
+
+declare type ParseExternalReferenceSchema<S extends ReferenceSchema, O extends ParseSchemaOptions, A extends string, P extends string | undefined, R extends JSONSchema7$1 = Omit<S, "$ref">> = A extends keyof O["references"] ? ParseReference<O["references"][A], O, P, R> : O extends {
+    rootSchema: IdSchema;
+} ? ParseExternalReferenceWithIdSchema<O, A, P, R> : M.Never;
+declare type ParseDomain<R extends string> = S.Join<L.Pop<S.Split<R, "/">>, "/">;
+declare type IdSchema = JSONSchema7$1 & {
+    $id: string;
 };
-declare type ParseDefinitionSchema<S extends DefinitionSchema<O>, O extends ParseSchemaOptions, R extends JSONSchema7$1 = Omit<S, "$ref">> = S["$ref"] extends `#/${O["definitionsPath"]}/${infer DefinitionName}` ? O["definitions"] extends Record<DefinitionName, JSONSchema7$1> ? M.$Intersect<ParseSchema<O["definitions"][DefinitionName], O>, ParseSchema<MergeSubSchema<O["definitions"][DefinitionName], R>, O>> : ParseSchema<R, O> : never;
+declare type ParseExternalReferenceWithIdSchema<O extends ParseSchemaOptions & {
+    rootSchema: IdSchema;
+}, A extends string, P extends string | undefined, R extends JSONSchema7$1, D extends string = ParseDomain<O["rootSchema"]["$id"]>, C extends string = S.Join<[D, A], "/">> = C extends keyof O["references"] ? ParseReference<O["references"][C], O, P, R> : M.Never;
+
+declare type ReferenceSchema = JSONSchema7$1 & {
+    $ref: string;
+};
+declare type ParseReferenceSchema<S extends ReferenceSchema, O extends ParseSchemaOptions, R extends string[] = S.Split<S["$ref"], "#">> = R[0] extends "" ? ParseDefinitionSchema<S, O, R[1]> : ParseExternalReferenceSchema<S, O, R[0], R[1]>;
 
 declare type ParseSchemaOptions = {
     parseNotKeyword: boolean;
     parseIfThenElseKeywords: boolean;
-    definitionsPath: string;
-    definitions: Record<string, JSONSchema7$1>;
+    rootSchema: JSONSchema7$1;
+    references: Record<string, JSONSchema7$1>;
     deserialize: DeserializationPattern[] | false;
 };
-declare type ParseSchema<S extends JSONSchema7$1, O extends ParseSchemaOptions, P = JSONSchema7$1 extends S ? M.Any : S extends true | string ? M.Any : S extends false ? M.Never : S extends NullableSchema ? ParseNullableSchema<S, O> : S extends DefinitionSchema<O> ? ParseDefinitionSchema<S, O> : And<DoesExtend<O["parseIfThenElseKeywords"], true>, DoesExtend<S, IfThenElseSchema>> extends true ? S extends IfThenElseSchema ? ParseIfThenElseSchema<S, O> : never : And<DoesExtend<O["parseNotKeyword"], true>, DoesExtend<S, NotSchema>> extends true ? S extends NotSchema ? ParseNotSchema<S, O> : never : S extends AllOfSchema ? ParseAllOfSchema<S, O> : S extends OneOfSchema ? ParseOneOfSchema<S, O> : S extends AnyOfSchema ? ParseAnyOfSchema<S, O> : S extends EnumSchema ? ParseEnumSchema<S, O> : S extends ConstSchema ? ParseConstSchema<S, O> : S extends MultipleTypesSchema ? ParseMultipleTypesSchema<S, O> : S extends SingleTypeSchema ? ParseSingleTypeSchema<S, O> : M.Any> = O extends {
+declare type ParseSchema<S extends JSONSchema7$1, O extends ParseSchemaOptions, P = JSONSchema7$1 extends S ? M.Any : S extends true | string ? M.Any : S extends false ? M.Never : S extends NullableSchema ? ParseNullableSchema<S, O> : S extends ReferenceSchema ? ParseReferenceSchema<S, O> : And<DoesExtend<O["parseIfThenElseKeywords"], true>, DoesExtend<S, IfThenElseSchema>> extends true ? S extends IfThenElseSchema ? ParseIfThenElseSchema<S, O> : never : And<DoesExtend<O["parseNotKeyword"], true>, DoesExtend<S, NotSchema>> extends true ? S extends NotSchema ? ParseNotSchema<S, O> : never : S extends AllOfSchema ? ParseAllOfSchema<S, O> : S extends OneOfSchema ? ParseOneOfSchema<S, O> : S extends AnyOfSchema ? ParseAnyOfSchema<S, O> : S extends EnumSchema ? ParseEnumSchema<S, O> : S extends ConstSchema ? ParseConstSchema<S, O> : S extends MultipleTypesSchema ? ParseMultipleTypesSchema<S, O> : S extends SingleTypeSchema ? ParseSingleTypeSchema<S, O> : M.Any> = O extends {
     deserialize: DeserializationPattern[];
 } ? M.$Intersect<DeserializeSchema<S, O>, P> : P;
 
-declare type ParseOptions<S extends JSONSchema7$1, O extends FromSchemaOptions, N extends Omit<ParseSchemaOptions, "definitions"> = {
+declare type ParseReferences<S extends JSONSchema7Reference[], R extends Record<string, JSONSchema7$1> = {}> = {
+    continue: ParseReferences<L.Tail<S>, R & {
+        [key in L.Head<S>["$id"]]: DeepWritable<L.Head<S>>;
+    }>;
+    stop: R;
+}[S extends [any, ...any[]] ? "continue" : "stop"];
+declare type ParseOptions<S extends JSONSchema7$1, O extends FromSchemaOptions> = {
     parseNotKeyword: O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : FromSchemaDefaultOptions["parseNotKeyword"];
     parseIfThenElseKeywords: O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : FromSchemaDefaultOptions["parseIfThenElseKeywords"];
-    definitionsPath: O["definitionsPath"] extends string ? O["definitionsPath"] : FromSchemaDefaultOptions["definitionsPath"];
+    rootSchema: S;
+    references: O["references"] extends JSONSchema7Reference[] ? ParseReferences<O["references"]> : {};
     deserialize: O["deserialize"] extends DeserializationPattern[] | false ? O["deserialize"] : FromSchemaDefaultOptions["deserialize"];
-}> = N & {
-    definitions: S extends Record<N["definitionsPath"], Record<string, JSONSchema7$1>> ? S[N["definitionsPath"]] : {};
 };
 
-declare type JSONSchema7 = JSONSchema7$1 | Readonly<JSONSchema7$1>;
+declare type JSONSchema7 = JSONSchema7$1 | DeepReadonly<JSONSchema7$1>;
+declare type JSONSchema7Reference = JSONSchema7Reference$1 | DeepReadonly<JSONSchema7Reference$1>;
 declare type JSONSchema = JSONSchema7;
-declare type FromSchema<S extends JSONSchema, O extends FromSchemaOptions = FromSchemaDefaultOptions, W extends JSONSchema7$1 = S extends O.Object ? Writable<S> : S> = M.$Resolve<ParseSchema<W, ParseOptions<W, O>>>;
+declare type FromSchema<S extends JSONSchema, O extends FromSchemaOptions = FromSchemaDefaultOptions, W extends JSONSchema7$1 = S extends O.Object ? DeepWritable<S> : S> = M.$Resolve<ParseSchema<W, ParseOptions<W, O>>>;
 
-export { DeserializationPattern, FromSchema, FromSchemaDefaultOptions, FromSchemaOptions, JSONSchema, JSONSchema7 };
+export { DeserializationPattern, FromSchema, FromSchemaDefaultOptions, FromSchemaOptions, JSONSchema, JSONSchema7, JSONSchema7Reference };
