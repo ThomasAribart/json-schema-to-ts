@@ -1,7 +1,6 @@
 import { M } from "ts-algebra";
 
 import { JSONSchema7 } from "../definitions";
-import { HasKeyIn } from "../utils";
 
 import { ParseSchema, ParseSchemaOptions } from "./index";
 import { MergeSubSchema } from "./utils";
@@ -29,10 +28,4 @@ export type ParseIfThenElseSchema<
         ParseSchema<MergeSubSchema<R, S["else"]>, O>
       >
     : M.$Exclude<ParseSchema<R, O>, ParseSchema<I, O>>
-  // TOIMPROVE: Directly use ParseAllOfSchema, ParseOneOfSchema etc...
-> = HasKeyIn<
-  S,
-  "enum" | "const" | "type" | "anyOf" | "oneOf" | "allOf" | "not"
-> extends true
-  ? M.$Intersect<M.$Union<T | E>, ParseSchema<R, O>>
-  : M.$Union<T | E>;
+> = M.$Intersect<M.$Union<T | E>, ParseSchema<R, O>>;

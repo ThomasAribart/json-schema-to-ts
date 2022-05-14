@@ -1,7 +1,6 @@
 import { M } from "ts-algebra";
 
 import { JSONSchema7 } from "../definitions";
-import { HasKeyIn } from "../utils";
 
 import { ParseSchema, ParseSchemaOptions } from "./index";
 import { MergeSubSchema } from "./utils";
@@ -24,13 +23,7 @@ export type ParseNotSchema<
   O extends ParseSchemaOptions,
   P = ParseSchema<Omit<S, "not">, O>,
   E = M.$Exclude<
-    // TOIMPROVE: Directly use ParseAllOfSchema, ParseOneOfSchema etc...
-    HasKeyIn<
-      S,
-      "enum" | "const" | "type" | "anyOf" | "oneOf" | "allOf"
-    > extends true
-      ? P
-      : AllTypes,
+    P extends M.AnyType ? M.$Intersect<AllTypes, P> : P,
     ParseSchema<MergeSubSchema<Omit<S, "not">, S["not"]>, O>
   >
 > = E extends M.Never ? P : E;
