@@ -2,10 +2,9 @@ import { M } from "ts-algebra";
 import { L } from "ts-toolbelt";
 
 import { JSONSchema7 } from "../definitions";
-import { HasKeyIn, Merge } from "../utils";
 
 import { ParseSchema, ParseSchemaOptions } from "./index";
-import { MergeSubSchema, RemoveInvalidAdditionalItems } from "./utils";
+import { MergeSubSchema } from "./utils";
 
 export type AnyOfSchema = JSONSchema7 & { anyOf: JSONSchema7[] };
 
@@ -26,15 +25,9 @@ type RecurseOnAnyOfSchema<
     P,
     O,
     | R
-    // TOIMPROVE: Directly use ParseEnumSchema, ParseConstSchema etc...
-    | (HasKeyIn<P, "enum" | "const" | "type"> extends true
-        ? M.$Intersect<
-            ParseSchema<Omit<P, "anyOf">, O>,
-            ParseSchema<MergeSubSchema<Omit<P, "anyOf">, L.Head<S>>, O>
-          >
-        : ParseSchema<
-            Merge<Omit<P, "anyOf">, RemoveInvalidAdditionalItems<L.Head<S>>>,
-            O
-          >)
+    | M.$Intersect<
+        ParseSchema<Omit<P, "anyOf">, O>,
+        ParseSchema<MergeSubSchema<Omit<P, "anyOf">, L.Head<S>>, O>
+      >
   >;
 }[S extends [any, ...any[]] ? "continue" : "stop"];
