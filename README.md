@@ -137,6 +137,9 @@ type Address = FromSchema<typeof addressSchema>;
   - [Definitions](#definitions)
   - [References](#references)
 - [Deserialization](#deserialization)
+- [Typeguards](#typeguards)
+  - [Validators](#validators)
+  - [Compilers](#compilers)
 - [FAQ](#frequently-asked-questions)
 
 ## Installation
@@ -731,6 +734,89 @@ type User = FromSchema<
 //  email: Email;
 //  birthDate: Date;
 // }
+```
+
+## Typeguards
+
+You can use `FromSchema` to implement your own typeguard:
+
+```typescript
+import { FromSchema } from "json-schema-to-ts";
+
+const validate = <S extends JSONSchema, T = FromSchema<S>>(
+  schema: S,
+  data: unknown
+): data is T => {
+  const isDataValid: boolean = ... // Implement validation here
+  return isDataValid
+}
+
+const petSchema = { ... } as const
+let data:unknown
+if (validate(petSchema, data)) {
+  const { name, ... } = data; // <= data is typed as Pet 🙌
+}
+```
+
+But `json-schema-to-ts` also exposes two helpers to write type guards. They don't impact the code that you wrote (they simply `return` it), but turn it into type guards.
+
+You can use them to wrap either [`validators`](#validator) or [`compilers`](#compiler).
+
+### Validators
+
+A validator is a function that receives a schema plus some data, and returns `true` if the data is valid compared to the schema, `false` otherwise.
+
+You can use the `wrapValidatorAsTypeGuard` helper to turn validators into type guards. Here is an implementation with [ajv](https://ajv.js.org/):
+
+```typescript
+import Ajv from "ajv";
+import { Validator, wrapValidatorAsTypeGuard } from "json-schema-to-ts";
+
+const ajv = new Ajv();
+
+// The validator definition is up to you
+const $validate: Validator = (schema, data)
+  => ajv.validate(schema, data);
+
+const validate = wrapValidatorAsTypeGuard<{
+  // You can provide FromSchema options as generic type
+  parseNotKeyword: true;
+}>($validate);
+
+const petSchema = { ... } as const;
+
+let data: unknown;
+if (validate(petSchema, data)) {
+  const { name, ... } = data; // <= data is typed as Pet 🙌
+}
+```
+
+### Compilers
+
+A compiler is a function that takes a schema as an input and returns a data validator for this schema as an output.
+
+You can use the `wrapCompilerAsTypeGuard` helper to turn compilers into type guard builders. Here is an implementation with [ajv](https://ajv.js.org/):
+
+```typescript
+import Ajv from "ajv";
+import { Compiler, wrapCompilerAsTypeGuard } from "json-schema-to-ts";
+
+// The compiler definition is up to you
+const $compile: Compiler = (schema) => ajv.compile(schema);
+
+const compile = wrapCompilerAsTypeGuard<{
+  // You can provide FromSchema options as generic type
+  parseNotKeyword: true;
+}>($compile);
+
+const petSchema = { ... } as const;
+
+const isPet = compile(petSchema);
+
+let data: unknown;
+if (isPet(data)) {
+  const { name, ... } = data; // <= data is typed as Pet 🙌
+}
 ```
 
 ## Frequently Asked Questions
