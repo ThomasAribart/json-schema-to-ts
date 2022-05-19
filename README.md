@@ -741,24 +741,41 @@ type User = FromSchema<
 You can use `FromSchema` to implement your own typeguard:
 
 ```typescript
-import { FromSchema } from "json-schema-to-ts";
+import { FromSchema, Validator } from "json-schema-to-ts";
 
-const validate = <S extends JSONSchema, T = FromSchema<S>>(
+// It's important to:
+// - Explicitely type your validator as Validator
+// - Use FromSchema as the default value of a second generic first
+const validate: Validator = <S extends JSONSchema, T = FromSchema<S>>(
   schema: S,
   data: unknown
 ): data is T => {
   const isDataValid: boolean = ... // Implement validation here
-  return isDataValid
-}
+  return isDataValid;
+};
 
 const petSchema = { ... } as const
-let data:unknown
+let data: unknown;
 if (validate(petSchema, data)) {
   const { name, ... } = data; // <= data is typed as Pet 🙌
 }
 ```
 
-But `json-schema-to-ts` also exposes two helpers to write type guards. They don't impact the code that you wrote (they simply `return` it), but turn it into type guards.
+If needed, you can provide `FromSchema` options to the `Validator` type:
+
+```typescript
+type Options = { parseNotKeyword: true };
+
+const validate: Validator<Options> = <
+  S extends JSONSchema,
+  T = FromSchema<S, Options>
+>(
+  schema: S,
+  data: unknown
+): data is T => { ... };
+```
+
+`json-schema-to-ts` also exposes two helpers to write type guards. They don't impact the code that you wrote (they simply `return` it), but turn it into type guards.
 
 You can use them to wrap either [`validators`](#validator) or [`compilers`](#compiler).
 
@@ -770,18 +787,15 @@ You can use the `wrapValidatorAsTypeGuard` helper to turn validators into type g
 
 ```typescript
 import Ajv from "ajv";
-import { Validator, wrapValidatorAsTypeGuard } from "json-schema-to-ts";
+import { $Validator, wrapValidatorAsTypeGuard } from "json-schema-to-ts";
 
 const ajv = new Ajv();
 
-// The validator definition is up to you
-const $validate: Validator = (schema, data)
-  => ajv.validate(schema, data);
+// The initial validator definition is up to you
+// ($Validator is prefixed with $ to differ from resulting type guard)
+const $validate: $Validator = (schema, data) => ajv.validate(schema, data);
 
-const validate = wrapValidatorAsTypeGuard<{
-  // You can provide FromSchema options as generic type
-  parseNotKeyword: true;
-}>($validate);
+const validate = wrapValidatorAsTypeGuard($validate);
 
 const petSchema = { ... } as const;
 
@@ -789,6 +803,14 @@ let data: unknown;
 if (validate(petSchema, data)) {
   const { name, ... } = data; // <= data is typed as Pet 🙌
 }
+```
+
+If needed, you can provide `FromSchema` options as generic type:
+
+```typescript
+const validate = wrapValidatorAsTypeGuard<{
+  parseNotKeyword: true;
+}>($validate);
 ```
 
 ### Compilers
@@ -799,15 +821,13 @@ You can use the `wrapCompilerAsTypeGuard` helper to turn compilers into type gua
 
 ```typescript
 import Ajv from "ajv";
-import { Compiler, wrapCompilerAsTypeGuard } from "json-schema-to-ts";
+import { $Compiler, wrapCompilerAsTypeGuard } from "json-schema-to-ts";
 
-// The compiler definition is up to you
-const $compile: Compiler = (schema) => ajv.compile(schema);
+// The initial compiler definition is up to you
+// ($Compiler is prefixed with $ to differ from resulting type guard)
+const $compile: $Compiler = (schema) => ajv.compile(schema);
 
-const compile = wrapCompilerAsTypeGuard<{
-  // You can provide FromSchema options as generic type
-  parseNotKeyword: true;
-}>($compile);
+const compile = wrapCompilerAsTypeGuard($compile);
 
 const petSchema = { ... } as const;
 
@@ -817,6 +837,14 @@ let data: unknown;
 if (isPet(data)) {
   const { name, ... } = data; // <= data is typed as Pet 🙌
 }
+```
+
+If needed, you can provide `FromSchema` options as generic type:
+
+```typescript
+const compile = wrapCompilerAsTypeGuard<{
+  parseNotKeyword: true;
+}>($compile);
 ```
 
 ## Frequently Asked Questions
