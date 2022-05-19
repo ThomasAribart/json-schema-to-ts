@@ -2,9 +2,9 @@ import { A } from "ts-toolbelt";
 
 import { ajv } from "./ajv.util.test";
 import { petSchema, Pet } from "./schema.util.test";
-import { Compiler, wrapCompilerAsTypeGuard } from "./compiler";
+import { $Compiler, wrapCompilerAsTypeGuard } from "./compiler";
 
-const $compile: Compiler = (schema) => ajv.compile(schema);
+const $compile: $Compiler = (schema) => ajv.compile(schema);
 
 const compile = wrapCompilerAsTypeGuard($compile);
 

@@ -16,7 +16,7 @@ export type {
   FromSchemaOptions,
   FromSchemaDefaultOptions,
 } from "./definitions";
-export type { Compiler, Validator } from "./type-guards";
+export type { $Compiler, Compiler, $Validator, Validator } from "./type-guards";
 export {
   wrapCompilerAsTypeGuard,
   wrapValidatorAsTypeGuard,
