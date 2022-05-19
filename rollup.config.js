@@ -13,16 +13,9 @@ for (const [dep, ver] of Object.entries(dependencies))
 
 const config = [
   {
-    input: "./lib/index.d.ts",
+    input: "./src/index.ts",
     output: [{ file: "./builds/deno/index.d.ts", format: "es" }],
-    plugins: [
-      rollupImportMapPlugin([
-        {
-          imports: importMap,
-        },
-      ]),
-      dts(),
-    ],
+    plugins: [rollupImportMapPlugin([{ imports: importMap }]), dts()],
   },
 ];
 
