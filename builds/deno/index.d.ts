@@ -1,6 +1,11 @@
 import { M } from 'https://cdn.skypack.dev/ts-algebra@^1.1.1?dts';
+import * as json_schema from 'https://cdn.skypack.dev/@types/json-schema@^7.0.9?dts';
 import { JSONSchema7 as JSONSchema7$2, JSONSchema7TypeName } from 'https://cdn.skypack.dev/@types/json-schema@^7.0.9?dts';
 import { L, O, A, S } from 'https://cdn.skypack.dev/ts-toolbelt@^9.6.0?dts';
+import * as ts_algebra_lib_meta_types_resolve from 'ts-algebra/lib/meta-types/resolve';
+import * as ts_algebra_lib_meta_types_intersection_union from 'ts-algebra/lib/meta-types/intersection/union';
+import * as ts_toolbelt_out_String_Split from 'ts-toolbelt/out/String/Split';
+import * as ts_algebra_lib_meta_types from 'ts-algebra/lib/meta-types';
 
 declare type DeserializationPattern = {
     pattern: unknown;
@@ -53,19 +58,11 @@ declare type FromSchemaDefaultOptions = {
 declare type And<A, B> = A extends true ? B extends true ? true : false : false;
 
 declare type DoesExtend<A, B> = A extends B ? true : false;
-declare type ArrayKeys = keyof [];
-declare type IsObject<T> = T extends object ? ArrayKeys extends Extract<keyof T, ArrayKeys> ? false : true : false;
 
 declare type DeepGet<O, P extends string[], D = undefined> = {
     stop: O;
     continue: L.Head<P> extends keyof O ? DeepGet<O[L.Head<P>], L.Tail<P>, D> : D;
 }[P extends [any, ...any[]] ? "continue" : "stop"];
-
-declare type HasKeyIn<O, K> = Extract<keyof O, K> extends never ? false : true;
-
-declare type Merge<A, B> = IsObject<A> extends true ? IsObject<B> extends true ? {
-    [K in keyof A | keyof B]: K extends keyof B ? B[K] : K extends keyof A ? A[K] : never;
-} : B : B;
 
 declare type DeepReadonly<T> = T extends O.Object ? {
     readonly [P in keyof T]: DeepReadonly<T[P]>;
@@ -195,7 +192,7 @@ declare type ParseConst<S extends ConstSchema> = M.Const<S["const"]>;
 declare type EnumSchema = JSONSchema7$1 & {
     enum: unknown[];
 };
-declare type ParseEnumSchema<S extends EnumSchema, O extends ParseSchemaOptions> = HasKeyIn<S, "const" | "type"> extends true ? M.$Intersect<ParseEnum<S>, ParseSchema<Omit<S, "enum">, O>> : ParseEnum<S>;
+declare type ParseEnumSchema<S extends EnumSchema, O extends ParseSchemaOptions> = M.$Intersect<ParseEnum<S>, ParseSchema<Omit<S, "enum">, O>>;
 declare type ParseEnum<S extends EnumSchema> = M.Enum<A.Compute<S["enum"][number]>>;
 
 declare type RemoveInvalidAdditionalItems<S extends JSONSchema7$1> = S extends {
@@ -218,7 +215,7 @@ declare type AnyOfSchema = JSONSchema7$1 & {
 declare type ParseAnyOfSchema<S extends AnyOfSchema, O extends ParseSchemaOptions> = M.$Union<RecurseOnAnyOfSchema<S["anyOf"], S, O>>;
 declare type RecurseOnAnyOfSchema<S extends JSONSchema7$1[], P extends AnyOfSchema, O extends ParseSchemaOptions, R = never> = {
     stop: R;
-    continue: RecurseOnAnyOfSchema<L.Tail<S>, P, O, R | (HasKeyIn<P, "enum" | "const" | "type"> extends true ? M.$Intersect<ParseSchema<Omit<P, "anyOf">, O>, ParseSchema<MergeSubSchema<Omit<P, "anyOf">, L.Head<S>>, O>> : ParseSchema<Merge<Omit<P, "anyOf">, RemoveInvalidAdditionalItems<L.Head<S>>>, O>)>;
+    continue: RecurseOnAnyOfSchema<L.Tail<S>, P, O, R | M.$Intersect<ParseSchema<Omit<P, "anyOf">, O>, ParseSchema<MergeSubSchema<Omit<P, "anyOf">, L.Head<S>>, O>>>;
 }[S extends [any, ...any[]] ? "continue" : "stop"];
 
 declare type OneOfSchema = JSONSchema7$1 & {
@@ -227,13 +224,13 @@ declare type OneOfSchema = JSONSchema7$1 & {
 declare type ParseOneOfSchema<P extends OneOfSchema, O extends ParseSchemaOptions> = M.$Union<RecurseOnOneOfSchema<P["oneOf"], P, O>>;
 declare type RecurseOnOneOfSchema<S extends JSONSchema7$1[], P extends OneOfSchema, O extends ParseSchemaOptions, R = never> = {
     stop: R;
-    continue: RecurseOnOneOfSchema<L.Tail<S>, P, O, R | (HasKeyIn<P, "enum" | "const" | "type" | "anyOf"> extends true ? M.$Intersect<ParseSchema<Omit<P, "oneOf">, O>, ParseSchema<MergeSubSchema<Omit<P, "oneOf">, L.Head<S>>, O>> : ParseSchema<Merge<Omit<P, "oneOf">, RemoveInvalidAdditionalItems<L.Head<S>>>, O>)>;
+    continue: RecurseOnOneOfSchema<L.Tail<S>, P, O, R | M.$Intersect<ParseSchema<Omit<P, "oneOf">, O>, ParseSchema<MergeSubSchema<Omit<P, "oneOf">, L.Head<S>>, O>>>;
 }[S extends [any, ...any[]] ? "continue" : "stop"];
 
 declare type AllOfSchema = JSONSchema7$1 & {
     allOf: JSONSchema7$1[];
 };
-declare type ParseAllOfSchema<P extends AllOfSchema, O extends ParseSchemaOptions> = RecurseOnAllOfSchema<P["allOf"], P, O, HasKeyIn<P, "enum" | "const" | "type" | "anyOf" | "oneOf"> extends true ? ParseSchema<Omit<P, "allOf">, O> : M.Any>;
+declare type ParseAllOfSchema<P extends AllOfSchema, O extends ParseSchemaOptions> = RecurseOnAllOfSchema<P["allOf"], P, O, ParseSchema<Omit<P, "allOf">, O>>;
 declare type RecurseOnAllOfSchema<S extends JSONSchema7$1[], P extends AllOfSchema, O extends ParseSchemaOptions, R> = {
     stop: R;
     continue: RecurseOnAllOfSchema<L.Tail<S>, P, O, M.$Intersect<ParseSchema<MergeSubSchema<Omit<P, "allOf">, L.Head<S>>, O>, R>>;
@@ -243,7 +240,7 @@ declare type NotSchema = JSONSchema7$1 & {
     not: JSONSchema7$1;
 };
 declare type AllTypes = M.Union<M.Primitive<null> | M.Primitive<boolean> | M.Primitive<number> | M.Primitive<string> | M.Array<M.Any> | M.Object<{}, never, M.Any>>;
-declare type ParseNotSchema<S extends NotSchema, O extends ParseSchemaOptions, P = ParseSchema<Omit<S, "not">, O>, E = M.$Exclude<HasKeyIn<S, "enum" | "const" | "type" | "anyOf" | "oneOf" | "allOf"> extends true ? P : AllTypes, ParseSchema<MergeSubSchema<Omit<S, "not">, S["not"]>, O>>> = E extends M.Never ? P : E;
+declare type ParseNotSchema<S extends NotSchema, O extends ParseSchemaOptions, P = ParseSchema<Omit<S, "not">, O>, E = M.$Exclude<P extends M.AnyType ? M.$Intersect<AllTypes, P> : P, ParseSchema<MergeSubSchema<Omit<S, "not">, S["not"]>, O>>> = E extends M.Never ? P : E;
 
 declare type IfThenElseSchema = JSONSchema7$1 & {
     if: JSONSchema7$1;
@@ -254,13 +251,13 @@ declare type ParseIfThenElseSchema<S extends IfThenElseSchema, O extends ParseSc
     then: JSONSchema7$1;
 } ? M.$Intersect<ParseSchema<I, O>, ParseSchema<MergeSubSchema<R, S["then"]>, O>> : ParseSchema<I, O>, E = S extends {
     else: JSONSchema7$1;
-} ? M.$Intersect<M.$Exclude<ParseSchema<R, O>, ParseSchema<I, O>>, ParseSchema<MergeSubSchema<R, S["else"]>, O>> : M.$Exclude<ParseSchema<R, O>, ParseSchema<I, O>>> = HasKeyIn<S, "enum" | "const" | "type" | "anyOf" | "oneOf" | "allOf" | "not"> extends true ? M.$Intersect<M.$Union<T | E>, ParseSchema<R, O>> : M.$Union<T | E>;
+} ? M.$Intersect<M.$Exclude<ParseSchema<R, O>, ParseSchema<I, O>>, ParseSchema<MergeSubSchema<R, S["else"]>, O>> : M.$Exclude<ParseSchema<R, O>, ParseSchema<I, O>>> = M.$Intersect<M.$Union<T | E>, ParseSchema<R, O>>;
 
 declare type NullableSchema = JSONSchema7$1 & {
     nullable: boolean;
 };
 
-declare type ParseNullableSchema<S extends NullableSchema, O extends ParseSchemaOptions, R = HasKeyIn<S, "enum" | "const" | "type" | "anyOf" | "oneOf" | "allOf" | "not" | "if"> extends true ? ParseSchema<Omit<S, "nullable">, O> : M.Any> = S extends {
+declare type ParseNullableSchema<S extends NullableSchema, O extends ParseSchemaOptions, R = ParseSchema<Omit<S, "nullable">, O>> = S extends {
     nullable: true;
 } ? M.$Union<M.Primitive<null> | R> : R;
 
@@ -309,9 +306,3313 @@ declare type ParseOptions<S extends JSONSchema7$1, O extends FromSchemaOptions> 
     deserialize: O["deserialize"] extends DeserializationPattern[] | false ? O["deserialize"] : FromSchemaDefaultOptions["deserialize"];
 };
 
+declare type Compiler = (schema: JSONSchema) => (data: unknown) => boolean;
+declare const wrapCompilerAsTypeGuard: <O extends FromSchemaOptions = FromSchemaDefaultOptions>(validatorBuilder: Compiler) => <S extends JSONSchema7, T = ts_algebra_lib_meta_types.$Resolve<ParseSchema<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S) ? ts_algebra_lib_meta_types.Any<false, never> : (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S) extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S) extends false ? ts_algebra_lib_meta_types.Never : (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S) extends NullableSchema ? ParseNullableSchema<false & {
+    nullable: boolean;
+} & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable"> ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable"> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable"> extends false ? ts_algebra_lib_meta_types.Never : Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable"> extends NullableSchema ? ParseNullableSchema<false & {
+    nullable: boolean;
+} & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends false ? ts_algebra_lib_meta_types.Never : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends NullableSchema ? ParseNullableSchema<false & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> | ParseNullableSchema<true & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> | ParseNullableSchema<Omit<json_schema.JSONSchema7, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions" | "examples"> & {
+    const?: unknown;
+    enum?: unknown;
+    items?: JSONSchema7$1 | JSONSchema7$1[] | undefined;
+    additionalItems?: JSONSchema7$1 | undefined;
+    contains?: JSONSchema7$1 | undefined;
+    properties?: Record<string, JSONSchema7$1> | undefined;
+    patternProperties?: Record<string, JSONSchema7$1> | undefined;
+    additionalProperties?: JSONSchema7$1 | undefined;
+    dependencies?: {
+        [key: string]: JSONSchema7$1 | string[];
+    } | undefined;
+    propertyNames?: JSONSchema7$1 | undefined;
+    if?: JSONSchema7$1 | undefined;
+    then?: JSONSchema7$1 | undefined;
+    else?: JSONSchema7$1 | undefined;
+    allOf?: JSONSchema7$1[] | undefined;
+    anyOf?: JSONSchema7$1[] | undefined;
+    oneOf?: JSONSchema7$1[] | undefined;
+    not?: JSONSchema7$1 | undefined;
+    nullable?: boolean | undefined;
+    definitions?: {
+        [key: string]: JSONSchema7$1;
+    } | undefined;
+    examples?: unknown[] | undefined;
+} & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends ReferenceSchema ? ParseReferenceSchema<ReferenceSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ts_toolbelt_out_String_Split.Split<(ReferenceSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["$ref"], "#">> : And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, DoesExtend<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, IfThenElseSchema>> extends true ? Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends IfThenElseSchema ? ts_algebra_lib_meta_types.Never : never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, DoesExtend<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, NotSchema>> extends true ? Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends NotSchema ? ParseNotSchema<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>, ts_algebra_lib_meta_types.$Exclude<ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>> extends ts_algebra_lib_meta_types.AnyType ? ts_algebra_lib_meta_types_intersection_union.IntersectUnion<{
+    type: "union";
+    values: {
+        type: "primitive";
+        value: null;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: boolean;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: number;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: string;
+        isSerialized: false;
+        deserialized: never;
+    } | ts_algebra_lib_meta_types.Array<ts_algebra_lib_meta_types.Any<false, never>, false, never> | {
+        type: "object";
+        values: {};
+        required: never;
+        isOpen: true;
+        openProps: ts_algebra_lib_meta_types.Any<false, never>;
+        isSerialized: false;
+        deserialized: never;
+    };
+}, ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> : ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>, ParseSchema<MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>>, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> ? ts_algebra_lib_meta_types.Any<false, never> : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends false ? ts_algebra_lib_meta_types.Never : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends NullableSchema ? any : any>>> : never : any>> | ParseNullableSchema<true & {
+    nullable: boolean;
+} & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends false ? ts_algebra_lib_meta_types.Never : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends NullableSchema ? ParseNullableSchema<false & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> | ParseNullableSchema<true & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> | ParseNullableSchema<Omit<json_schema.JSONSchema7, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions" | "examples"> & {
+    const?: unknown;
+    enum?: unknown;
+    items?: JSONSchema7$1 | JSONSchema7$1[] | undefined;
+    additionalItems?: JSONSchema7$1 | undefined;
+    contains?: JSONSchema7$1 | undefined;
+    properties?: Record<string, JSONSchema7$1> | undefined;
+    patternProperties?: Record<string, JSONSchema7$1> | undefined;
+    additionalProperties?: JSONSchema7$1 | undefined;
+    dependencies?: {
+        [key: string]: JSONSchema7$1 | string[];
+    } | undefined;
+    propertyNames?: JSONSchema7$1 | undefined;
+    if?: JSONSchema7$1 | undefined;
+    then?: JSONSchema7$1 | undefined;
+    else?: JSONSchema7$1 | undefined;
+    allOf?: JSONSchema7$1[] | undefined;
+    anyOf?: JSONSchema7$1[] | undefined;
+    oneOf?: JSONSchema7$1[] | undefined;
+    not?: JSONSchema7$1 | undefined;
+    nullable?: boolean | undefined;
+    definitions?: {
+        [key: string]: JSONSchema7$1;
+    } | undefined;
+    examples?: unknown[] | undefined;
+} & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends ReferenceSchema ? ParseReferenceSchema<ReferenceSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ts_toolbelt_out_String_Split.Split<(ReferenceSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["$ref"], "#">> : And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, DoesExtend<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, IfThenElseSchema>> extends true ? Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends IfThenElseSchema ? ts_algebra_lib_meta_types.Never : never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, DoesExtend<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, NotSchema>> extends true ? Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends NotSchema ? ParseNotSchema<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>, ts_algebra_lib_meta_types.$Exclude<ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>> extends ts_algebra_lib_meta_types.AnyType ? ts_algebra_lib_meta_types_intersection_union.IntersectUnion<{
+    type: "union";
+    values: {
+        type: "primitive";
+        value: null;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: boolean;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: number;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: string;
+        isSerialized: false;
+        deserialized: never;
+    } | ts_algebra_lib_meta_types.Array<ts_algebra_lib_meta_types.Any<false, never>, false, never> | {
+        type: "object";
+        values: {};
+        required: never;
+        isOpen: true;
+        openProps: ts_algebra_lib_meta_types.Any<false, never>;
+        isSerialized: false;
+        deserialized: never;
+    };
+}, ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> : ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>, ParseSchema<MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>>, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> ? ts_algebra_lib_meta_types.Any<false, never> : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends false ? ts_algebra_lib_meta_types.Never : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends NullableSchema ? any : any>>> : never : any>> | ParseNullableSchema<Omit<json_schema.JSONSchema7, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions" | "examples"> & {
+    const?: unknown;
+    enum?: unknown;
+    items?: JSONSchema7$1 | JSONSchema7$1[] | undefined;
+    additionalItems?: JSONSchema7$1 | undefined;
+    contains?: JSONSchema7$1 | undefined;
+    properties?: Record<string, JSONSchema7$1> | undefined;
+    patternProperties?: Record<string, JSONSchema7$1> | undefined;
+    additionalProperties?: JSONSchema7$1 | undefined;
+    dependencies?: {
+        [key: string]: JSONSchema7$1 | string[];
+    } | undefined;
+    propertyNames?: JSONSchema7$1 | undefined;
+    if?: JSONSchema7$1 | undefined;
+    then?: JSONSchema7$1 | undefined;
+    else?: JSONSchema7$1 | undefined;
+    allOf?: JSONSchema7$1[] | undefined;
+    anyOf?: JSONSchema7$1[] | undefined;
+    oneOf?: JSONSchema7$1[] | undefined;
+    not?: JSONSchema7$1 | undefined;
+    nullable?: boolean | undefined;
+    definitions?: {
+        [key: string]: JSONSchema7$1;
+    } | undefined;
+    examples?: unknown[] | undefined;
+} & {
+    nullable: boolean;
+} & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends false ? ts_algebra_lib_meta_types.Never : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends NullableSchema ? ParseNullableSchema<false & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> | ParseNullableSchema<true & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> | ParseNullableSchema<Omit<json_schema.JSONSchema7, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions" | "examples"> & {
+    const?: unknown;
+    enum?: unknown;
+    items?: JSONSchema7$1 | JSONSchema7$1[] | undefined;
+    additionalItems?: JSONSchema7$1 | undefined;
+    contains?: JSONSchema7$1 | undefined;
+    properties?: Record<string, JSONSchema7$1> | undefined;
+    patternProperties?: Record<string, JSONSchema7$1> | undefined;
+    additionalProperties?: JSONSchema7$1 | undefined;
+    dependencies?: {
+        [key: string]: JSONSchema7$1 | string[];
+    } | undefined;
+    propertyNames?: JSONSchema7$1 | undefined;
+    if?: JSONSchema7$1 | undefined;
+    then?: JSONSchema7$1 | undefined;
+    else?: JSONSchema7$1 | undefined;
+    allOf?: JSONSchema7$1[] | undefined;
+    anyOf?: JSONSchema7$1[] | undefined;
+    oneOf?: JSONSchema7$1[] | undefined;
+    not?: JSONSchema7$1 | undefined;
+    nullable?: boolean | undefined;
+    definitions?: {
+        [key: string]: JSONSchema7$1;
+    } | undefined;
+    examples?: unknown[] | undefined;
+} & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends ReferenceSchema ? ParseReferenceSchema<ReferenceSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ts_toolbelt_out_String_Split.Split<(ReferenceSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["$ref"], "#">> : And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, DoesExtend<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, IfThenElseSchema>> extends true ? Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends IfThenElseSchema ? ts_algebra_lib_meta_types.Never : never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, DoesExtend<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, NotSchema>> extends true ? Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends NotSchema ? ParseNotSchema<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>, ts_algebra_lib_meta_types.$Exclude<ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>> extends ts_algebra_lib_meta_types.AnyType ? ts_algebra_lib_meta_types_intersection_union.IntersectUnion<{
+    type: "union";
+    values: {
+        type: "primitive";
+        value: null;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: boolean;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: number;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: string;
+        isSerialized: false;
+        deserialized: never;
+    } | ts_algebra_lib_meta_types.Array<ts_algebra_lib_meta_types.Any<false, never>, false, never> | {
+        type: "object";
+        values: {};
+        required: never;
+        isOpen: true;
+        openProps: ts_algebra_lib_meta_types.Any<false, never>;
+        isSerialized: false;
+        deserialized: never;
+    };
+}, ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> : ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>, ParseSchema<MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>>, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> ? ts_algebra_lib_meta_types.Any<false, never> : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends false ? ts_algebra_lib_meta_types.Never : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends NullableSchema ? any : any>>> : never : any>> : any>> | ParseNullableSchema<true & {
+    nullable: boolean;
+} & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable"> ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable"> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable"> extends false ? ts_algebra_lib_meta_types.Never : Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable"> extends NullableSchema ? ParseNullableSchema<false & {
+    nullable: boolean;
+} & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends false ? ts_algebra_lib_meta_types.Never : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends NullableSchema ? ParseNullableSchema<false & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> | ParseNullableSchema<true & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> | ParseNullableSchema<Omit<json_schema.JSONSchema7, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions" | "examples"> & {
+    const?: unknown;
+    enum?: unknown;
+    items?: JSONSchema7$1 | JSONSchema7$1[] | undefined;
+    additionalItems?: JSONSchema7$1 | undefined;
+    contains?: JSONSchema7$1 | undefined;
+    properties?: Record<string, JSONSchema7$1> | undefined;
+    patternProperties?: Record<string, JSONSchema7$1> | undefined;
+    additionalProperties?: JSONSchema7$1 | undefined;
+    dependencies?: {
+        [key: string]: JSONSchema7$1 | string[];
+    } | undefined;
+    propertyNames?: JSONSchema7$1 | undefined;
+    if?: JSONSchema7$1 | undefined;
+    then?: JSONSchema7$1 | undefined;
+    else?: JSONSchema7$1 | undefined;
+    allOf?: JSONSchema7$1[] | undefined;
+    anyOf?: JSONSchema7$1[] | undefined;
+    oneOf?: JSONSchema7$1[] | undefined;
+    not?: JSONSchema7$1 | undefined;
+    nullable?: boolean | undefined;
+    definitions?: {
+        [key: string]: JSONSchema7$1;
+    } | undefined;
+    examples?: unknown[] | undefined;
+} & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends ReferenceSchema ? ParseReferenceSchema<ReferenceSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ts_toolbelt_out_String_Split.Split<(ReferenceSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["$ref"], "#">> : And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, DoesExtend<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, IfThenElseSchema>> extends true ? Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends IfThenElseSchema ? ts_algebra_lib_meta_types.Never : never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, DoesExtend<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, NotSchema>> extends true ? Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends NotSchema ? ParseNotSchema<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>, ts_algebra_lib_meta_types.$Exclude<ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>> extends ts_algebra_lib_meta_types.AnyType ? ts_algebra_lib_meta_types_intersection_union.IntersectUnion<{
+    type: "union";
+    values: {
+        type: "primitive";
+        value: null;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: boolean;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: number;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: string;
+        isSerialized: false;
+        deserialized: never;
+    } | ts_algebra_lib_meta_types.Array<ts_algebra_lib_meta_types.Any<false, never>, false, never> | {
+        type: "object";
+        values: {};
+        required: never;
+        isOpen: true;
+        openProps: ts_algebra_lib_meta_types.Any<false, never>;
+        isSerialized: false;
+        deserialized: never;
+    };
+}, ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> : ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>, ParseSchema<MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>>, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> ? ts_algebra_lib_meta_types.Any<false, never> : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends false ? ts_algebra_lib_meta_types.Never : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends NullableSchema ? any : any>>> : never : any>> | ParseNullableSchema<true & {
+    nullable: boolean;
+} & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends false ? ts_algebra_lib_meta_types.Never : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends NullableSchema ? ParseNullableSchema<false & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> | ParseNullableSchema<true & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> | ParseNullableSchema<Omit<json_schema.JSONSchema7, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions" | "examples"> & {
+    const?: unknown;
+    enum?: unknown;
+    items?: JSONSchema7$1 | JSONSchema7$1[] | undefined;
+    additionalItems?: JSONSchema7$1 | undefined;
+    contains?: JSONSchema7$1 | undefined;
+    properties?: Record<string, JSONSchema7$1> | undefined;
+    patternProperties?: Record<string, JSONSchema7$1> | undefined;
+    additionalProperties?: JSONSchema7$1 | undefined;
+    dependencies?: {
+        [key: string]: JSONSchema7$1 | string[];
+    } | undefined;
+    propertyNames?: JSONSchema7$1 | undefined;
+    if?: JSONSchema7$1 | undefined;
+    then?: JSONSchema7$1 | undefined;
+    else?: JSONSchema7$1 | undefined;
+    allOf?: JSONSchema7$1[] | undefined;
+    anyOf?: JSONSchema7$1[] | undefined;
+    oneOf?: JSONSchema7$1[] | undefined;
+    not?: JSONSchema7$1 | undefined;
+    nullable?: boolean | undefined;
+    definitions?: {
+        [key: string]: JSONSchema7$1;
+    } | undefined;
+    examples?: unknown[] | undefined;
+} & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends ReferenceSchema ? ParseReferenceSchema<ReferenceSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ts_toolbelt_out_String_Split.Split<(ReferenceSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["$ref"], "#">> : And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, DoesExtend<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, IfThenElseSchema>> extends true ? Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends IfThenElseSchema ? ts_algebra_lib_meta_types.Never : never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, DoesExtend<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, NotSchema>> extends true ? Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends NotSchema ? ParseNotSchema<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>, ts_algebra_lib_meta_types.$Exclude<ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>> extends ts_algebra_lib_meta_types.AnyType ? ts_algebra_lib_meta_types_intersection_union.IntersectUnion<{
+    type: "union";
+    values: {
+        type: "primitive";
+        value: null;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: boolean;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: number;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: string;
+        isSerialized: false;
+        deserialized: never;
+    } | ts_algebra_lib_meta_types.Array<ts_algebra_lib_meta_types.Any<false, never>, false, never> | {
+        type: "object";
+        values: {};
+        required: never;
+        isOpen: true;
+        openProps: ts_algebra_lib_meta_types.Any<false, never>;
+        isSerialized: false;
+        deserialized: never;
+    };
+}, ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> : ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>, ParseSchema<MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>>, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> ? ts_algebra_lib_meta_types.Any<false, never> : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends false ? ts_algebra_lib_meta_types.Never : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends NullableSchema ? any : any>>> : never : any>> | ParseNullableSchema<Omit<json_schema.JSONSchema7, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions" | "examples"> & {
+    const?: unknown;
+    enum?: unknown;
+    items?: JSONSchema7$1 | JSONSchema7$1[] | undefined;
+    additionalItems?: JSONSchema7$1 | undefined;
+    contains?: JSONSchema7$1 | undefined;
+    properties?: Record<string, JSONSchema7$1> | undefined;
+    patternProperties?: Record<string, JSONSchema7$1> | undefined;
+    additionalProperties?: JSONSchema7$1 | undefined;
+    dependencies?: {
+        [key: string]: JSONSchema7$1 | string[];
+    } | undefined;
+    propertyNames?: JSONSchema7$1 | undefined;
+    if?: JSONSchema7$1 | undefined;
+    then?: JSONSchema7$1 | undefined;
+    else?: JSONSchema7$1 | undefined;
+    allOf?: JSONSchema7$1[] | undefined;
+    anyOf?: JSONSchema7$1[] | undefined;
+    oneOf?: JSONSchema7$1[] | undefined;
+    not?: JSONSchema7$1 | undefined;
+    nullable?: boolean | undefined;
+    definitions?: {
+        [key: string]: JSONSchema7$1;
+    } | undefined;
+    examples?: unknown[] | undefined;
+} & {
+    nullable: boolean;
+} & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends false ? ts_algebra_lib_meta_types.Never : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends NullableSchema ? ParseNullableSchema<false & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> | ParseNullableSchema<true & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> | ParseNullableSchema<Omit<json_schema.JSONSchema7, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions" | "examples"> & {
+    const?: unknown;
+    enum?: unknown;
+    items?: JSONSchema7$1 | JSONSchema7$1[] | undefined;
+    additionalItems?: JSONSchema7$1 | undefined;
+    contains?: JSONSchema7$1 | undefined;
+    properties?: Record<string, JSONSchema7$1> | undefined;
+    patternProperties?: Record<string, JSONSchema7$1> | undefined;
+    additionalProperties?: JSONSchema7$1 | undefined;
+    dependencies?: {
+        [key: string]: JSONSchema7$1 | string[];
+    } | undefined;
+    propertyNames?: JSONSchema7$1 | undefined;
+    if?: JSONSchema7$1 | undefined;
+    then?: JSONSchema7$1 | undefined;
+    else?: JSONSchema7$1 | undefined;
+    allOf?: JSONSchema7$1[] | undefined;
+    anyOf?: JSONSchema7$1[] | undefined;
+    oneOf?: JSONSchema7$1[] | undefined;
+    not?: JSONSchema7$1 | undefined;
+    nullable?: boolean | undefined;
+    definitions?: {
+        [key: string]: JSONSchema7$1;
+    } | undefined;
+    examples?: unknown[] | undefined;
+} & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends ReferenceSchema ? ParseReferenceSchema<ReferenceSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ts_toolbelt_out_String_Split.Split<(ReferenceSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["$ref"], "#">> : And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, DoesExtend<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, IfThenElseSchema>> extends true ? Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends IfThenElseSchema ? ts_algebra_lib_meta_types.Never : never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, DoesExtend<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, NotSchema>> extends true ? Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends NotSchema ? ParseNotSchema<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>, ts_algebra_lib_meta_types.$Exclude<ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>> extends ts_algebra_lib_meta_types.AnyType ? ts_algebra_lib_meta_types_intersection_union.IntersectUnion<{
+    type: "union";
+    values: {
+        type: "primitive";
+        value: null;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: boolean;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: number;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: string;
+        isSerialized: false;
+        deserialized: never;
+    } | ts_algebra_lib_meta_types.Array<ts_algebra_lib_meta_types.Any<false, never>, false, never> | {
+        type: "object";
+        values: {};
+        required: never;
+        isOpen: true;
+        openProps: ts_algebra_lib_meta_types.Any<false, never>;
+        isSerialized: false;
+        deserialized: never;
+    };
+}, ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> : ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>, ParseSchema<MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>>, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> ? ts_algebra_lib_meta_types.Any<false, never> : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends false ? ts_algebra_lib_meta_types.Never : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends NullableSchema ? any : any>>> : never : any>> : any>> | ParseNullableSchema<Omit<json_schema.JSONSchema7, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions" | "examples"> & {
+    const?: unknown;
+    enum?: unknown;
+    items?: JSONSchema7$1 | JSONSchema7$1[] | undefined;
+    additionalItems?: JSONSchema7$1 | undefined;
+    contains?: JSONSchema7$1 | undefined;
+    properties?: Record<string, JSONSchema7$1> | undefined;
+    patternProperties?: Record<string, JSONSchema7$1> | undefined;
+    additionalProperties?: JSONSchema7$1 | undefined;
+    dependencies?: {
+        [key: string]: JSONSchema7$1 | string[];
+    } | undefined;
+    propertyNames?: JSONSchema7$1 | undefined;
+    if?: JSONSchema7$1 | undefined;
+    then?: JSONSchema7$1 | undefined;
+    else?: JSONSchema7$1 | undefined;
+    allOf?: JSONSchema7$1[] | undefined;
+    anyOf?: JSONSchema7$1[] | undefined;
+    oneOf?: JSONSchema7$1[] | undefined;
+    not?: JSONSchema7$1 | undefined;
+    nullable?: boolean | undefined;
+    definitions?: {
+        [key: string]: JSONSchema7$1;
+    } | undefined;
+    examples?: unknown[] | undefined;
+} & {
+    nullable: boolean;
+} & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable"> ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable"> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable"> extends false ? ts_algebra_lib_meta_types.Never : Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable"> extends NullableSchema ? ParseNullableSchema<false & {
+    nullable: boolean;
+} & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends false ? ts_algebra_lib_meta_types.Never : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends NullableSchema ? ParseNullableSchema<false & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> | ParseNullableSchema<true & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> | ParseNullableSchema<Omit<json_schema.JSONSchema7, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions" | "examples"> & {
+    const?: unknown;
+    enum?: unknown;
+    items?: JSONSchema7$1 | JSONSchema7$1[] | undefined;
+    additionalItems?: JSONSchema7$1 | undefined;
+    contains?: JSONSchema7$1 | undefined;
+    properties?: Record<string, JSONSchema7$1> | undefined;
+    patternProperties?: Record<string, JSONSchema7$1> | undefined;
+    additionalProperties?: JSONSchema7$1 | undefined;
+    dependencies?: {
+        [key: string]: JSONSchema7$1 | string[];
+    } | undefined;
+    propertyNames?: JSONSchema7$1 | undefined;
+    if?: JSONSchema7$1 | undefined;
+    then?: JSONSchema7$1 | undefined;
+    else?: JSONSchema7$1 | undefined;
+    allOf?: JSONSchema7$1[] | undefined;
+    anyOf?: JSONSchema7$1[] | undefined;
+    oneOf?: JSONSchema7$1[] | undefined;
+    not?: JSONSchema7$1 | undefined;
+    nullable?: boolean | undefined;
+    definitions?: {
+        [key: string]: JSONSchema7$1;
+    } | undefined;
+    examples?: unknown[] | undefined;
+} & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends ReferenceSchema ? ParseReferenceSchema<ReferenceSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ts_toolbelt_out_String_Split.Split<(ReferenceSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["$ref"], "#">> : And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, DoesExtend<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, IfThenElseSchema>> extends true ? Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends IfThenElseSchema ? ts_algebra_lib_meta_types.Never : never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, DoesExtend<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, NotSchema>> extends true ? Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends NotSchema ? ParseNotSchema<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>, ts_algebra_lib_meta_types.$Exclude<ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>> extends ts_algebra_lib_meta_types.AnyType ? ts_algebra_lib_meta_types_intersection_union.IntersectUnion<{
+    type: "union";
+    values: {
+        type: "primitive";
+        value: null;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: boolean;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: number;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: string;
+        isSerialized: false;
+        deserialized: never;
+    } | ts_algebra_lib_meta_types.Array<ts_algebra_lib_meta_types.Any<false, never>, false, never> | {
+        type: "object";
+        values: {};
+        required: never;
+        isOpen: true;
+        openProps: ts_algebra_lib_meta_types.Any<false, never>;
+        isSerialized: false;
+        deserialized: never;
+    };
+}, ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> : ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>, ParseSchema<MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>>, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> ? ts_algebra_lib_meta_types.Any<false, never> : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends false ? ts_algebra_lib_meta_types.Never : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends NullableSchema ? any : any>>> : never : any>> | ParseNullableSchema<true & {
+    nullable: boolean;
+} & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends false ? ts_algebra_lib_meta_types.Never : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends NullableSchema ? ParseNullableSchema<false & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> | ParseNullableSchema<true & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> | ParseNullableSchema<Omit<json_schema.JSONSchema7, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions" | "examples"> & {
+    const?: unknown;
+    enum?: unknown;
+    items?: JSONSchema7$1 | JSONSchema7$1[] | undefined;
+    additionalItems?: JSONSchema7$1 | undefined;
+    contains?: JSONSchema7$1 | undefined;
+    properties?: Record<string, JSONSchema7$1> | undefined;
+    patternProperties?: Record<string, JSONSchema7$1> | undefined;
+    additionalProperties?: JSONSchema7$1 | undefined;
+    dependencies?: {
+        [key: string]: JSONSchema7$1 | string[];
+    } | undefined;
+    propertyNames?: JSONSchema7$1 | undefined;
+    if?: JSONSchema7$1 | undefined;
+    then?: JSONSchema7$1 | undefined;
+    else?: JSONSchema7$1 | undefined;
+    allOf?: JSONSchema7$1[] | undefined;
+    anyOf?: JSONSchema7$1[] | undefined;
+    oneOf?: JSONSchema7$1[] | undefined;
+    not?: JSONSchema7$1 | undefined;
+    nullable?: boolean | undefined;
+    definitions?: {
+        [key: string]: JSONSchema7$1;
+    } | undefined;
+    examples?: unknown[] | undefined;
+} & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends ReferenceSchema ? ParseReferenceSchema<ReferenceSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ts_toolbelt_out_String_Split.Split<(ReferenceSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["$ref"], "#">> : And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, DoesExtend<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, IfThenElseSchema>> extends true ? Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends IfThenElseSchema ? ts_algebra_lib_meta_types.Never : never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, DoesExtend<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, NotSchema>> extends true ? Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends NotSchema ? ParseNotSchema<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>, ts_algebra_lib_meta_types.$Exclude<ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>> extends ts_algebra_lib_meta_types.AnyType ? ts_algebra_lib_meta_types_intersection_union.IntersectUnion<{
+    type: "union";
+    values: {
+        type: "primitive";
+        value: null;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: boolean;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: number;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: string;
+        isSerialized: false;
+        deserialized: never;
+    } | ts_algebra_lib_meta_types.Array<ts_algebra_lib_meta_types.Any<false, never>, false, never> | {
+        type: "object";
+        values: {};
+        required: never;
+        isOpen: true;
+        openProps: ts_algebra_lib_meta_types.Any<false, never>;
+        isSerialized: false;
+        deserialized: never;
+    };
+}, ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> : ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>, ParseSchema<MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>>, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> ? ts_algebra_lib_meta_types.Any<false, never> : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends false ? ts_algebra_lib_meta_types.Never : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends NullableSchema ? any : any>>> : never : any>> | ParseNullableSchema<Omit<json_schema.JSONSchema7, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions" | "examples"> & {
+    const?: unknown;
+    enum?: unknown;
+    items?: JSONSchema7$1 | JSONSchema7$1[] | undefined;
+    additionalItems?: JSONSchema7$1 | undefined;
+    contains?: JSONSchema7$1 | undefined;
+    properties?: Record<string, JSONSchema7$1> | undefined;
+    patternProperties?: Record<string, JSONSchema7$1> | undefined;
+    additionalProperties?: JSONSchema7$1 | undefined;
+    dependencies?: {
+        [key: string]: JSONSchema7$1 | string[];
+    } | undefined;
+    propertyNames?: JSONSchema7$1 | undefined;
+    if?: JSONSchema7$1 | undefined;
+    then?: JSONSchema7$1 | undefined;
+    else?: JSONSchema7$1 | undefined;
+    allOf?: JSONSchema7$1[] | undefined;
+    anyOf?: JSONSchema7$1[] | undefined;
+    oneOf?: JSONSchema7$1[] | undefined;
+    not?: JSONSchema7$1 | undefined;
+    nullable?: boolean | undefined;
+    definitions?: {
+        [key: string]: JSONSchema7$1;
+    } | undefined;
+    examples?: unknown[] | undefined;
+} & {
+    nullable: boolean;
+} & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends false ? ts_algebra_lib_meta_types.Never : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends NullableSchema ? ParseNullableSchema<false & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> | ParseNullableSchema<true & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> | ParseNullableSchema<Omit<json_schema.JSONSchema7, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions" | "examples"> & {
+    const?: unknown;
+    enum?: unknown;
+    items?: JSONSchema7$1 | JSONSchema7$1[] | undefined;
+    additionalItems?: JSONSchema7$1 | undefined;
+    contains?: JSONSchema7$1 | undefined;
+    properties?: Record<string, JSONSchema7$1> | undefined;
+    patternProperties?: Record<string, JSONSchema7$1> | undefined;
+    additionalProperties?: JSONSchema7$1 | undefined;
+    dependencies?: {
+        [key: string]: JSONSchema7$1 | string[];
+    } | undefined;
+    propertyNames?: JSONSchema7$1 | undefined;
+    if?: JSONSchema7$1 | undefined;
+    then?: JSONSchema7$1 | undefined;
+    else?: JSONSchema7$1 | undefined;
+    allOf?: JSONSchema7$1[] | undefined;
+    anyOf?: JSONSchema7$1[] | undefined;
+    oneOf?: JSONSchema7$1[] | undefined;
+    not?: JSONSchema7$1 | undefined;
+    nullable?: boolean | undefined;
+    definitions?: {
+        [key: string]: JSONSchema7$1;
+    } | undefined;
+    examples?: unknown[] | undefined;
+} & {
+    nullable: boolean;
+} & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NullableSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> : Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends ReferenceSchema ? ParseReferenceSchema<ReferenceSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ts_toolbelt_out_String_Split.Split<(ReferenceSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["$ref"], "#">> : And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, DoesExtend<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, IfThenElseSchema>> extends true ? Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends IfThenElseSchema ? ts_algebra_lib_meta_types.Never : never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, DoesExtend<Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, NotSchema>> extends true ? Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable"> extends NotSchema ? ParseNotSchema<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>, ts_algebra_lib_meta_types.$Exclude<ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>> extends ts_algebra_lib_meta_types.AnyType ? ts_algebra_lib_meta_types_intersection_union.IntersectUnion<{
+    type: "union";
+    values: {
+        type: "primitive";
+        value: null;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: boolean;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: number;
+        isSerialized: false;
+        deserialized: never;
+    } | {
+        type: "primitive";
+        value: string;
+        isSerialized: false;
+        deserialized: never;
+    } | ts_algebra_lib_meta_types.Array<ts_algebra_lib_meta_types.Any<false, never>, false, never> | {
+        type: "object";
+        values: {};
+        required: never;
+        isOpen: true;
+        openProps: ts_algebra_lib_meta_types.Any<false, never>;
+        isSerialized: false;
+        deserialized: never;
+    };
+}, ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>> : ParseSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, And<DoesExtend<O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : false, true>, false> extends true ? never : And<DoesExtend<O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : false, true>, false> extends true ? never : ts_algebra_lib_meta_types.Any<false, never>>, ParseSchema<MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>>, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> ? ts_algebra_lib_meta_types.Any<false, never> : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends string | true ? ts_algebra_lib_meta_types.Any<false, never> : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends false ? ts_algebra_lib_meta_types.Never : MergeSubSchema<Omit<NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">, "not">, (NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"], RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>, Omit<{
+    properties: {};
+    additionalProperties: true;
+    required: [];
+}, keyof RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> & RemoveInvalidAdditionalItems<(NotSchema & Omit<NullableSchema & Omit<NullableSchema & (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S), "nullable">, "nullable">)["not"]>> extends NullableSchema ? any : any>>> : never : any>> : any>> : any>, ts_algebra_lib_meta_types_resolve.ResolveDefaultOptions>>(schema: S) => (data: unknown) => data is T;
+
+declare type Validator = (schema: JSONSchema, data: unknown) => boolean;
+declare const wrapValidatorAsTypeGuard: <O extends FromSchemaOptions = FromSchemaDefaultOptions>(validator: Validator) => <S extends JSONSchema7, T = ts_algebra_lib_meta_types.$Resolve<ParseSchema<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, ParseOptions<S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S, O>, JSONSchema7$1 extends (S extends {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+} ? DeepWritable<S> : S) ? any : any>, ts_algebra_lib_meta_types_resolve.ResolveDefaultOptions>>(schema: S, data: unknown) => data is T;
+
 declare type JSONSchema7 = JSONSchema7$1 | DeepReadonly<JSONSchema7$1>;
 declare type JSONSchema7Reference = JSONSchema7Reference$1 | DeepReadonly<JSONSchema7Reference$1>;
 declare type JSONSchema = JSONSchema7;
 declare type FromSchema<S extends JSONSchema, O extends FromSchemaOptions = FromSchemaDefaultOptions, W extends JSONSchema7$1 = S extends O.Object ? DeepWritable<S> : S> = M.$Resolve<ParseSchema<W, ParseOptions<W, O>>>;
 
-export { DeserializationPattern, FromSchema, FromSchemaDefaultOptions, FromSchemaOptions, JSONSchema, JSONSchema7, JSONSchema7Reference };
+export { Compiler, DeserializationPattern, FromSchema, FromSchemaDefaultOptions, FromSchemaOptions, JSONSchema, JSONSchema7, JSONSchema7Reference, Validator, wrapCompilerAsTypeGuard, wrapValidatorAsTypeGuard };
