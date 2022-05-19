@@ -11,11 +11,16 @@ import type { ParseSchema } from "./parse-schema";
 import type { ParseOptions } from "./parse-options";
 import type { Readonly, Writable } from "./utils";
 
-export {
+export type {
   DeserializationPattern,
   FromSchemaOptions,
   FromSchemaDefaultOptions,
 } from "./definitions";
+export type { Compiler, Validator } from "./type-guards";
+export {
+  wrapCompilerAsTypeGuard,
+  wrapValidatorAsTypeGuard,
+} from "./type-guards";
 
 /**
  * Unwidened V7 JSON schema (e.g. defined with the `as const` statement)
