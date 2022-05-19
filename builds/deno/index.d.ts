@@ -301,12 +301,14 @@ declare type ParseOptions<S extends JSONSchema7$1, O extends FromSchemaOptions> 
     deserialize: O["deserialize"] extends DeserializationPattern[] | false ? O["deserialize"] : FromSchemaDefaultOptions["deserialize"];
 };
 
-declare type Compiler = (schema: JSONSchema) => (data: unknown) => boolean;
-declare type CompilerWrapper = <O extends FromSchemaOptions = FromSchemaDefaultOptions>(compiler: Compiler) => <S extends JSONSchema, T = FromSchema<S, O>>(schema: S) => (data: unknown) => data is T;
+declare type $Compiler = (schema: JSONSchema) => (data: unknown) => boolean;
+declare type Compiler<O extends FromSchemaOptions = FromSchemaDefaultOptions> = <S extends JSONSchema, T = FromSchema<S, O>>(schema: S) => (data: unknown) => data is T;
+declare type CompilerWrapper = <O extends FromSchemaOptions = FromSchemaDefaultOptions>(compiler: $Compiler) => Compiler<O>;
 declare const wrapCompilerAsTypeGuard: CompilerWrapper;
 
-declare type Validator = (schema: JSONSchema, data: unknown) => boolean;
-declare type ValidatorWrapper = <O extends FromSchemaOptions = FromSchemaDefaultOptions>(validator: Validator) => <S extends JSONSchema, T = FromSchema<S, O>>(schema: S, data: unknown) => data is T;
+declare type $Validator = (schema: JSONSchema, data: unknown) => boolean;
+declare type Validator<O extends FromSchemaOptions = FromSchemaDefaultOptions> = <S extends JSONSchema, T = FromSchema<S, O>>(schema: S, data: unknown) => data is T;
+declare type ValidatorWrapper = <O extends FromSchemaOptions = FromSchemaDefaultOptions>(validator: $Validator) => Validator<O>;
 declare const wrapValidatorAsTypeGuard: ValidatorWrapper;
 
 declare type JSONSchema7 = JSONSchema7$1 | DeepReadonly<JSONSchema7$1>;
@@ -314,4 +316,4 @@ declare type JSONSchema7Reference = JSONSchema7Reference$1 | DeepReadonly<JSONSc
 declare type JSONSchema = JSONSchema7;
 declare type FromSchema<S extends JSONSchema, O extends FromSchemaOptions = FromSchemaDefaultOptions, W extends JSONSchema7$1 = S extends O.Object ? DeepWritable<S> : S> = M.$Resolve<ParseSchema<W, ParseOptions<W, O>>>;
 
-export { Compiler, DeserializationPattern, FromSchema, FromSchemaDefaultOptions, FromSchemaOptions, JSONSchema, JSONSchema7, JSONSchema7Reference, Validator, wrapCompilerAsTypeGuard, wrapValidatorAsTypeGuard };
+export { $Compiler, $Validator, Compiler, DeserializationPattern, FromSchema, FromSchemaDefaultOptions, FromSchemaOptions, JSONSchema, JSONSchema7, JSONSchema7Reference, Validator, wrapCompilerAsTypeGuard, wrapValidatorAsTypeGuard };
