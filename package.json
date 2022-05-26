@@ -14,13 +14,14 @@
   },
   "dependencies": {
     "@types/json-schema": "^7.0.9",
-    "ts-toolbelt": "^9.6.0",
-    "ts-algebra": "^1.1.1"
+    "ts-algebra": "^1.1.1",
+    "ts-toolbelt": "^9.6.0"
   },
   "devDependencies": {
     "@babel/core": "^7.17.5",
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-typescript": "^7.16.7",
+    "@rollup/plugin-typescript": "^8.3.2",
     "@types/jest": "^27.4.0",
     "ajv": "^8.10.0",
     "babel-jest": "^27.5.1",
@@ -28,6 +29,7 @@
     "rollup": "^2.67.3",
     "rollup-plugin-dts": "4.1.0",
     "rollup-plugin-import-map": "^2.2.2",
+    "tslib": "^2.4.0",
     "typescript": "^4.5.5"
   },
   "author": "Thomas Aribart",
