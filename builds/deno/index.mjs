@@ -1,3 +1,5 @@
+/// <reference types="./index.d.ts"/>
+
 var wrapCompilerAsTypeGuard = function (compiler) {
     return function (schema) {
         var validator = compiler(schema);
