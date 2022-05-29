@@ -745,7 +745,7 @@ import { FromSchema, Validator } from "json-schema-to-ts";
 
 // It's important to:
 // - Explicitely type your validator as Validator
-// - Use FromSchema as the default value of a second generic first
+// - Use FromSchema as the default value of a 2nd generic first
 const validate: Validator = <S extends JSONSchema, T = FromSchema<S>>(
   schema: S,
   data: unknown
@@ -757,21 +757,23 @@ const validate: Validator = <S extends JSONSchema, T = FromSchema<S>>(
 const petSchema = { ... } as const
 let data: unknown;
 if (validate(petSchema, data)) {
-  const { name, ... } = data; // <= data is typed as Pet 🙌
+  const { name, ... } = data; // data is typed as Pet 🙌
 }
 ```
 
-If needed, you can provide `FromSchema` options to the `Validator` type:
+If needed, you can provide `FromSchema` options and additional validation options to the `Validator` type:
 
 ```typescript
-type Options = { parseNotKeyword: true };
+type FromSchemaOptions = { parseNotKeyword: true };
+type ValidationOptions = [{ fastValidate: boolean }]
 
-const validate: Validator<Options> = <
+const validate: Validator<FromSchemaOptions, ValidationOptions> = <
   S extends JSONSchema,
-  T = FromSchema<S, Options>
+  T = FromSchema<S, FromSchemaOptions>
 >(
   schema: S,
-  data: unknown
+  data: unknown,
+  ...validationOptions: ValidationOptions
 ): data is T => { ... };
 ```
 
@@ -801,16 +803,31 @@ const petSchema = { ... } as const;
 
 let data: unknown;
 if (validate(petSchema, data)) {
-  const { name, ... } = data; // <= data is typed as Pet 🙌
+  const { name, ... } = data; // data is typed as Pet 🙌
 }
 ```
 
-If needed, you can provide `FromSchema` options as generic type:
+If needed, you can provide `FromSchema` options and additional validation options as generic types:
 
 ```typescript
-const validate = wrapValidatorAsTypeGuard<{
-  parseNotKeyword: true;
-}>($validate);
+type FromSchemaOptions = { parseNotKeyword: true };
+type ValidationOptions = [{ fastValidate: boolean }]
+
+const $validate: $Validator<ValidationOptions> = (
+  schema,
+  data,
+  ...validationOptions // typed as ValidationOptions
+) => { ... };
+
+// validate will inherit from ValidationOptions
+const validate = wrapValidatorAsTypeGuard($validate);
+
+// with special FromSchemaOptions
+// (ValidationOptions needs to be re-provided)
+const validate = wrapValidatorAsTypeGuard<
+  FromSchemaOptions,
+  ValidationOptions
+>($validate);
 ```
 
 ### Compilers
@@ -835,16 +852,39 @@ const isPet = compile(petSchema);
 
 let data: unknown;
 if (isPet(data)) {
-  const { name, ... } = data; // <= data is typed as Pet 🙌
+  const { name, ... } = data; // data is typed as Pet 🙌
 }
 ```
 
-If needed, you can provide `FromSchema` options as generic type:
+If needed, you can provide `FromSchema` options, additional compiling and validation options as generic types:
 
 ```typescript
-const compile = wrapCompilerAsTypeGuard<{
-  parseNotKeyword: true;
-}>($compile);
+type FromSchemaOptions = { parseNotKeyword: true };
+type CompilingOptions = [{ fastCompile: boolean }];
+type ValidationOptions = [{ fastValidate: boolean }];
+
+const $compile: $Compiler<CompilingOptions, ValidationOptions> = (
+  schema,
+  ...compilingOptions // typed as CompilingOptions
+) => {
+  ...
+
+  return (
+    data,
+    ...validationOptions // typed as ValidationOptions
+  ) => { ...  };
+};
+
+// compile will inherit from all options
+const compile = wrapCompilerAsTypeGuard($compile);
+
+// with special FromSchemaOptions
+// (options need to be re-provided)
+const compile = wrapCompilerAsTypeGuard<
+  FromSchemaOptions,
+  CompilingOptions,
+  ValidationOptions
+>($compile);
 ```
 
 ## Frequently Asked Questions
