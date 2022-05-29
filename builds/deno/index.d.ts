@@ -301,14 +301,14 @@ declare type ParseOptions<S extends JSONSchema7$1, O extends FromSchemaOptions> 
     deserialize: O["deserialize"] extends DeserializationPattern[] | false ? O["deserialize"] : FromSchemaDefaultOptions["deserialize"];
 };
 
-declare type $Compiler = (schema: JSONSchema) => (data: unknown) => boolean;
-declare type Compiler<O extends FromSchemaOptions = FromSchemaDefaultOptions> = <S extends JSONSchema, T = FromSchema<S, O>>(schema: S) => (data: unknown) => data is T;
-declare type CompilerWrapper = <O extends FromSchemaOptions = FromSchemaDefaultOptions>(compiler: $Compiler) => Compiler<O>;
+declare type $Compiler<C extends unknown[] = [], V extends unknown[] = []> = (schema: JSONSchema, ...compilingOptions: C) => (data: unknown, ...validationOptions: V) => boolean;
+declare type Compiler<O extends FromSchemaOptions = FromSchemaDefaultOptions, C extends unknown[] = [], V extends unknown[] = []> = <S extends JSONSchema, T = FromSchema<S, O>>(schema: S, ...compilingOptions: C) => (data: unknown, ...validationOptions: V) => data is T;
+declare type CompilerWrapper = <O extends FromSchemaOptions = FromSchemaDefaultOptions, C extends unknown[] = [], V extends unknown[] = []>(compiler: $Compiler<C, V>) => Compiler<O, C, V>;
 declare const wrapCompilerAsTypeGuard: CompilerWrapper;
 
-declare type $Validator = (schema: JSONSchema, data: unknown) => boolean;
-declare type Validator<O extends FromSchemaOptions = FromSchemaDefaultOptions> = <S extends JSONSchema, T = FromSchema<S, O>>(schema: S, data: unknown) => data is T;
-declare type ValidatorWrapper = <O extends FromSchemaOptions = FromSchemaDefaultOptions>(validator: $Validator) => Validator<O>;
+declare type $Validator<V extends unknown[] = []> = (schema: JSONSchema, data: unknown, ...validationOptions: V) => boolean;
+declare type Validator<O extends FromSchemaOptions = FromSchemaDefaultOptions, V extends unknown[] = []> = <S extends JSONSchema, T = FromSchema<S, O>>(schema: S, data: unknown, ...validationOptions: V) => data is T;
+declare type ValidatorWrapper = <O extends FromSchemaOptions = FromSchemaDefaultOptions, V extends unknown[] = []>(validator: $Validator<V>) => Validator<O, V>;
 declare const wrapValidatorAsTypeGuard: ValidatorWrapper;
 
 declare type JSONSchema7 = JSONSchema7$1 | DeepReadonly<JSONSchema7$1>;
