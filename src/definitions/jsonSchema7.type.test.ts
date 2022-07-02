@@ -1,6 +1,7 @@
-import { FromSchema } from "index";
+import { JSONSchema } from "index";
 
-const schemaWithArrayExamples = {
+// Should work with array examples
+const schemaWithArrayExamples: JSONSchema = {
   additionalProperties: true,
   type: "object",
   properties: {
@@ -14,8 +15,32 @@ const schemaWithArrayExamples = {
     },
   ],
 } as const;
+schemaWithArrayExamples;
 
-// Should work with array examples
-type Result = FromSchema<typeof schemaWithArrayExamples>;
-const result: Result = {};
-result;
+// Should work with non-array default
+const schemaWithNonArrayDefault: JSONSchema = {
+  additionalProperties: true,
+  type: "object",
+  properties: {
+    foo: {
+      type: "array",
+      items: { type: "string" },
+      default: "thomas",
+    },
+  },
+} as const;
+schemaWithNonArrayDefault;
+
+// Should work with array default
+const schemaWithArrayDefault: JSONSchema = {
+  additionalProperties: true,
+  type: "object",
+  properties: {
+    foo: {
+      type: "array",
+      items: { type: "string" },
+      default: ["thomas", "stan"],
+    },
+  },
+} as const;
+schemaWithArrayDefault;

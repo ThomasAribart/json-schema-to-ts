@@ -23,6 +23,7 @@ export type JSONSchema7 =
       | "not"
       | "definitions"
       | "examples"
+      | "default"
     > & {
       const?: unknown;
       enum?: unknown;
@@ -50,6 +51,9 @@ export type JSONSchema7 =
       // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/0e40d820c92ec6457854fa6726bbff2ffea4e7dd/types/json-schema/index.d.ts#L590
       // https://github.com/microsoft/TypeScript/issues/3496#issuecomment-128553540
       examples?: unknown[];
+      // Required to allow array values in default field
+      // https://github.com/ThomasAribart/json-schema-to-ts/issues/80
+      default?: unknown;
     });
 
 export type JSONSchema7Reference = JSONSchema7 & { $id: string };
