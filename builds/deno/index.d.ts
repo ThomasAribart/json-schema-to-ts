@@ -7,7 +7,7 @@ declare type DeserializationPattern = {
     output: unknown;
 };
 
-declare type JSONSchema7$1 = boolean | (Omit<JSONSchema7$2, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions" | "examples"> & {
+declare type JSONSchema7$1 = boolean | (Omit<JSONSchema7$2, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions" | "examples" | "default"> & {
     const?: unknown;
     enum?: unknown;
     items?: JSONSchema7$1 | JSONSchema7$1[];
@@ -32,6 +32,7 @@ declare type JSONSchema7$1 = boolean | (Omit<JSONSchema7$2, "const" | "enum" | "
         [key: string]: JSONSchema7$1;
     };
     examples?: unknown[];
+    default?: unknown;
 });
 declare type JSONSchema7Reference$1 = JSONSchema7$1 & {
     $id: string;
