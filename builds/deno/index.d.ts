@@ -33,6 +33,7 @@ declare type JSONSchema7$1 = boolean | (Omit<JSONSchema7$2, "const" | "enum" | "
     };
     examples?: unknown[];
     default?: unknown;
+    [key: string]: unknown;
 });
 declare type JSONSchema7Reference$1 = JSONSchema7$1 & {
     $id: string;
