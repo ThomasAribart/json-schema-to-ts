@@ -101,24 +101,6 @@ type AssertOddNumber = A.Equals<ReceivedOddNumber, ExpectedOddNumber>;
 const assertOddNumber: AssertOddNumber = 1;
 assertOddNumber;
 
-// Incorrect
-
-const incorrectSchema = {
-  type: "number",
-  not: { bogus: "option" },
-} as const;
-
-type ReceivedIncorrect = FromSchema<
-  // @ts-expect-error
-  typeof incorrectSchema,
-  { parseNotKeyword: true }
->;
-type ExpectedIncorrect = unknown;
-
-type AssertIncorrect = A.Equals<ReceivedIncorrect, ExpectedIncorrect>;
-const assertIncorrect: AssertIncorrect = 1;
-assertIncorrect;
-
 // Refinment types
 
 const goodLanguageSchema = {
