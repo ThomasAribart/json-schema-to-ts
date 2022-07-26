@@ -44,3 +44,10 @@ const schemaWithArrayDefault: JSONSchema = {
   },
 } as const;
 schemaWithArrayDefault;
+
+// Should work with extended schema (custom property)
+const schemaWithCustomProperty: JSONSchema = {
+  type: "object",
+  transform: ["trim"],
+} as const;
+schemaWithCustomProperty;

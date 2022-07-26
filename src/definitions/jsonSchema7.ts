@@ -54,6 +54,7 @@ export type JSONSchema7 =
       // Required to allow array values in default field
       // https://github.com/ThomasAribart/json-schema-to-ts/issues/80
       default?: unknown;
+      [key: string]: unknown;
     });
 
 export type JSONSchema7Reference = JSONSchema7 & { $id: string };
