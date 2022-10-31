@@ -73,7 +73,7 @@ type Pet = FromSchema<typeof petSchema>;
 
 ## Why use `json-schema-to-ts`?
 
-If you're looking for runtime validation with added types, libraries like [yup](https://github.com/jquense/yup), [zod](https://github.com/vriad/zod) or [runtypes](https://github.com/pelotom/runtypes) may suit your needs while being easier to use!
+If you're looking for runtime validation with added types, libraries like [yup](https://github.com/jquense/yup), [zod](https://github.com/vriad/zod) [runtypes](https://github.com/pelotom/runtypes), or [ajv](https://www.npmjs.com/package/ajv) may suit your needs while being easier to use!
 
 On the other hand, JSON schemas have the benefit of being widely used, more versatile and reusable (swaggers, APIaaS...).
 
