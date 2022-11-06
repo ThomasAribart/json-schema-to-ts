@@ -1,7 +1,7 @@
-import { ParseSchemaOptions } from "../index";
+import type { ParseSchemaOptions } from "../index";
 
-import { ReferenceSchema } from ".";
-import { ParseReference } from "./utils";
+import type { ReferenceSchema } from ".";
+import type { ParseReference } from "./utils";
 
 export type ParseDefinitionSchema<
   S extends ReferenceSchema,

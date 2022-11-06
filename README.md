@@ -69,7 +69,21 @@ type Pet = FromSchema<typeof petSchema>;
 // => Will work 🙌
 ```
 
-> The `as const` statement is used so that TypeScript takes the schema definition to the word (e.g. _true_ is interpreted as the _true_ constant and not widened as _boolean_). It is pure TypeScript and has zero impact on the compiled code.
+The `as const` statement is used so that TypeScript takes the schema definition to the word (e.g. _true_ is interpreted as the _true_ constant and not widened as _boolean_). It is pure TypeScript and has zero impact on the compiled code.
+
+If you don't mind impacting the compiled code, you can use the `asConst` util, which simply returns the schema while narrowing its inferred type.
+
+```typescript
+import { asConst } from "json-schema-to-ts";
+
+const dogSchema = asConst({
+  type: "object",
+  ...
+});
+
+type Dog = FromSchema<typeof dogSchema>;
+// => Will work as well 🙌
+```
 
 ## Why use `json-schema-to-ts`?
 
@@ -152,7 +166,7 @@ npm install --save-dev json-schema-to-ts
 yarn add --dev json-schema-to-ts
 ```
 
-> `json-schema-to-ts` requires TypeScript 3.3+. Activating `strictNullChecks` or using `strict` mode is recommended.
+> `json-schema-to-ts` requires TypeScript 4.3+. Using `strict` mode is required, as well as (apparently) turning off [`noStrictGenericChecks`](https://www.typescriptlang.org/tsconfig#noStrictGenericChecks).
 
 ## Use cases
 

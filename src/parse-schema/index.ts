@@ -1,20 +1,23 @@
-import { M } from "ts-algebra";
+import type { M } from "ts-algebra";
 
-import { DeserializationPattern, JSONSchema7 } from "../definitions";
-import { And, DoesExtend } from "../utils";
+import type { DeserializationPattern, JSONSchema7 } from "../definitions";
+import type { And, DoesExtend } from "../type-utils";
 
-import { DeserializeSchema } from "./deserialize";
-import { ConstSchema, ParseConstSchema } from "./const";
-import { EnumSchema, ParseEnumSchema } from "./enum";
-import { ParseSingleTypeSchema, SingleTypeSchema } from "./singleType";
-import { MultipleTypesSchema, ParseMultipleTypesSchema } from "./multipleTypes";
-import { AnyOfSchema, ParseAnyOfSchema } from "./anyOf";
-import { OneOfSchema, ParseOneOfSchema } from "./oneOf";
-import { AllOfSchema, ParseAllOfSchema } from "./allOf";
-import { ParseNotSchema, NotSchema } from "./not";
-import { ParseIfThenElseSchema, IfThenElseSchema } from "./ifThenElse";
-import { NullableSchema, ParseNullableSchema } from "./nullable";
-import { ReferenceSchema, ParseReferenceSchema } from "./references";
+import type { DeserializeSchema } from "./deserialize";
+import type { ConstSchema, ParseConstSchema } from "./const";
+import type { EnumSchema, ParseEnumSchema } from "./enum";
+import type { ParseSingleTypeSchema, SingleTypeSchema } from "./singleType";
+import type {
+  MultipleTypesSchema,
+  ParseMultipleTypesSchema,
+} from "./multipleTypes";
+import type { AnyOfSchema, ParseAnyOfSchema } from "./anyOf";
+import type { OneOfSchema, ParseOneOfSchema } from "./oneOf";
+import type { AllOfSchema, ParseAllOfSchema } from "./allOf";
+import type { ParseNotSchema, NotSchema } from "./not";
+import type { ParseIfThenElseSchema, IfThenElseSchema } from "./ifThenElse";
+import type { NullableSchema, ParseNullableSchema } from "./nullable";
+import type { ReferenceSchema, ParseReferenceSchema } from "./references";
 
 export type ParseSchemaOptions = {
   parseNotKeyword: boolean;

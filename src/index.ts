@@ -1,5 +1,5 @@
-import { M } from "ts-algebra";
-import { O } from "ts-toolbelt";
+import type { M } from "ts-algebra";
+import type { O } from "ts-toolbelt";
 
 import type {
   JSONSchema7 as $JSONSchema7,
@@ -9,18 +9,19 @@ import type {
 } from "./definitions";
 import type { ParseSchema } from "./parse-schema";
 import type { ParseOptions } from "./parse-options";
-import type { Readonly, Writable } from "./utils";
+import type { Readonly, Writable } from "./type-utils";
 
 export type {
   DeserializationPattern,
   FromSchemaOptions,
   FromSchemaDefaultOptions,
 } from "./definitions";
-export type { $Compiler, Compiler, $Validator, Validator } from "./type-guards";
+export type { $Compiler, Compiler, $Validator, Validator } from "./utils";
 export {
   wrapCompilerAsTypeGuard,
   wrapValidatorAsTypeGuard,
-} from "./type-guards";
+  asConst,
+} from "./utils";
 
 /**
  * Unwidened V7 JSON schema (e.g. defined with the `as const` statement)

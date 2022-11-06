@@ -1,4 +1,4 @@
-import { JSONSchema7 as $JSONSchema7 } from "json-schema";
+import type { JSONSchema7 as $JSONSchema7 } from "json-schema";
 
 export type JSONSchema7 =
   | boolean

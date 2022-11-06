@@ -1,4 +1,4 @@
-import { L } from "ts-toolbelt";
+import type { L } from "ts-toolbelt";
 
 export type DeepGet<O, P extends string[], D = undefined> = {
   stop: O;

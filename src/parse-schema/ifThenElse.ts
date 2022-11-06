@@ -1,9 +1,9 @@
-import { M } from "ts-algebra";
+import type { M } from "ts-algebra";
 
-import { JSONSchema7 } from "../definitions";
+import type { JSONSchema7 } from "../definitions";
 
-import { ParseSchema, ParseSchemaOptions } from "./index";
-import { MergeSubSchema } from "./utils";
+import type { ParseSchema, ParseSchemaOptions } from "./index";
+import type { MergeSubSchema } from "./utils";
 
 export type IfThenElseSchema = JSONSchema7 & {
   if: JSONSchema7;

@@ -1,10 +1,10 @@
-import { M } from "ts-algebra";
+import type { M } from "ts-algebra";
 
-import { JSONSchema7 } from "../definitions";
+import type { JSONSchema7 } from "../definitions";
 
-import { ParseSchema, ParseSchemaOptions } from "./index";
-import { SingleTypeSchema } from "./singleType";
-import { MultipleTypesSchema } from "./multipleTypes";
+import type { ParseSchema, ParseSchemaOptions } from "./index";
+import type { SingleTypeSchema } from "./singleType";
+import type { MultipleTypesSchema } from "./multipleTypes";
 
 export type ConstSchema = JSONSchema7 & { const: unknown };
 

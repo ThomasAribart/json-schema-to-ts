@@ -1,6 +1,6 @@
-export { And } from "./and";
-export { DoesExtend, IsObject } from "./extends";
-export { DeepGet } from "./get";
-export { Merge } from "./merge";
-export { DeepReadonly as Readonly } from "./readonly";
-export { DeepWritable as Writable } from "./writable";
+export type { $Compiler, Compiler, $Validator, Validator } from "./type-guards";
+export {
+  wrapCompilerAsTypeGuard,
+  wrapValidatorAsTypeGuard,
+} from "./type-guards";
+export { asConst } from "./asConst";

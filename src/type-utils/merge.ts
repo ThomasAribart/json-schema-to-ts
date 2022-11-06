@@ -1,4 +1,4 @@
-import { IsObject } from "./extends";
+import type { IsObject } from "./extends";
 
 /**
  * Merge two types `A` and `B`:

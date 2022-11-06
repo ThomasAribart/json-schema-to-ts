@@ -1,6 +1,9 @@
-import { JSONSchema7Reference } from "../index";
-import { DeserializationPattern } from "./deserializationPattern";
+import type { JSONSchema7Reference } from "../index";
+import type { DeserializationPattern } from "./deserializationPattern";
 
+/**
+ * FromSchema options constraints
+ */
 export type FromSchemaOptions = {
   parseNotKeyword?: boolean;
   parseIfThenElseKeywords?: boolean;
@@ -8,6 +11,9 @@ export type FromSchemaOptions = {
   deserialize?: DeserializationPattern[] | false;
 };
 
+/**
+ * FromSchema default options
+ */
 export type FromSchemaDefaultOptions = {
   parseNotKeyword: false;
   parseIfThenElseKeywords: false;

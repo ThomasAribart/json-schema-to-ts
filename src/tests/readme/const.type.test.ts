@@ -1,6 +1,6 @@
-import { A } from "ts-toolbelt";
+import type { A } from "ts-toolbelt";
 
-import { FromSchema } from "index";
+import type { FromSchema } from "index";
 
 const constSchema = {
   const: "foo",

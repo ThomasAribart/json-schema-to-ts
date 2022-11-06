@@ -1,10 +1,10 @@
-import { S } from "ts-toolbelt";
+import type { S } from "ts-toolbelt";
 
-import { JSONSchema7 } from "../../definitions";
-import { ParseSchemaOptions } from "../index";
+import type { JSONSchema7 } from "../../definitions";
+import type { ParseSchemaOptions } from "../index";
 
-import { ParseDefinitionSchema } from "./definitions";
-import { ParseExternalReferenceSchema } from "./references";
+import type { ParseDefinitionSchema } from "./definitions";
+import type { ParseExternalReferenceSchema } from "./references";
 
 export type ReferenceSchema = JSONSchema7 & {
   $ref: string;

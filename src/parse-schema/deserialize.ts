@@ -1,9 +1,9 @@
-import { M } from "ts-algebra";
-import { L } from "ts-toolbelt";
+import type { M } from "ts-algebra";
+import type { L } from "ts-toolbelt";
 
-import { JSONSchema7, DeserializationPattern } from "../definitions";
+import type { JSONSchema7, DeserializationPattern } from "../definitions";
 
-import { ParseSchemaOptions } from "./index";
+import type { ParseSchemaOptions } from "./index";
 
 export type DeserializeSchema<
   S extends JSONSchema7,
