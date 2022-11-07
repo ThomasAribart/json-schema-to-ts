@@ -1,6 +1,6 @@
 import { M } from 'https://cdn.skypack.dev/ts-algebra@^1.1.1?dts';
 import { JSONSchema7 as JSONSchema7$2, JSONSchema7TypeName } from 'https://cdn.skypack.dev/@types/json-schema@^7.0.9?dts';
-import { L, O, A, S } from 'https://cdn.skypack.dev/ts-toolbelt@^9.6.0?dts';
+import { L, O, S } from 'https://cdn.skypack.dev/ts-toolbelt@^9.6.0?dts';
 
 declare type DeserializationPattern = {
     pattern: unknown;
@@ -54,12 +54,20 @@ declare type FromSchemaDefaultOptions = {
 
 declare type And<A, B> = A extends true ? B extends true ? true : false : false;
 
+declare type Compute<A> = A extends Promise<infer T> ? Promise<Compute<T>> : A extends (...args: infer P) => infer R ? (...args: Compute<P>) => Compute<R> : A extends Set<infer V> ? Set<Compute<V>> : A extends object ? {
+    [key in keyof A]: Compute<A[key]>;
+} : A;
+
 declare type DoesExtend<A, B> = A extends B ? true : false;
 
 declare type DeepGet<O, P extends string[], D = undefined> = {
     stop: O;
     continue: L.Head<P> extends keyof O ? DeepGet<O[L.Head<P>], L.Tail<P>, D> : D;
 }[P extends [any, ...any[]] ? "continue" : "stop"];
+
+declare type Narrow<A> = A extends Promise<infer T> ? Promise<Narrow<T>> : A extends (...args: infer P) => infer R ? (...args: Narrow<P>) => Narrow<R> : A extends [] ? [] : A extends object ? {
+    [key in keyof A]: Narrow<A[key]>;
+} : A extends string | number | boolean | bigint ? A : never;
 
 declare type DeepReadonly<T> = T extends O.Object ? {
     readonly [P in keyof T]: DeepReadonly<T[P]>;
@@ -190,7 +198,7 @@ declare type EnumSchema = JSONSchema7$1 & {
     enum: unknown[];
 };
 declare type ParseEnumSchema<S extends EnumSchema, O extends ParseSchemaOptions> = M.$Intersect<ParseEnum<S>, ParseSchema<Omit<S, "enum">, O>>;
-declare type ParseEnum<S extends EnumSchema> = M.Enum<A.Compute<S["enum"][number]>>;
+declare type ParseEnum<S extends EnumSchema> = M.Enum<Compute<S["enum"][number]>>;
 
 declare type RemoveInvalidAdditionalItems<S extends JSONSchema7$1> = S extends {
     items: JSONSchema7$1 | JSONSchema7$1[];
@@ -313,9 +321,11 @@ declare type Validator<O extends FromSchemaOptions = FromSchemaDefaultOptions, V
 declare type ValidatorWrapper = <O extends FromSchemaOptions = FromSchemaDefaultOptions, V extends unknown[] = []>(validator: $Validator<V>) => Validator<O, V>;
 declare const wrapValidatorAsTypeGuard: ValidatorWrapper;
 
+declare const asConst: <A>(narrowed: Narrow<A>) => Narrow<A>;
+
 declare type JSONSchema7 = JSONSchema7$1 | DeepReadonly<JSONSchema7$1>;
 declare type JSONSchema7Reference = JSONSchema7Reference$1 | DeepReadonly<JSONSchema7Reference$1>;
 declare type JSONSchema = JSONSchema7;
 declare type FromSchema<S extends JSONSchema, O extends FromSchemaOptions = FromSchemaDefaultOptions, W extends JSONSchema7$1 = S extends O.Object ? DeepWritable<S> : S> = M.$Resolve<ParseSchema<W, ParseOptions<W, O>>>;
 
-export { $Compiler, $Validator, Compiler, DeserializationPattern, FromSchema, FromSchemaDefaultOptions, FromSchemaOptions, JSONSchema, JSONSchema7, JSONSchema7Reference, Validator, wrapCompilerAsTypeGuard, wrapValidatorAsTypeGuard };
+export { $Compiler, $Validator, Compiler, DeserializationPattern, FromSchema, FromSchemaDefaultOptions, FromSchemaOptions, JSONSchema, JSONSchema7, JSONSchema7Reference, Validator, asConst, wrapCompilerAsTypeGuard, wrapValidatorAsTypeGuard };

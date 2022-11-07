@@ -52,4 +52,6 @@ var wrapValidatorAsTypeGuard = function (validator) {
     };
 };
 
-export { wrapCompilerAsTypeGuard, wrapValidatorAsTypeGuard };
+var asConst = function (narrowed) { return narrowed; };
+
+export { asConst, wrapCompilerAsTypeGuard, wrapValidatorAsTypeGuard };
