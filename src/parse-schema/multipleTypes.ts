@@ -1,10 +1,10 @@
-import { JSONSchema7TypeName } from "json-schema";
-import { M } from "ts-algebra";
-import { L } from "ts-toolbelt";
+import type { JSONSchema7TypeName } from "json-schema";
+import type { M } from "ts-algebra";
+import type { L } from "ts-toolbelt";
 
-import { JSONSchema7 } from "../definitions";
+import type { JSONSchema7 } from "../definitions";
 
-import { ParseSchema, ParseSchemaOptions } from "./index";
+import type { ParseSchema, ParseSchemaOptions } from "./index";
 
 export type MultipleTypesSchema = JSONSchema7 & { type: JSONSchema7TypeName[] };
 

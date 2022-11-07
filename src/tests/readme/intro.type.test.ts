@@ -1,6 +1,7 @@
-import { A } from "ts-toolbelt";
+import type { A } from "ts-toolbelt";
 
-import { FromSchema } from "index";
+import type { FromSchema } from "index";
+import { asConst } from "utils/asConst";
 
 // Dog
 
@@ -27,6 +28,25 @@ type ExpectedDog = {
 type AssertDog = A.Equals<ReceivedDog, ExpectedDog>;
 const assertDog: AssertDog = 1;
 assertDog;
+
+// With asConst util
+
+const dogSchemaB = asConst({
+  type: "object",
+  properties: {
+    name: { type: "string" },
+    age: { type: "integer" },
+    hobbies: { type: "array", items: { type: "string" } },
+    favoriteFood: { enum: ["pizza", "taco", "fries"] },
+  },
+  required: ["name", "age"],
+});
+
+type ReceivedDog2 = FromSchema<typeof dogSchemaB>;
+
+type AssertDog2 = A.Equals<ReceivedDog2, ExpectedDog>;
+const assertDog2: AssertDog2 = 1;
+assertDog2;
 
 // Address (impossible schema)
 

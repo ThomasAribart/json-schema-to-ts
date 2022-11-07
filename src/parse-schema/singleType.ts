@@ -1,11 +1,11 @@
-import { JSONSchema7TypeName } from "json-schema";
-import { M } from "ts-algebra";
+import type { JSONSchema7TypeName } from "json-schema";
+import type { M } from "ts-algebra";
 
-import { JSONSchema7 } from "../definitions";
+import type { JSONSchema7 } from "../definitions";
 
-import { ParseSchemaOptions } from "./index";
-import { ParseObjectSchema, ObjectSchema } from "./object";
-import { ParseArraySchema, ArraySchema } from "./array";
+import type { ParseSchemaOptions } from "./index";
+import type { ParseObjectSchema, ObjectSchema } from "./object";
+import type { ParseArraySchema, ArraySchema } from "./array";
 
 export type SingleTypeSchema = JSONSchema7 & { type: JSONSchema7TypeName };
 

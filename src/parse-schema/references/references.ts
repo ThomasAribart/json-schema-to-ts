@@ -1,12 +1,12 @@
-import { M } from "ts-algebra";
-import { L, S } from "ts-toolbelt";
+import type { M } from "ts-algebra";
+import type { L, S } from "ts-toolbelt";
 
-import { JSONSchema7 } from "../../definitions";
+import type { JSONSchema7 } from "../../definitions";
 
-import { ParseSchemaOptions } from "../index";
+import type { ParseSchemaOptions } from "../index";
 
-import { ReferenceSchema } from "./index";
-import { ParseReference } from "./utils";
+import type { ReferenceSchema } from "./index";
+import type { ParseReference } from "./utils";
 
 export type ParseExternalReferenceSchema<
   S extends ReferenceSchema,

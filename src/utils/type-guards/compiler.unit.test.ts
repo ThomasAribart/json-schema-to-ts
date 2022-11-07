@@ -1,6 +1,6 @@
-import { A } from "ts-toolbelt";
+import type { A } from "ts-toolbelt";
 
-import { JSONSchema } from "../index";
+import type { JSONSchema } from "../../index";
 
 import { ajv } from "./ajv.util.test";
 import { petSchema, Pet } from "./schema.util.test";

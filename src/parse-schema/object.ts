@@ -1,8 +1,8 @@
-import { M } from "ts-algebra";
+import type { M } from "ts-algebra";
 
-import { JSONSchema7 } from "../definitions";
+import type { JSONSchema7 } from "../definitions";
 
-import { ParseSchema, ParseSchemaOptions } from "./index";
+import type { ParseSchema, ParseSchemaOptions } from "./index";
 
 export type ObjectSchema = JSONSchema7 & { type: "object" };
 

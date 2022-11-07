@@ -1,4 +1,4 @@
-import { FromSchema } from "index";
+import type { FromSchema } from "index";
 
 import { ajv } from "./ajv.util.test";
 

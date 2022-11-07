@@ -1,4 +1,4 @@
-import { JSONSchema } from "index";
+import type { JSONSchema } from "index";
 
 // Should work with array examples
 const schemaWithArrayExamples: JSONSchema = {

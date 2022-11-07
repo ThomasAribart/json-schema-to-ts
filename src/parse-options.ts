@@ -1,13 +1,13 @@
-import { L } from "ts-toolbelt";
+import type { L } from "ts-toolbelt";
 
-import { Writable } from "./utils";
-import {
+import type { Writable } from "./type-utils";
+import type {
   JSONSchema7,
   FromSchemaOptions,
   FromSchemaDefaultOptions,
   DeserializationPattern,
 } from "./definitions";
-import { JSONSchema7Reference } from "./index";
+import type { JSONSchema7Reference } from "./index";
 
 export type ParseReferences<
   S extends JSONSchema7Reference[],

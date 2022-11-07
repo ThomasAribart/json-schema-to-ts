@@ -1,11 +1,11 @@
-import { M } from "ts-algebra";
-import { L, S } from "ts-toolbelt";
+import type { M } from "ts-algebra";
+import type { L, S } from "ts-toolbelt";
 
-import { JSONSchema7 } from "../../definitions";
-import { DeepGet } from "../../utils";
+import type { JSONSchema7 } from "../../definitions";
+import type { DeepGet } from "../../type-utils";
 
-import { ParseSchema, ParseSchemaOptions } from "../index";
-import { MergeSubSchema } from "../utils";
+import type { ParseSchema, ParseSchemaOptions } from "../index";
+import type { MergeSubSchema } from "../utils";
 
 export type ParseReference<
   S extends JSONSchema7,

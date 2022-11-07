@@ -1,10 +1,10 @@
-import { M } from "ts-algebra";
-import { L } from "ts-toolbelt";
+import type { M } from "ts-algebra";
+import type { L } from "ts-toolbelt";
 
-import { JSONSchema7 } from "../definitions";
-import { DoesExtend } from "../utils";
+import type { JSONSchema7 } from "../definitions";
+import type { DoesExtend } from "../type-utils";
 
-import { ParseSchema, ParseSchemaOptions } from "./index";
+import type { ParseSchema, ParseSchemaOptions } from "./index";
 
 export type ArraySchema = JSONSchema7 & { type: "array" };
 

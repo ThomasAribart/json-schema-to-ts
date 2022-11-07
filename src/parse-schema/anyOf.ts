@@ -1,10 +1,10 @@
-import { M } from "ts-algebra";
-import { L } from "ts-toolbelt";
+import type { M } from "ts-algebra";
+import type { L } from "ts-toolbelt";
 
-import { JSONSchema7 } from "../definitions";
+import type { JSONSchema7 } from "../definitions";
 
-import { ParseSchema, ParseSchemaOptions } from "./index";
-import { MergeSubSchema } from "./utils";
+import type { ParseSchema, ParseSchemaOptions } from "./index";
+import type { MergeSubSchema } from "./utils";
 
 export type AnyOfSchema = JSONSchema7 & { anyOf: JSONSchema7[] };
 
