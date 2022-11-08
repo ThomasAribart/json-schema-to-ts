@@ -3,7 +3,7 @@ import type {
   JSONSchema,
   FromSchemaOptions,
   FromSchemaDefaultOptions,
-} from "../../index";
+} from "~/index";
 
 /**
  * Any compiler function type (non type-guarding)
@@ -28,7 +28,7 @@ export type $Compiler<C extends unknown[] = [], V extends unknown[] = []> = (
 export type Compiler<
   O extends FromSchemaOptions = FromSchemaDefaultOptions,
   C extends unknown[] = [],
-  V extends unknown[] = []
+  V extends unknown[] = [],
 > = <S extends JSONSchema, T = FromSchema<S, O>>(
   schema: S,
   ...compilingOptions: C
@@ -37,9 +37,9 @@ export type Compiler<
 type CompilerWrapper = <
   O extends FromSchemaOptions = FromSchemaDefaultOptions,
   C extends unknown[] = [],
-  V extends unknown[] = []
+  V extends unknown[] = [],
 >(
-  compiler: $Compiler<C, V>
+  compiler: $Compiler<C, V>,
 ) => Compiler<O, C, V>;
 
 /**
@@ -49,15 +49,16 @@ export const wrapCompilerAsTypeGuard: CompilerWrapper =
   <
     O extends FromSchemaOptions = FromSchemaDefaultOptions,
     C extends unknown[] = [],
-    V extends unknown[] = []
+    V extends unknown[] = [],
   >(
-    compiler: $Compiler<C, V>
+    compiler: $Compiler<C, V>,
   ) =>
   <S extends JSONSchema, T = FromSchema<S, O>>(
     schema: S,
     ...compilingOptions: C
   ) => {
     const validator = compiler(schema, ...compilingOptions);
+
     return (data: unknown, ...validationOptions: V): data is T =>
       validator(data, ...validationOptions);
   };

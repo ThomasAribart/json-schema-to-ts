@@ -1,4 +1,4 @@
-import type { FromSchema } from "index";
+import type { FromSchema } from "~/index";
 
 import { ajv } from "./ajv.util.test";
 
@@ -94,12 +94,12 @@ describe("Mixed types schemas", () => {
     it("accepts object with required & valid properties", () => {
       uberComplexInstance = { name: "Garfield" };
       expect(ajv.validate(uberComplexTypesSchema, uberComplexInstance)).toBe(
-        true
+        true,
       );
 
       uberComplexInstance = { name: "Garfield", description: "a cool cat" };
       expect(ajv.validate(uberComplexTypesSchema, uberComplexInstance)).toBe(
-        true
+        true,
       );
     });
 
@@ -107,29 +107,29 @@ describe("Mixed types schemas", () => {
       // @ts-expect-error
       uberComplexInstance = { name: "Garfield", description: 42 };
       expect(ajv.validate(uberComplexTypesSchema, uberComplexInstance)).toBe(
-        false
+        false,
       );
     });
 
     it("accepts tuples with valid values", () => {
       uberComplexInstance = [];
       expect(ajv.validate(uberComplexTypesSchema, uberComplexInstance)).toBe(
-        true
+        true,
       );
 
       uberComplexInstance = [42];
       expect(ajv.validate(uberComplexTypesSchema, uberComplexInstance)).toBe(
-        true
+        true,
       );
 
       uberComplexInstance = [42, "foo"];
       expect(ajv.validate(uberComplexTypesSchema, uberComplexInstance)).toBe(
-        true
+        true,
       );
 
       uberComplexInstance = [42, "foo", { descr: "bar" }];
       expect(ajv.validate(uberComplexTypesSchema, uberComplexInstance)).toBe(
-        true
+        true,
       );
     });
 
@@ -137,7 +137,7 @@ describe("Mixed types schemas", () => {
       // @ts-expect-error
       uberComplexInstance = ["42", "foo", { descr: "bar" }];
       expect(ajv.validate(uberComplexTypesSchema, uberComplexInstance)).toBe(
-        false
+        false,
       );
     });
 
@@ -145,7 +145,7 @@ describe("Mixed types schemas", () => {
       // @ts-expect-error
       uberComplexInstance = [42, "foo", { descr: "bar" }, "baz"];
       expect(ajv.validate(uberComplexTypesSchema, uberComplexInstance)).toBe(
-        false
+        false,
       );
     });
   });

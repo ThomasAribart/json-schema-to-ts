@@ -1,6 +1,6 @@
 import type { M } from "ts-algebra";
 
-import type { JSONSchema7 } from "../definitions";
+import type { JSONSchema7 } from "~/definitions";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 import type { MergeSubSchema } from "./utils";
@@ -27,5 +27,5 @@ export type ParseIfThenElseSchema<
         M.$Exclude<ParseSchema<R, O>, ParseSchema<I, O>>,
         ParseSchema<MergeSubSchema<R, S["else"]>, O>
       >
-    : M.$Exclude<ParseSchema<R, O>, ParseSchema<I, O>>
+    : M.$Exclude<ParseSchema<R, O>, ParseSchema<I, O>>,
 > = M.$Intersect<M.$Union<T | E>, ParseSchema<R, O>>;

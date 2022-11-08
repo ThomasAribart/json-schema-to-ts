@@ -1,8 +1,9 @@
-import type { A } from "ts-toolbelt";
 import type { M } from "ts-algebra";
+import type { A } from "ts-toolbelt";
 
-import type { FromSchema } from "../index";
-import type { ParseOptions } from "../parse-options";
+import type { FromSchema } from "~/index";
+import type { ParseOptions } from "~/parse-options";
+
 import type { DeserializeSchema } from "./deserialize";
 
 type DatePattern = { type: "string"; format: "date-time" };

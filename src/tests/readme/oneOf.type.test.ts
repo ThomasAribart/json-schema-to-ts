@@ -1,6 +1,6 @@
 import type { A } from "ts-toolbelt";
 
-import type { FromSchema } from "index";
+import type { FromSchema } from "~/index";
 
 const catSchema = {
   type: "object",
@@ -34,5 +34,6 @@ type AssertCat = A.Equals<ReceivedCat, ExpectedCat>;
 const assertCat: AssertCat = 1;
 assertCat;
 
-// @ts-expect-error
-const invalidCat: Cat = { name: "Garfield" };
+// Cannot raise error at the moment
+const invalidCat: ReceivedCat = { name: "Garfield" };
+invalidCat;

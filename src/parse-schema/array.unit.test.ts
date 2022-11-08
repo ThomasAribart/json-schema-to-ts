@@ -1,4 +1,5 @@
-import type { FromSchema } from "index";
+/* eslint-disable max-lines */
+import type { FromSchema } from "~/index";
 
 import { ajv } from "./ajv.util.test";
 
@@ -52,7 +53,7 @@ describe("Array schemas", () => {
         // @ts-expect-error
         stringArrayInstance = ["foo", "bar", { not: "a string" }];
         expect(ajv.validate(stringArraySchema, stringArrayInstance)).toBe(
-          false
+          false,
         );
       });
     });

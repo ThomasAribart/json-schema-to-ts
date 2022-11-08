@@ -1,6 +1,6 @@
 import type { M } from "ts-algebra";
 
-import type { JSONSchema7 } from "../definitions";
+import type { JSONSchema7 } from "~/definitions";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 import type { MergeSubSchema } from "./utils";
@@ -14,7 +14,7 @@ type AllTypes = M.Union<
   | M.Primitive<boolean>
   | M.Primitive<number>
   | M.Primitive<string>
-  | M.Array<M.Any>
+  | M.Array
   | M.Object<{}, never, M.Any>
 >;
 
@@ -25,5 +25,5 @@ export type ParseNotSchema<
   E = M.$Exclude<
     P extends M.AnyType ? M.$Intersect<AllTypes, P> : P,
     ParseSchema<MergeSubSchema<Omit<S, "not">, S["not"]>, O>
-  >
+  >,
 > = E extends M.Never ? P : E;

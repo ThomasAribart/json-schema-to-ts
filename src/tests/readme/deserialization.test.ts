@@ -1,6 +1,6 @@
 import type { A } from "ts-toolbelt";
 
-import type { FromSchema } from "index";
+import type { FromSchema } from "~/index";
 
 const userSchema = {
   type: "object",
@@ -38,7 +38,7 @@ type ReceivedUser = FromSchema<
           format: "date-time";
         };
         output: Date;
-      }
+      },
     ];
   }
 >;

@@ -1,7 +1,7 @@
 import type { A } from "ts-toolbelt";
 
-import type { FromSchema } from "index";
-import { asConst } from "utils/asConst";
+import type { FromSchema } from "~/index";
+import { asConst } from "~/utils/asConst";
 
 // Dog
 

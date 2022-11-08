@@ -1,4 +1,5 @@
-import type { JSONSchema7Reference } from "../index";
+import type { JSONSchema7Reference } from "~/index";
+
 import type { DeserializationPattern } from "./deserializationPattern";
 
 /**

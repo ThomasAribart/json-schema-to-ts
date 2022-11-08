@@ -1,6 +1,6 @@
 import type { A } from "ts-toolbelt";
 
-import type { FromSchemaDefaultOptions } from "definitions";
+import type { FromSchemaDefaultOptions } from "~/definitions";
 
 import type { ParseOptions, ParseReferences } from "./parse-options";
 

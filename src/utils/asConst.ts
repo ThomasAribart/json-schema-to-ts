@@ -1,4 +1,4 @@
-import type { Narrow } from "../type-utils/narrow";
+import type { Narrow } from "~/type-utils";
 
 /**
  * Returns the input parameter without muting it, but narrowing its inferred type.

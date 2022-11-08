@@ -1,12 +1,12 @@
 import type { A } from "ts-toolbelt";
 
-import type { JSONSchema } from "../../index";
+import type { JSONSchema } from "~/index";
 
 import { ajv } from "./ajv.util.test";
-import { petSchema, Pet } from "./schema.util.test";
 import { $Compiler, wrapCompilerAsTypeGuard } from "./compiler";
+import { petSchema, Pet } from "./schema.util.test";
 
-const $compile: $Compiler = (schema) => ajv.compile(schema);
+const $compile: $Compiler = schema => ajv.compile(schema);
 const compile = wrapCompilerAsTypeGuard($compile);
 const isPet = compile(petSchema);
 
@@ -14,7 +14,7 @@ type CompilingOtions = [{ fastCompile: boolean }];
 type ValidationOptions = [{ shouldThrow: boolean }];
 const $compileWithOptions: $Compiler<CompilingOtions, ValidationOptions> = (
   schema,
-  compilingOptions
+  compilingOptions,
 ) => {
   const { fastCompile } = compilingOptions;
 

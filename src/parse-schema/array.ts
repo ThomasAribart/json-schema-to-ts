@@ -1,42 +1,45 @@
 import type { M } from "ts-algebra";
 import type { L } from "ts-toolbelt";
 
-import type { JSONSchema7 } from "../definitions";
-import type { DoesExtend } from "../type-utils";
+import type { JSONSchema7 } from "~/definitions";
+import type { DoesExtend } from "~/type-utils";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 
 export type ArraySchema = JSONSchema7 & { type: "array" };
 
-export type SimpleArraySchema = JSONSchema7 & {
+type SimpleArraySchema = JSONSchema7 & {
   type: "array";
   items: JSONSchema7;
 };
 
-export type TupleSchema = JSONSchema7 & { type: "array"; items: JSONSchema7[] };
+type TupleSchema = JSONSchema7 & { type: "array"; items: JSONSchema7[] };
 
 export type ParseArraySchema<
   S extends ArraySchema,
-  O extends ParseSchemaOptions
+  O extends ParseSchemaOptions,
 > = S extends SimpleArraySchema
   ? M.$Array<ParseSchema<S["items"], O>>
   : S extends TupleSchema
   ? M.$Union<FromTreeTuple<ParseTuple<S["items"], O>, S, O>>
   : M.$Array;
 
-export type ParseTuple<
+type ParseTuple<
   S extends JSONSchema7[],
   O extends ParseSchemaOptions,
-  R extends any[] = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  R extends any[] = [],
 > = {
   stop: R;
   continue: ParseTuple<L.Tail<S>, O, L.Prepend<R, ParseSchema<L.Head<S>, O>>>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }[S extends [any, ...any[]] ? "continue" : "stop"];
 
 type FromTreeTuple<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   T extends any[],
   S extends ArraySchema,
-  O extends ParseSchemaOptions
+  O extends ParseSchemaOptions,
 > = ApplyAdditionalItems<
   ApplyBoundaries<
     T,
@@ -48,13 +51,15 @@ type FromTreeTuple<
 >;
 
 type ApplyBoundaries<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   T extends any[],
   Min extends number,
   Max extends number | undefined,
   R = never,
   HasMin extends boolean = false,
   HasMax extends boolean = false,
-  C extends any[] = T
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  C extends any[] = T,
 > = {
   stop: {
     result: Max extends undefined
@@ -87,14 +92,16 @@ type ApplyBoundaries<
   >;
 }[Min extends T["length"]
   ? "stop"
-  : T extends [any, ...any[]]
+  : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends [any, ...any[]]
   ? "continue"
   : "stop"];
 
 type IsLongerThan<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   T extends any[],
   N extends number | undefined,
-  R extends boolean = false
+  R extends boolean = false,
 > = {
   continue: N extends undefined
     ? false
@@ -102,17 +109,20 @@ type IsLongerThan<
     ? true
     : IsLongerThan<L.Tail<T>, N>;
   stop: T["length"] extends N ? true : R;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }[T extends [any, ...any[]] ? "continue" : "stop"];
 
 type ApplyAdditionalItems<
   R extends {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     result: any;
     hasEncounteredMin: boolean;
     hasEncounteredMax: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     completeTuple: any[];
   },
   A extends JSONSchema7,
-  O extends ParseSchemaOptions
+  O extends ParseSchemaOptions,
 > = R extends { hasEncounteredMax: true }
   ? R extends { hasEncounteredMin: true }
     ? R["result"]

@@ -1,4 +1,4 @@
-import type { FromSchema } from "index";
+import type { FromSchema } from "~/index";
 
 import { ajv } from "./ajv.util.test";
 
@@ -12,12 +12,12 @@ describe("Nullable schemas", () => {
     it("accepts null value", () => {
       nullableBooleanInst = true;
       expect(ajv.validate(nullableBooleanSchema, nullableBooleanInst)).toBe(
-        true
+        true,
       );
 
       nullableBooleanInst = null;
       expect(ajv.validate(nullableBooleanSchema, nullableBooleanInst)).toBe(
-        true
+        true,
       );
     });
   });
@@ -43,7 +43,7 @@ describe("Nullable schemas", () => {
       // @ts-expect-error
       nonNullableBooleanInst = null;
       expect(
-        ajv.validate(nonNullableBooleanSchema, nonNullableBooleanInst)
+        ajv.validate(nonNullableBooleanSchema, nonNullableBooleanInst),
       ).toBe(false);
     });
   });
@@ -89,7 +89,7 @@ describe("Nullable schemas", () => {
         implicitNonNullable: "str",
       };
       expect(ajv.validate(objectWithNullablePropSchema, objectInst)).toBe(
-        false
+        false,
       );
 
       objectInst = {
@@ -99,7 +99,7 @@ describe("Nullable schemas", () => {
         implicitNonNullable: null,
       };
       expect(ajv.validate(objectWithNullablePropSchema, objectInst)).toBe(
-        false
+        false,
       );
     });
   });
@@ -158,7 +158,7 @@ describe("Nullable schemas", () => {
         potentiallyNullable: null,
       };
       expect(ajv.validate(objectWithNullablePropSchema, objectInst)).toBe(
-        false
+        false,
       );
     });
   });

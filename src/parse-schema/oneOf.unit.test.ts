@@ -1,4 +1,5 @@
-import type { FromSchema } from "index";
+/* eslint-disable max-lines */
+import type { FromSchema } from "~/index";
 
 import { ajv } from "./ajv.util.test";
 
@@ -817,24 +818,24 @@ describe("OneOf schemas", () => {
       it("accepts tuples with <= 1 items", () => {
         factoredTupleInstance = [];
         expect(ajv.validate(factoredTupleSchema, factoredTupleInstance)).toBe(
-          true
+          true,
         );
 
         factoredTupleInstance = ["0"];
         expect(ajv.validate(factoredTupleSchema, factoredTupleInstance)).toBe(
-          true
+          true,
         );
       });
 
       it("accepts tuples with >= 3 items", () => {
         factoredTupleInstance = ["0", 1, true];
         expect(ajv.validate(factoredTupleSchema, factoredTupleInstance)).toBe(
-          true
+          true,
         );
 
         factoredTupleInstance = ["0", 1, true, "any"];
         expect(ajv.validate(factoredTupleSchema, factoredTupleInstance)).toBe(
-          true
+          true,
         );
       });
 
@@ -842,7 +843,7 @@ describe("OneOf schemas", () => {
         // @ts-expect-error: Tuples should not have 2 items
         factoredTupleInstance = ["0", 1];
         expect(ajv.validate(factoredTupleSchema, factoredTupleInstance)).toBe(
-          false
+          false,
         );
       });
     });

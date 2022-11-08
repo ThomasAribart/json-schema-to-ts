@@ -1,6 +1,6 @@
 import type { A } from "ts-toolbelt";
 
-import type { JSONSchema } from "../../index";
+import type { JSONSchema } from "~/index";
 
 import { ajv } from "./ajv.util.test";
 import { petSchema, Pet } from "./schema.util.test";
@@ -13,7 +13,7 @@ type ValidationOptions = [{ shouldThrow: boolean }];
 const $validateWithOptions: $Validator<ValidationOptions> = (
   schema,
   data,
-  validationOptions
+  validationOptions,
 ) => {
   const { shouldThrow } = validationOptions;
   const isValid = ajv.validate(schema, data);
@@ -58,7 +58,7 @@ describe("Validator", () => {
     assertOptions;
 
     expect(
-      validateWithOptions(petSchema, validData, { shouldThrow: true })
+      validateWithOptions(petSchema, validData, { shouldThrow: true }),
     ).toBe(true);
   });
 
@@ -75,7 +75,7 @@ describe("Validator", () => {
     }
 
     expect(validateWithOptions(petSchema, invalidData, validationOptions)).toBe(
-      false
+      false,
     );
   });
 });

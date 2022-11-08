@@ -1,6 +1,7 @@
 import type { A } from "ts-toolbelt";
 
-import type { FromSchema } from "../index";
+import type { FromSchema } from "~/index";
+
 import { asConst } from "./asConst";
 
 const number = asConst(1);
@@ -35,8 +36,9 @@ const func = asConst(
   (a: string, b: { some: "object" }): [1, "string", true] => {
     a;
     b;
+
     return [1, "string", true];
-  }
+  },
 );
 const assertFunc: A.Equals<
   typeof func,
@@ -44,7 +46,7 @@ const assertFunc: A.Equals<
 > = 1;
 assertFunc;
 
-const promise = asConst(new Promise<1>((resolve) => resolve(1)));
+const promise = asConst(new Promise<1>(resolve => resolve(1)));
 const assertPromise: A.Equals<typeof promise, Promise<1>> = 1;
 assertPromise;
 
