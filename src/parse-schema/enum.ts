@@ -1,7 +1,7 @@
 import type { M } from "ts-algebra";
 
 import type { JSONSchema7 } from "~/definitions";
-import type { Compute } from "~/type-utils/compute";
+import type { Compute } from "~/type-utils";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 

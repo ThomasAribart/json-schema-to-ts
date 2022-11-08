@@ -7,12 +7,12 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "release": "bash scripts/release.bash",
-    "test": "yarn test:type && yarn test:lint && yarn test:unit",
+    "test": "yarn test:type && yarn test:lint && yarn test:unit && yarn test:unused-exports",
     "test:type": "tsc --noEmit",
     "test:lint": "yarn eslint --ext=js,ts .",
     "test:unit": "jest --verbose --runInBand --collectCoverage --logHeapUsage --passWithNoTests",
-    "test:unused-exports": "./node_modules/.bin/ts-unused-exports ./tsconfig.json --excludeDeclarationFiles --silent --excludePathsFromReport=jest.config.ts",
-    "test:circular": "yarn depcruise --validate .dependency-cruiser.js .",
+    "test:unused-exports": "yarn ts-unused-exports ./tsconfig.json --excludePathsFromReport='src/index.ts;'",
+    "test:circular": "yarn depcruise --validate .dependency-cruiser.js ./src",
     "build": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
@@ -31,6 +31,7 @@
     "@typescript-eslint/parser": "^5.42.1",
     "ajv": "^8.10.0",
     "babel-jest": "^27.5.1",
+    "dependency-cruiser": "^11.18.0",
     "eslint": "^8.27.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-import-resolver-typescript": "^3.5.2",

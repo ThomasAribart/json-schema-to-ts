@@ -8,12 +8,12 @@ import type { ParseSchema, ParseSchemaOptions } from "./index";
 
 export type ArraySchema = JSONSchema7 & { type: "array" };
 
-export type SimpleArraySchema = JSONSchema7 & {
+type SimpleArraySchema = JSONSchema7 & {
   type: "array";
   items: JSONSchema7;
 };
 
-export type TupleSchema = JSONSchema7 & { type: "array"; items: JSONSchema7[] };
+type TupleSchema = JSONSchema7 & { type: "array"; items: JSONSchema7[] };
 
 export type ParseArraySchema<
   S extends ArraySchema,
@@ -24,7 +24,7 @@ export type ParseArraySchema<
   ? M.$Union<FromTreeTuple<ParseTuple<S["items"], O>, S, O>>
   : M.$Array;
 
-export type ParseTuple<
+type ParseTuple<
   S extends JSONSchema7[],
   O extends ParseSchemaOptions,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

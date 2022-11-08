@@ -1,6 +1,6 @@
 import type { JSONSchema7 } from "~/definitions";
 
-export type RemoveInvalidAdditionalItems<S extends JSONSchema7> = S extends {
+type RemoveInvalidAdditionalItems<S extends JSONSchema7> = S extends {
   items: JSONSchema7 | JSONSchema7[];
 }
   ? S extends { additionalItems: JSONSchema7 }

@@ -19,11 +19,11 @@ export type ParseExternalReferenceSchema<
   ? ParseExternalReferenceWithIdSchema<O, A, P, R>
   : M.Never;
 
-export type ParseDomain<R extends string> = S.Join<L.Pop<S.Split<R, "/">>, "/">;
+type ParseDomain<R extends string> = S.Join<L.Pop<S.Split<R, "/">>, "/">;
 
 type IdSchema = JSONSchema7 & { $id: string };
 
-export type ParseExternalReferenceWithIdSchema<
+type ParseExternalReferenceWithIdSchema<
   O extends ParseSchemaOptions & { rootSchema: IdSchema },
   A extends string,
   P extends string | undefined,
