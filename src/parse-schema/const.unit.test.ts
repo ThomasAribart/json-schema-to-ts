@@ -1,4 +1,5 @@
-import type { FromSchema } from "index";
+/* eslint-disable max-lines */
+import type { FromSchema } from "~/index";
 
 import { ajv } from "./ajv.util.test";
 
@@ -217,7 +218,7 @@ describe("Array", () => {
     1,
     "pizza",
     { description: "A delicious pizza" },
-    ["tomatoes", "cheese"]
+    ["tomatoes", "cheese"],
   ];
 
   const pizzaRecipeSchema = {

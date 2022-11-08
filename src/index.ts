@@ -7,8 +7,8 @@ import type {
   FromSchemaOptions,
   FromSchemaDefaultOptions,
 } from "./definitions";
-import type { ParseSchema } from "./parse-schema";
 import type { ParseOptions } from "./parse-options";
+import type { ParseSchema } from "./parse-schema";
 import type { Readonly, Writable } from "./type-utils";
 
 export type {
@@ -47,6 +47,6 @@ export type JSONSchema = JSONSchema7;
  */
 export type FromSchema<
   S extends JSONSchema,
-  O extends FromSchemaOptions = FromSchemaDefaultOptions,
-  W extends $JSONSchema7 = S extends O.Object ? Writable<S> : S
-> = M.$Resolve<ParseSchema<W, ParseOptions<W, O>>>;
+  Opt extends FromSchemaOptions = FromSchemaDefaultOptions,
+  W extends $JSONSchema7 = S extends O.Object ? Writable<S> : S,
+> = M.$Resolve<ParseSchema<W, ParseOptions<W, Opt>>>;

@@ -1,6 +1,5 @@
 import type { L } from "ts-toolbelt";
 
-import type { Writable } from "./type-utils";
 import type {
   JSONSchema7,
   FromSchemaOptions,
@@ -8,16 +7,18 @@ import type {
   DeserializationPattern,
 } from "./definitions";
 import type { JSONSchema7Reference } from "./index";
+import type { Writable } from "./type-utils";
 
 export type ParseReferences<
   S extends JSONSchema7Reference[],
-  R extends Record<string, JSONSchema7> = {}
+  R extends Record<string, JSONSchema7> = {},
 > = {
   continue: ParseReferences<
     L.Tail<S>,
     R & { [key in L.Head<S>["$id"]]: Writable<L.Head<S>> }
   >;
   stop: R;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }[S extends [any, ...any[]] ? "continue" : "stop"];
 
 export type ParseOptions<S extends JSONSchema7, O extends FromSchemaOptions> = {

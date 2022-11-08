@@ -7,13 +7,15 @@
     "strict": true,
     "skipLibCheck": true,
     "declaration": true,
-    "paths": { "*": ["./*"] },
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "removeComments": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "paths": {
+      "~/*": ["*"]
+    }
   },
   "exclude": ["builds", "lib"]
 }

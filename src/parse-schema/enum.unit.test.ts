@@ -1,4 +1,5 @@
-import type { FromSchema } from "index";
+/* eslint-disable max-lines */
+import type { FromSchema } from "~/index";
 
 import { ajv } from "./ajv.util.test";
 

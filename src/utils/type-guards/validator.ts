@@ -3,7 +3,7 @@ import type {
   JSONSchema,
   FromSchemaOptions,
   FromSchemaDefaultOptions,
-} from "../../index";
+} from "~/index";
 
 /**
  * Any validator function type (non type-guarding)
@@ -29,7 +29,7 @@ export type $Validator<V extends unknown[] = []> = (
  */
 export type Validator<
   O extends FromSchemaOptions = FromSchemaDefaultOptions,
-  V extends unknown[] = []
+  V extends unknown[] = [],
 > = <S extends JSONSchema, T = FromSchema<S, O>>(
   schema: S,
   data: unknown,
@@ -38,9 +38,9 @@ export type Validator<
 
 type ValidatorWrapper = <
   O extends FromSchemaOptions = FromSchemaDefaultOptions,
-  V extends unknown[] = []
+  V extends unknown[] = [],
 >(
-  validator: $Validator<V>
+  validator: $Validator<V>,
 ) => Validator<O, V>;
 
 /**
@@ -49,9 +49,9 @@ type ValidatorWrapper = <
 export const wrapValidatorAsTypeGuard: ValidatorWrapper =
   <
     O extends FromSchemaOptions = FromSchemaDefaultOptions,
-    V extends unknown[] = []
+    V extends unknown[] = [],
   >(
-    validator: $Validator<V>
+    validator: $Validator<V>,
   ) =>
   <S extends JSONSchema, T = FromSchema<S, O>>(
     schema: S,

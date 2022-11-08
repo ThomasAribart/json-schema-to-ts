@@ -1,7 +1,7 @@
 import type { M } from "ts-algebra";
 import type { L } from "ts-toolbelt";
 
-import type { JSONSchema7 } from "../definitions";
+import type { JSONSchema7 } from "~/definitions";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 import type { MergeSubSchema } from "./utils";
@@ -10,14 +10,14 @@ export type AnyOfSchema = JSONSchema7 & { anyOf: JSONSchema7[] };
 
 export type ParseAnyOfSchema<
   S extends AnyOfSchema,
-  O extends ParseSchemaOptions
+  O extends ParseSchemaOptions,
 > = M.$Union<RecurseOnAnyOfSchema<S["anyOf"], S, O>>;
 
 type RecurseOnAnyOfSchema<
   S extends JSONSchema7[],
   P extends AnyOfSchema,
   O extends ParseSchemaOptions,
-  R = never
+  R = never,
 > = {
   stop: R;
   continue: RecurseOnAnyOfSchema<
@@ -30,4 +30,5 @@ type RecurseOnAnyOfSchema<
         ParseSchema<MergeSubSchema<Omit<P, "anyOf">, L.Head<S>>, O>
       >
   >;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }[S extends [any, ...any[]] ? "continue" : "stop"];

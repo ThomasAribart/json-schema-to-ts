@@ -1,4 +1,4 @@
-import type { FromSchema } from "index";
+import type { FromSchema } from "~/index";
 
 export const petSchema = {
   type: "object",

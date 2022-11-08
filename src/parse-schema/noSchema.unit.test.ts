@@ -1,5 +1,5 @@
-import type { JSONSchema7 } from "definitions";
-import type { FromSchema } from "index";
+import type { JSONSchema7 } from "~/definitions";
+import type { FromSchema } from "~/index";
 
 import { ajv } from "./ajv.util.test";
 

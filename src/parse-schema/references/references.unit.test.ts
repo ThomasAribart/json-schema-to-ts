@@ -1,6 +1,7 @@
+/* eslint-disable max-lines */
 import type { A } from "ts-toolbelt";
 
-import type { FromSchema } from "index";
+import type { FromSchema } from "~/index";
 
 import { ajv } from "../ajv.util.test";
 
@@ -211,7 +212,7 @@ describe("References", () => {
         additionalProp: true,
       };
       expect(ajv.validate(personWithAgeSchema, personWithAgeInstance)).toBe(
-        false
+        false,
       );
     });
 
@@ -219,13 +220,13 @@ describe("References", () => {
       // @ts-expect-error
       personWithAgeInstance = { name: "judy" };
       expect(ajv.validate(personWithAgeSchema, personWithAgeInstance)).toBe(
-        false
+        false,
       );
 
       // @ts-expect-error
       personWithAgeInstance = { age: 42 };
       expect(ajv.validate(personWithAgeSchema, personWithAgeInstance)).toBe(
-        false
+        false,
       );
     });
   });
@@ -258,7 +259,7 @@ describe("References", () => {
     it("accepts a valid person", () => {
       personWithAgeInstance = { name: "judy", age: 42 };
       expect(ajv.validate(personWithAgeSchema2, personWithAgeInstance)).toBe(
-        true
+        true,
       );
     });
 
@@ -269,7 +270,7 @@ describe("References", () => {
         age: true,
       };
       expect(ajv.validate(personWithAgeSchema2, personWithAgeInstance)).toBe(
-        false
+        false,
       );
     });
   });

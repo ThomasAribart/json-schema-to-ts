@@ -1,19 +1,18 @@
 import type { M } from "ts-algebra";
 import type { L, S } from "ts-toolbelt";
 
-import type { JSONSchema7 } from "../../definitions";
+import type { JSONSchema7 } from "~/definitions";
 
 import type { ParseSchemaOptions } from "../index";
-
 import type { ReferenceSchema } from "./index";
 import type { ParseReference } from "./utils";
 
 export type ParseExternalReferenceSchema<
-  S extends ReferenceSchema,
+  Sc extends ReferenceSchema,
   O extends ParseSchemaOptions,
   A extends string,
   P extends string | undefined,
-  R extends JSONSchema7 = Omit<S, "$ref">
+  R extends JSONSchema7 = Omit<Sc, "$ref">,
 > = A extends keyof O["references"]
   ? ParseReference<O["references"][A], O, P, R>
   : O extends { rootSchema: IdSchema }
@@ -30,7 +29,7 @@ export type ParseExternalReferenceWithIdSchema<
   P extends string | undefined,
   R extends JSONSchema7,
   D extends string = ParseDomain<O["rootSchema"]["$id"]>,
-  C extends string = S.Join<[D, A], "/">
+  C extends string = S.Join<[D, A], "/">,
 > = C extends keyof O["references"]
   ? ParseReference<O["references"][C], O, P, R>
   : M.Never;

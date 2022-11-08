@@ -1,7 +1,7 @@
-import dts from "rollup-plugin-dts";
-import { rollupImportMapPlugin } from "rollup-plugin-import-map";
 import typescript from "@rollup/plugin-typescript";
 import { join, basename } from "path";
+import dts from "rollup-plugin-dts";
+import { rollupImportMapPlugin } from "rollup-plugin-import-map";
 
 import { dependencies } from "./package.json";
 
@@ -20,8 +20,9 @@ const REFERENCE_COMMENT = `/// <reference types="./${DEFINITION_FILE_NAME}"/>\n`
 // nor do they support a ?dts query string suffix to the url, which is necessary for deno
 // import maps are a great substitute for such a plugin, and they offer more flexibility
 const imports = {};
-for (const [dep, ver] of Object.entries(dependencies))
+for (const [dep, ver] of Object.entries(dependencies)) {
   imports[basename(dep)] = `https://cdn.skypack.dev/${dep}@${ver}?dts`;
+}
 
 const config = [
   {

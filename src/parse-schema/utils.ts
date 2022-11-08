@@ -1,4 +1,4 @@
-import type { JSONSchema7 } from "../definitions";
+import type { JSONSchema7 } from "~/definitions";
 
 export type RemoveInvalidAdditionalItems<S extends JSONSchema7> = S extends {
   items: JSONSchema7 | JSONSchema7[];
@@ -17,5 +17,5 @@ export type MergeSubSchema<
   P extends JSONSchema7,
   S extends JSONSchema7,
   R extends JSONSchema7 = RemoveInvalidAdditionalItems<S>,
-  C extends JSONSchema7 = Omit<EmptySchema, keyof R> & R
+  C extends JSONSchema7 = Omit<EmptySchema, keyof R> & R,
 > = Omit<P, keyof C> & C;
