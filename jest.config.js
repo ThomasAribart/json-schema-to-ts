@@ -1,13 +1,18 @@
 module.exports = {
+  preset: "ts-jest",
   globals: {
     "ts-jest": {
       isolatedModules: true,
     },
   },
-  testTimeout: 20000,
-  roots: ["<rootDir>"],
-  testMatch: ["**/*.unit.test.ts"],
-  testPathIgnorePatterns: ["/node_modules/"],
-  clearMocks: true,
   testEnvironment: "node",
+  coverageReporters: ["json-summary"],
+  testMatch: ["**/*.unit.test.ts"],
+  testPathIgnorePatterns: ["/node_modules/", "/lib/"],
+  modulePathIgnorePatterns: ["/dist/"],
+  clearMocks: true,
+  rootDir: "src",
+  moduleNameMapper: {
+    "^~/(.*)$": "<rootDir>/$1",
+  },
 };

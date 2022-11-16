@@ -6,7 +6,8 @@
     "**/node_modules": true,
     "**/builds": true,
     ".yarn": true,
-    "yarn.lock": true
+    "yarn.lock": true,
+    "lib": true
   },
   "files.exclude": {
     "**/.git": true,

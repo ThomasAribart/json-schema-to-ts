@@ -13,6 +13,7 @@ const COMMONJS_FILE_PATH = join(BUILD_PATH, COMMONJS_FILE_NAME);
 const ESM_FILE_NAME = "index.mjs";
 const ESM_FILE_PATH = join(BUILD_PATH, ESM_FILE_NAME);
 
+const BUNDLED_SOURCE_INPUT_PATH = join("lib", "types", "index.d.ts");
 const SOURCE_INPUT_PATH = join("src", "index.ts");
 const REFERENCE_COMMENT = `/// <reference types="./${DEFINITION_FILE_NAME}"/>\n`;
 
@@ -26,7 +27,8 @@ for (const [dep, ver] of Object.entries(dependencies)) {
 
 const config = [
   {
-    input: SOURCE_INPUT_PATH,
+    // Using bundled path to not have to deal with absolute paths transpilation
+    input: BUNDLED_SOURCE_INPUT_PATH,
     output: [{ file: DEFINITION_FILE_PATH, format: "es" }],
     plugins: [rollupImportMapPlugin([{ imports }]), dts()],
   },
