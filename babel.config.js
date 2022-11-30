@@ -8,10 +8,10 @@ const defaultPresets = [
 module.exports = {
   env: {
     cjs: {
-      presets: [["@babel/preset-env", { modules: false }], ...defaultPresets],
+      presets: [["@babel/preset-env", { modules: "cjs" }], ...defaultPresets],
     },
     esm: {
-      presets: [["@babel/preset-env", { modules: "cjs" }], ...defaultPresets],
+      presets: [["@babel/preset-env", { modules: false }], ...defaultPresets],
     },
   },
   ignore: [/.*\/(.*\.|)test\.tsx?/, /node_modules/, /lib/, /builds/],
