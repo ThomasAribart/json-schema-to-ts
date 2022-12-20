@@ -274,4 +274,45 @@ describe("References", () => {
       );
     });
   });
+
+  describe("Local ref", () => {
+    const ref = {
+      $id: "refElement",
+      type: "string",
+      default: "",
+      enum: ["1", "2", "3", ""],
+    } as const;
+
+    const elem = {
+      type: "object",
+      additionalProperties: false,
+      required: ["refKey"],
+      properties: {
+        refKey: { $ref: "refElement" },
+      },
+    } as const;
+
+    type LocalRef = FromSchema<typeof elem, { references: [typeof ref] }>;
+    let localRefInstance: LocalRef;
+    const assertLocalRef: A.Equals<
+      LocalRef,
+      Required<{ refKey: "1" | "2" | "3" | "" }>
+    > = 1;
+    assertLocalRef;
+
+    ajv.addSchema(ref);
+
+    it("accepts a valid value", () => {
+      localRefInstance = { refKey: "1" };
+      expect(ajv.validate(elem, localRefInstance)).toBe(true);
+    });
+
+    it("rejects an invalid value", () => {
+      localRefInstance = {
+        // @ts-expect-error
+        refKey: "test",
+      };
+      expect(ajv.validate(elem, localRefInstance)).toBe(false);
+    });
+  });
 });
