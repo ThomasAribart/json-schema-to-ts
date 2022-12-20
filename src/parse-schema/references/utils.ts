@@ -12,7 +12,10 @@ export type ParseReference<
   O extends ParseSchemaOptions,
   P extends string | undefined,
   R extends JSONSchema7,
-  C extends JSONSchema7 = P extends string
+  C extends JSONSchema7 = P extends undefined
+    ? Sc
+    : // Check needed to avoid TS complains
+    P extends string
     ? // Tail is needed to remove initial "" from split path
       DeepGet<Sc, L.Tail<S.Split<P, "/">>, false>
     : Sc,
