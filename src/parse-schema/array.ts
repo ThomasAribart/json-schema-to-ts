@@ -1,8 +1,7 @@
 import type { M } from "ts-algebra";
-import type { L } from "ts-toolbelt";
 
 import type { JSONSchema7 } from "~/definitions";
-import type { DoesExtend } from "~/type-utils";
+import type { DoesExtend, Reverse, Tail } from "~/type-utils";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 
@@ -33,7 +32,7 @@ type ParseTuple<
   ? // TODO increase TS version and use "extends" in Array https://devblogs.microsoft.com/typescript/announcing-typescript-4-8/#improved-inference-for-infer-types-in-template-string-types
     H extends JSONSchema7
     ? T extends JSONSchema7[]
-      ? ParseTuple<T, O, L.Prepend<R, ParseSchema<H, O>>>
+      ? ParseTuple<T, O, [ParseSchema<H, O>, ...R]>
       : never
     : never
   : R;
@@ -66,29 +65,27 @@ type ApplyBoundaries<
 > = {
   stop: {
     result: Max extends undefined
-      ? R | M.$Tuple<L.Reverse<T>>
+      ? R | M.$Tuple<Reverse<T>>
       : HasMax extends true
-      ? R | M.$Tuple<L.Reverse<T>>
+      ? R | M.$Tuple<Reverse<T>>
       : Max extends T["length"]
-      ? M.$Tuple<L.Reverse<T>>
-      : IsLongerThan<L.Tail<T>, Max> extends true
+      ? M.$Tuple<Reverse<T>>
+      : IsLongerThan<Tail<T>, Max> extends true
       ? never
-      : R | M.$Tuple<L.Reverse<T>>;
+      : R | M.$Tuple<Reverse<T>>;
     hasEncounteredMin: DoesExtend<Min, T["length"]>;
     hasEncounteredMax: HasMax extends true
       ? true
       : Max extends T["length"]
       ? true
-      : IsLongerThan<L.Tail<T>, Max>;
+      : IsLongerThan<Tail<T>, Max>;
     completeTuple: C;
   };
   continue: ApplyBoundaries<
-    L.Tail<T>,
+    Tail<T>,
     Min,
     Max,
-    T["length"] extends Max
-      ? M.$Tuple<L.Reverse<T>>
-      : R | M.$Tuple<L.Reverse<T>>,
+    T["length"] extends Max ? M.$Tuple<Reverse<T>> : R | M.$Tuple<Reverse<T>>,
     HasMin extends true ? true : DoesExtend<Min, T["length"]>,
     HasMax extends true ? true : DoesExtend<Max, T["length"]>,
     C
@@ -110,7 +107,7 @@ type IsLongerThan<
     ? false
     : T["length"] extends N
     ? true
-    : IsLongerThan<L.Tail<T>, N>;
+    : IsLongerThan<Tail<T>, N>;
   stop: T["length"] extends N ? true : R;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }[T extends [any, ...any[]] ? "continue" : "stop"];
@@ -136,8 +133,8 @@ type ApplyAdditionalItems<
     : M.Never
   : A extends true
   ? R extends { hasEncounteredMin: true }
-    ? R["result"] | M.$Tuple<L.Reverse<R["completeTuple"]>, M.Any>
-    : M.$Tuple<L.Reverse<R["completeTuple"]>, M.Any>
+    ? R["result"] | M.$Tuple<Reverse<R["completeTuple"]>, M.Any>
+    : M.$Tuple<Reverse<R["completeTuple"]>, M.Any>
   : R["hasEncounteredMin"] extends true
-  ? R["result"] | M.$Tuple<L.Reverse<R["completeTuple"]>, ParseSchema<A, O>>
-  : M.$Tuple<L.Reverse<R["completeTuple"]>, ParseSchema<A, O>>;
+  ? R["result"] | M.$Tuple<Reverse<R["completeTuple"]>, ParseSchema<A, O>>
+  : M.$Tuple<Reverse<R["completeTuple"]>, ParseSchema<A, O>>;
