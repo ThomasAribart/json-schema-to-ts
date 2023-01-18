@@ -1,5 +1,4 @@
 import { M } from 'https://cdn.skypack.dev/ts-algebra@^1.1.1?dts';
-import { L, O, S } from 'https://cdn.skypack.dev/ts-toolbelt@^9.6.0?dts';
 import { JSONSchema7 as JSONSchema7$2, JSONSchema7TypeName } from 'https://cdn.skypack.dev/@types/json-schema@^7.0.9?dts';
 
 declare type DeserializationPattern = {
@@ -60,29 +59,37 @@ declare type Compute<A> = A extends Promise<infer T> ? Promise<Compute<T>> : A e
 
 declare type DoesExtend<A, B> = A extends B ? true : false;
 
-declare type DeepGet<O, P extends string[], D = undefined> = {
-    stop: O;
-    continue: L.Head<P> extends keyof O ? DeepGet<O[L.Head<P>], L.Tail<P>, D> : D;
-}[P extends [any, ...any[]] ? "continue" : "stop"];
+declare type DeepGet<O, P extends string[], D = undefined> = P extends [
+    infer H,
+    ...infer T
+] ? H extends string ? T extends string[] ? H extends keyof O ? DeepGet<O[H], T, D> : D : never : never : O;
+
+declare type Join<S extends string[], D extends string = ","> = S extends [] ? "" : S extends [string] ? `${S[0]}` : S extends [string, ...infer T] ? T extends string[] ? `${S[0]}${D}${Join<T, D>}` : never : string;
 
 declare type Narrow<A> = A extends Promise<infer T> ? Promise<Narrow<T>> : A extends (...args: infer P) => infer R ? (...args: Narrow<P>) => Narrow<R> : A extends [] ? [] : A extends object ? {
     [key in keyof A]: Narrow<A[key]>;
 } : A extends string | number | boolean | bigint ? A : never;
 
-declare type DeepReadonly<T> = T extends O.Object ? {
+declare type Pop<L extends unknown[]> = L extends readonly [...infer LBody, unknown] | readonly [...infer LBody, unknown?] ? LBody : L;
+
+declare type DeepReadonly<T> = T extends Record<string | number | symbol, any> ? {
     readonly [P in keyof T]: DeepReadonly<T[P]>;
 } : T;
+
+declare type Reverse<L extends unknown[]> = L extends [infer H, ...infer T] ? [...Reverse<T>, H] : L;
+
+declare type RecSplit<S extends string, D extends string = "", R extends string[] = []> = S extends `${infer BS}${D}${infer AS}` ? RecSplit<AS, D, [...R, BS]> : [...R, S];
+declare type Split<S extends string, D extends string = "", R extends string[] = RecSplit<S, D>> = D extends "" ? Pop<R> : R;
+
+declare type Tail<L extends unknown[]> = L extends readonly [] ? L : L extends readonly [unknown?, ...infer T] ? T : L;
 
 declare type DeepWritable<T> = {
     -readonly [P in keyof T]: DeepWritable<T[P]>;
 };
 
-declare type ParseReferences<S extends JSONSchema7Reference[], R extends Record<string, JSONSchema7$1> = {}> = {
-    continue: ParseReferences<L.Tail<S>, R & {
-        [key in L.Head<S>["$id"]]: DeepWritable<L.Head<S>>;
-    }>;
-    stop: R;
-}[S extends [any, ...any[]] ? "continue" : "stop"];
+declare type ParseReferences<S extends JSONSchema7Reference[], R extends Record<string, JSONSchema7$1> = {}> = S extends [infer H, ...infer T] ? H extends JSONSchema7Reference ? T extends JSONSchema7Reference[] ? ParseReferences<T, R & {
+    [key in H["$id"]]: DeepWritable<H>;
+}> : never : never : R;
 declare type ParseOptions<S extends JSONSchema7$1, O extends FromSchemaOptions> = {
     parseNotKeyword: O["parseNotKeyword"] extends boolean ? O["parseNotKeyword"] : FromSchemaDefaultOptions["parseNotKeyword"];
     parseIfThenElseKeywords: O["parseIfThenElseKeywords"] extends boolean ? O["parseIfThenElseKeywords"] : FromSchemaDefaultOptions["parseIfThenElseKeywords"];
@@ -109,30 +116,21 @@ declare type AllOfSchema = JSONSchema7$1 & {
     allOf: JSONSchema7$1[];
 };
 declare type ParseAllOfSchema<P extends AllOfSchema, O extends ParseSchemaOptions> = RecurseOnAllOfSchema<P["allOf"], P, O, ParseSchema<Omit<P, "allOf">, O>>;
-declare type RecurseOnAllOfSchema<S extends JSONSchema7$1[], P extends AllOfSchema, O extends ParseSchemaOptions, R> = {
-    stop: R;
-    continue: RecurseOnAllOfSchema<L.Tail<S>, P, O, M.$Intersect<ParseSchema<MergeSubSchema<Omit<P, "allOf">, L.Head<S>>, O>, R>>;
-}[S extends [any, ...any[]] ? "continue" : "stop"];
+declare type RecurseOnAllOfSchema<S extends JSONSchema7$1[], P extends AllOfSchema, O extends ParseSchemaOptions, R> = S extends [infer H, ...infer T] ? H extends JSONSchema7$1 ? T extends JSONSchema7$1[] ? RecurseOnAllOfSchema<T, P, O, M.$Intersect<ParseSchema<MergeSubSchema<Omit<P, "allOf">, H>, O>, R>> : never : never : R;
 
 declare type AnyOfSchema = JSONSchema7$1 & {
     anyOf: JSONSchema7$1[];
 };
 declare type ParseAnyOfSchema<S extends AnyOfSchema, O extends ParseSchemaOptions> = M.$Union<RecurseOnAnyOfSchema<S["anyOf"], S, O>>;
-declare type RecurseOnAnyOfSchema<S extends JSONSchema7$1[], P extends AnyOfSchema, O extends ParseSchemaOptions, R = never> = {
-    stop: R;
-    continue: RecurseOnAnyOfSchema<L.Tail<S>, P, O, R | M.$Intersect<ParseSchema<Omit<P, "anyOf">, O>, ParseSchema<MergeSubSchema<Omit<P, "anyOf">, L.Head<S>>, O>>>;
-}[S extends [any, ...any[]] ? "continue" : "stop"];
+declare type RecurseOnAnyOfSchema<S extends JSONSchema7$1[], P extends AnyOfSchema, O extends ParseSchemaOptions, R = never> = S extends [infer H, ...infer T] ? H extends JSONSchema7$1 ? T extends JSONSchema7$1[] ? RecurseOnAnyOfSchema<T, P, O, R | M.$Intersect<ParseSchema<Omit<P, "anyOf">, O>, ParseSchema<MergeSubSchema<Omit<P, "anyOf">, H>, O>>> : never : never : R;
 
 declare type MultipleTypesSchema = JSONSchema7$1 & {
     type: JSONSchema7TypeName[];
 };
 declare type ParseMultipleTypesSchema<P extends MultipleTypesSchema, O extends ParseSchemaOptions> = M.$Union<RecurseOnMixedSchema<P["type"], P, O>>;
-declare type RecurseOnMixedSchema<S extends JSONSchema7TypeName[], P extends MultipleTypesSchema, O extends ParseSchemaOptions, R = never> = {
-    stop: R;
-    continue: RecurseOnMixedSchema<L.Tail<S>, P, O, R | ParseSchema<Omit<P, "type"> & {
-        type: L.Head<S>;
-    }, O>>;
-}[S extends [any, ...any[]] ? "continue" : "stop"];
+declare type RecurseOnMixedSchema<S extends JSONSchema7TypeName[], P extends MultipleTypesSchema, O extends ParseSchemaOptions, R = never> = S extends [infer H, ...infer T] ? H extends JSONSchema7TypeName ? T extends JSONSchema7TypeName[] ? RecurseOnMixedSchema<T, P, O, R | ParseSchema<Omit<P, "type"> & {
+    type: H;
+}, O>> : never : never : R;
 
 declare type ArraySchema = JSONSchema7$1 & {
     type: "array";
@@ -146,10 +144,7 @@ declare type TupleSchema = JSONSchema7$1 & {
     items: JSONSchema7$1[];
 };
 declare type ParseArraySchema<S extends ArraySchema, O extends ParseSchemaOptions> = S extends SimpleArraySchema ? M.$Array<ParseSchema<S["items"], O>> : S extends TupleSchema ? M.$Union<FromTreeTuple<ParseTuple<S["items"], O>, S, O>> : M.$Array;
-declare type ParseTuple<S extends JSONSchema7$1[], O extends ParseSchemaOptions, R extends any[] = []> = {
-    stop: R;
-    continue: ParseTuple<L.Tail<S>, O, L.Prepend<R, ParseSchema<L.Head<S>, O>>>;
-}[S extends [any, ...any[]] ? "continue" : "stop"];
+declare type ParseTuple<S extends JSONSchema7$1[], O extends ParseSchemaOptions, R extends any[] = []> = S extends [infer H, ...infer T] ? H extends JSONSchema7$1 ? T extends JSONSchema7$1[] ? ParseTuple<T, O, [ParseSchema<H, O>, ...R]> : never : never : R;
 declare type FromTreeTuple<T extends any[], S extends ArraySchema, O extends ParseSchemaOptions> = ApplyAdditionalItems<ApplyBoundaries<T, S extends {
     minItems: number;
 } ? S["minItems"] : 0, S extends {
@@ -159,15 +154,15 @@ declare type FromTreeTuple<T extends any[], S extends ArraySchema, O extends Par
 } ? S["additionalItems"] : true, O>;
 declare type ApplyBoundaries<T extends any[], Min extends number, Max extends number | undefined, R = never, HasMin extends boolean = false, HasMax extends boolean = false, C extends any[] = T> = {
     stop: {
-        result: Max extends undefined ? R | M.$Tuple<L.Reverse<T>> : HasMax extends true ? R | M.$Tuple<L.Reverse<T>> : Max extends T["length"] ? M.$Tuple<L.Reverse<T>> : IsLongerThan<L.Tail<T>, Max> extends true ? never : R | M.$Tuple<L.Reverse<T>>;
+        result: Max extends undefined ? R | M.$Tuple<Reverse<T>> : HasMax extends true ? R | M.$Tuple<Reverse<T>> : Max extends T["length"] ? M.$Tuple<Reverse<T>> : IsLongerThan<Tail<T>, Max> extends true ? never : R | M.$Tuple<Reverse<T>>;
         hasEncounteredMin: DoesExtend<Min, T["length"]>;
-        hasEncounteredMax: HasMax extends true ? true : Max extends T["length"] ? true : IsLongerThan<L.Tail<T>, Max>;
+        hasEncounteredMax: HasMax extends true ? true : Max extends T["length"] ? true : IsLongerThan<Tail<T>, Max>;
         completeTuple: C;
     };
-    continue: ApplyBoundaries<L.Tail<T>, Min, Max, T["length"] extends Max ? M.$Tuple<L.Reverse<T>> : R | M.$Tuple<L.Reverse<T>>, HasMin extends true ? true : DoesExtend<Min, T["length"]>, HasMax extends true ? true : DoesExtend<Max, T["length"]>, C>;
+    continue: ApplyBoundaries<Tail<T>, Min, Max, T["length"] extends Max ? M.$Tuple<Reverse<T>> : R | M.$Tuple<Reverse<T>>, HasMin extends true ? true : DoesExtend<Min, T["length"]>, HasMax extends true ? true : DoesExtend<Max, T["length"]>, C>;
 }[Min extends T["length"] ? "stop" : T extends [any, ...any[]] ? "continue" : "stop"];
 declare type IsLongerThan<T extends any[], N extends number | undefined, R extends boolean = false> = {
-    continue: N extends undefined ? false : T["length"] extends N ? true : IsLongerThan<L.Tail<T>, N>;
+    continue: N extends undefined ? false : T["length"] extends N ? true : IsLongerThan<Tail<T>, N>;
     stop: T["length"] extends N ? true : R;
 }[T extends [any, ...any[]] ? "continue" : "stop"];
 declare type ApplyAdditionalItems<R extends {
@@ -183,7 +178,7 @@ declare type ApplyAdditionalItems<R extends {
     hasEncounteredMin: true;
 } ? R["result"] : M.Never : A extends true ? R extends {
     hasEncounteredMin: true;
-} ? R["result"] | M.$Tuple<L.Reverse<R["completeTuple"]>, M.Any> : M.$Tuple<L.Reverse<R["completeTuple"]>, M.Any> : R["hasEncounteredMin"] extends true ? R["result"] | M.$Tuple<L.Reverse<R["completeTuple"]>, ParseSchema<A, O>> : M.$Tuple<L.Reverse<R["completeTuple"]>, ParseSchema<A, O>>;
+} ? R["result"] | M.$Tuple<Reverse<R["completeTuple"]>, M.Any> : M.$Tuple<Reverse<R["completeTuple"]>, M.Any> : R["hasEncounteredMin"] extends true ? R["result"] | M.$Tuple<Reverse<R["completeTuple"]>, ParseSchema<A, O>> : M.$Tuple<Reverse<R["completeTuple"]>, ParseSchema<A, O>>;
 
 declare type ObjectSchema = JSONSchema7$1 & {
     type: "object";
@@ -235,10 +230,7 @@ declare type ParseConst<S extends ConstSchema> = M.Const<S["const"]>;
 declare type DeserializeSchema<S extends JSONSchema7$1, O extends Omit<ParseSchemaOptions, "deserialize"> & {
     deserialize: DeserializationPattern[];
 }> = RecurseOnDeserializationPatterns<S, O["deserialize"]>;
-declare type RecurseOnDeserializationPatterns<S extends JSONSchema7$1, P extends DeserializationPattern[], R = M.Any> = {
-    stop: R;
-    continue: RecurseOnDeserializationPatterns<S, L.Tail<P>, S extends L.Head<P>["pattern"] ? M.$Intersect<M.Any<true, L.Head<P>["output"]>, R> : R>;
-}[P extends [any, ...any[]] ? "continue" : "stop"];
+declare type RecurseOnDeserializationPatterns<S extends JSONSchema7$1, P extends DeserializationPattern[], R = M.Any> = P extends [infer H, ...infer T] ? H extends DeserializationPattern ? T extends DeserializationPattern[] ? RecurseOnDeserializationPatterns<S, T, S extends H["pattern"] ? M.$Intersect<M.Any<true, H["output"]>, R> : R> : never : never : R;
 
 declare type EnumSchema = JSONSchema7$1 & {
     enum: unknown[];
@@ -274,30 +266,27 @@ declare type OneOfSchema = JSONSchema7$1 & {
     oneOf: JSONSchema7$1[];
 };
 declare type ParseOneOfSchema<P extends OneOfSchema, O extends ParseSchemaOptions> = M.$Union<RecurseOnOneOfSchema<P["oneOf"], P, O>>;
-declare type RecurseOnOneOfSchema<S extends JSONSchema7$1[], P extends OneOfSchema, O extends ParseSchemaOptions, R = never> = {
-    stop: R;
-    continue: RecurseOnOneOfSchema<L.Tail<S>, P, O, R | M.$Intersect<ParseSchema<Omit<P, "oneOf">, O>, ParseSchema<MergeSubSchema<Omit<P, "oneOf">, L.Head<S>>, O>>>;
-}[S extends [any, ...any[]] ? "continue" : "stop"];
+declare type RecurseOnOneOfSchema<S extends JSONSchema7$1[], P extends OneOfSchema, O extends ParseSchemaOptions, R = never> = S extends [infer H, ...infer T] ? H extends JSONSchema7$1 ? T extends JSONSchema7$1[] ? RecurseOnOneOfSchema<T, P, O, R | M.$Intersect<ParseSchema<Omit<P, "oneOf">, O>, ParseSchema<MergeSubSchema<Omit<P, "oneOf">, H>, O>>> : never : never : R;
 
-declare type ParseReference<Sc extends JSONSchema7$1, O extends ParseSchemaOptions, P extends string | undefined, R extends JSONSchema7$1, C extends JSONSchema7$1 = P extends string ? DeepGet<Sc, L.Tail<S.Split<P, "/">>, false> : Sc> = M.$Intersect<ParseSchema<C, O>, ParseSchema<MergeSubSchema<C, R>, O>>;
+declare type ParseReference<Sc extends JSONSchema7$1, O extends ParseSchemaOptions, P extends string | undefined, R extends JSONSchema7$1, C extends JSONSchema7$1 = P extends string ? DeepGet<Sc, Tail<Split<P, "/">>, false> : Sc> = M.$Intersect<ParseSchema<C, O>, ParseSchema<MergeSubSchema<C, R>, O>>;
 
 declare type ParseDefinitionSchema<S extends ReferenceSchema, O extends ParseSchemaOptions, P extends string> = ParseReference<O["rootSchema"], O, P, Omit<S, "$ref">>;
 
 declare type ParseExternalReferenceSchema<Sc extends ReferenceSchema, O extends ParseSchemaOptions, A extends string, P extends string | undefined, R extends JSONSchema7$1 = Omit<Sc, "$ref">> = A extends keyof O["references"] ? ParseReference<O["references"][A], O, P, R> : O extends {
     rootSchema: IdSchema;
 } ? ParseExternalReferenceWithIdSchema<O, A, P, R> : M.Never;
-declare type ParseDomain<R extends string> = S.Join<L.Pop<S.Split<R, "/">>, "/">;
+declare type ParseDomain<R extends string> = Join<Pop<Split<R, "/">>, "/">;
 declare type IdSchema = JSONSchema7$1 & {
     $id: string;
 };
 declare type ParseExternalReferenceWithIdSchema<O extends ParseSchemaOptions & {
     rootSchema: IdSchema;
-}, A extends string, P extends string | undefined, R extends JSONSchema7$1, D extends string = ParseDomain<O["rootSchema"]["$id"]>, C extends string = S.Join<[D, A], "/">> = C extends keyof O["references"] ? ParseReference<O["references"][C], O, P, R> : M.Never;
+}, A extends string, P extends string | undefined, R extends JSONSchema7$1, D extends string = ParseDomain<O["rootSchema"]["$id"]>, C extends string = Join<[D, A], "/">> = C extends keyof O["references"] ? ParseReference<O["references"][C], O, P, R> : M.Never;
 
 declare type ReferenceSchema = JSONSchema7$1 & {
     $ref: string;
 };
-declare type ParseReferenceSchema<Sc extends ReferenceSchema, O extends ParseSchemaOptions, R extends string[] = S.Split<Sc["$ref"], "#">> = R[0] extends "" ? ParseDefinitionSchema<Sc, O, R[1]> : ParseExternalReferenceSchema<Sc, O, R[0], R[1]>;
+declare type ParseReferenceSchema<Sc extends ReferenceSchema, O extends ParseSchemaOptions, R extends string[] = Split<Sc["$ref"], "#">> = R[0] extends "" ? ParseDefinitionSchema<Sc, O, R[1]> : ParseExternalReferenceSchema<Sc, O, R[0], R[1]>;
 
 declare type ParseSchemaOptions = {
     parseNotKeyword: boolean;
@@ -325,6 +314,6 @@ declare const asConst: <A>(narrowed: Narrow<A>) => Narrow<A>;
 declare type JSONSchema7 = JSONSchema7$1 | DeepReadonly<JSONSchema7$1>;
 declare type JSONSchema7Reference = JSONSchema7Reference$1 | DeepReadonly<JSONSchema7Reference$1>;
 declare type JSONSchema = JSONSchema7;
-declare type FromSchema<S extends JSONSchema, Opt extends FromSchemaOptions = FromSchemaDefaultOptions, W extends JSONSchema7$1 = S extends O.Object ? DeepWritable<S> : S> = M.$Resolve<ParseSchema<W, ParseOptions<W, Opt>>>;
+declare type FromSchema<S extends JSONSchema, Opt extends FromSchemaOptions = FromSchemaDefaultOptions, W extends JSONSchema7$1 = DeepWritable<S>> = M.$Resolve<ParseSchema<W, ParseOptions<W, Opt>>>;
 
 export { $Compiler, $Validator, Compiler, DeserializationPattern, FromSchema, FromSchemaDefaultOptions, FromSchemaOptions, JSONSchema, JSONSchema7, JSONSchema7Reference, Validator, asConst, wrapCompilerAsTypeGuard, wrapValidatorAsTypeGuard };
