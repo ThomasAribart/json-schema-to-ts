@@ -1,5 +1,3 @@
-import type { L } from "ts-toolbelt";
-
 import type {
   JSONSchema7,
   FromSchemaOptions,
@@ -12,14 +10,14 @@ import type { Writable } from "./type-utils";
 export type ParseReferences<
   S extends JSONSchema7Reference[],
   R extends Record<string, JSONSchema7> = {},
-> = {
-  continue: ParseReferences<
-    L.Tail<S>,
-    R & { [key in L.Head<S>["$id"]]: Writable<L.Head<S>> }
-  >;
-  stop: R;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}[S extends [any, ...any[]] ? "continue" : "stop"];
+> = S extends [infer H, ...infer T]
+  ? // TODO increase TS version and use "extends" in Array https://devblogs.microsoft.com/typescript/announcing-typescript-4-8/#improved-inference-for-infer-types-in-template-string-types
+    H extends JSONSchema7Reference
+    ? T extends JSONSchema7Reference[]
+      ? ParseReferences<T, R & { [key in H["$id"]]: Writable<H> }>
+      : never
+    : never
+  : R;
 
 export type ParseOptions<S extends JSONSchema7, O extends FromSchemaOptions> = {
   parseNotKeyword: O["parseNotKeyword"] extends boolean

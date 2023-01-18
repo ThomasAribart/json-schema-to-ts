@@ -1,5 +1,4 @@
 import type { M } from "ts-algebra";
-import type { L } from "ts-toolbelt";
 
 import type { JSONSchema7, DeserializationPattern } from "~/definitions";
 
@@ -16,14 +15,15 @@ type RecurseOnDeserializationPatterns<
   S extends JSONSchema7,
   P extends DeserializationPattern[],
   R = M.Any,
-> = {
-  stop: R;
-  continue: RecurseOnDeserializationPatterns<
-    S,
-    L.Tail<P>,
-    S extends L.Head<P>["pattern"]
-      ? M.$Intersect<M.Any<true, L.Head<P>["output"]>, R>
-      : R
-  >;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}[P extends [any, ...any[]] ? "continue" : "stop"];
+> = P extends [infer H, ...infer T]
+  ? // TODO increase TS version and use "extends" in Array https://devblogs.microsoft.com/typescript/announcing-typescript-4-8/#improved-inference-for-infer-types-in-template-string-types
+    H extends DeserializationPattern
+    ? T extends DeserializationPattern[]
+      ? RecurseOnDeserializationPatterns<
+          S,
+          T,
+          S extends H["pattern"] ? M.$Intersect<M.Any<true, H["output"]>, R> : R
+        >
+      : never
+    : never
+  : R;

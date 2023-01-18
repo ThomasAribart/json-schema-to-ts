@@ -29,11 +29,14 @@ type ParseTuple<
   O extends ParseSchemaOptions,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   R extends any[] = [],
-> = {
-  stop: R;
-  continue: ParseTuple<L.Tail<S>, O, L.Prepend<R, ParseSchema<L.Head<S>, O>>>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}[S extends [any, ...any[]] ? "continue" : "stop"];
+> = S extends [infer H, ...infer T]
+  ? // TODO increase TS version and use "extends" in Array https://devblogs.microsoft.com/typescript/announcing-typescript-4-8/#improved-inference-for-infer-types-in-template-string-types
+    H extends JSONSchema7
+    ? T extends JSONSchema7[]
+      ? ParseTuple<T, O, L.Prepend<R, ParseSchema<H, O>>>
+      : never
+    : never
+  : R;
 
 type FromTreeTuple<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
