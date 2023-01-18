@@ -7,12 +7,12 @@
   "types": "lib/types/index.d.ts",
   "scripts": {
     "release": "bash scripts/release.bash",
-    "test": "yarn test:type && yarn test:lint && yarn test:unit && yarn test:unused-exports",
-    "test:type": "tsc --noEmit",
-    "test:lint": "yarn eslint --ext=js,ts .",
-    "test:unit": "jest --verbose --runInBand --collectCoverage --logHeapUsage --passWithNoTests",
-    "test:unused-exports": "yarn ts-unused-exports ./tsconfig.json --excludePathsFromReport='src/index.ts;'",
-    "test:circular": "yarn depcruise --validate .dependency-cruiser.js ./src",
+    "test": "yarn test-type && yarn test-unit && yarn test-unused-exports && yarn test-lint",
+    "test-type": "tsc --noEmit",
+    "test-lint": "yarn eslint --ext=js,ts .",
+    "test-unit": "jest --verbose --runInBand --collectCoverage --logHeapUsage --passWithNoTests",
+    "test-unused-exports": "yarn ts-unused-exports ./tsconfig.json --excludePathsFromReport='src/index.ts;'",
+    "test-circular": "yarn depcruise --validate .dependency-cruiser.js ./src",
     "transpile": "babel src --extensions .ts --quiet",
     "build": "rm -rf lib && yarn build-cjs && yarn build-esm && yarn build-types",
     "build-cjs": "NODE_ENV=cjs yarn transpile --out-dir lib/cjs --source-maps",
@@ -22,8 +22,7 @@
   "dependencies": {
     "@babel/runtime": "^7.18.3",
     "@types/json-schema": "^7.0.9",
-    "ts-algebra": "^1.1.1",
-    "ts-toolbelt": "^9.6.0"
+    "ts-algebra": "^1.1.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.6",
@@ -55,6 +54,7 @@
     "rollup-plugin-import-map": "^2.2.2",
     "rollup-plugin-typescript-paths": "^1.4.0",
     "ts-jest": "^28.0.2",
+    "ts-toolbelt": "^9.6.0",
     "ts-unused-exports": "^8.0.0",
     "ttypescript": "^1.5.13",
     "typescript": "^4.5.5"

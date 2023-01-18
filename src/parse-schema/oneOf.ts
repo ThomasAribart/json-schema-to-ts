@@ -1,5 +1,4 @@
 import type { M } from "ts-algebra";
-import type { L } from "ts-toolbelt";
 
 import type { JSONSchema7 } from "~/definitions";
 
@@ -18,17 +17,20 @@ type RecurseOnOneOfSchema<
   P extends OneOfSchema,
   O extends ParseSchemaOptions,
   R = never,
-> = {
-  stop: R;
-  continue: RecurseOnOneOfSchema<
-    L.Tail<S>,
-    P,
-    O,
-    | R
-    | M.$Intersect<
-        ParseSchema<Omit<P, "oneOf">, O>,
-        ParseSchema<MergeSubSchema<Omit<P, "oneOf">, L.Head<S>>, O>
-      >
-  >;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}[S extends [any, ...any[]] ? "continue" : "stop"];
+> = S extends [infer H, ...infer T]
+  ? // TODO increase TS version and use "extends" in Array https://devblogs.microsoft.com/typescript/announcing-typescript-4-8/#improved-inference-for-infer-types-in-template-string-types
+    H extends JSONSchema7
+    ? T extends JSONSchema7[]
+      ? RecurseOnOneOfSchema<
+          T,
+          P,
+          O,
+          | R
+          | M.$Intersect<
+              ParseSchema<Omit<P, "oneOf">, O>,
+              ParseSchema<MergeSubSchema<Omit<P, "oneOf">, H>, O>
+            >
+        >
+      : never
+    : never
+  : R;

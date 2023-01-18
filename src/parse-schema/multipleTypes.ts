@@ -1,6 +1,5 @@
 import type { JSONSchema7TypeName } from "json-schema";
 import type { M } from "ts-algebra";
-import type { L } from "ts-toolbelt";
 
 import type { JSONSchema7 } from "~/definitions";
 
@@ -18,13 +17,16 @@ type RecurseOnMixedSchema<
   P extends MultipleTypesSchema,
   O extends ParseSchemaOptions,
   R = never,
-> = {
-  stop: R;
-  continue: RecurseOnMixedSchema<
-    L.Tail<S>,
-    P,
-    O,
-    R | ParseSchema<Omit<P, "type"> & { type: L.Head<S> }, O>
-  >;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}[S extends [any, ...any[]] ? "continue" : "stop"];
+> = S extends [infer H, ...infer T]
+  ? // TODO increase TS version and use "extends" in Array https://devblogs.microsoft.com/typescript/announcing-typescript-4-8/#improved-inference-for-infer-types-in-template-string-types
+    H extends JSONSchema7TypeName
+    ? T extends JSONSchema7TypeName[]
+      ? RecurseOnMixedSchema<
+          T,
+          P,
+          O,
+          R | ParseSchema<Omit<P, "type"> & { type: H }, O>
+        >
+      : never
+    : never
+  : R;
