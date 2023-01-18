@@ -1,5 +1,4 @@
 import type { M } from "ts-algebra";
-import type { O } from "ts-toolbelt";
 
 import type {
   JSONSchema7 as $JSONSchema7,
@@ -48,5 +47,5 @@ export type JSONSchema = JSONSchema7;
 export type FromSchema<
   S extends JSONSchema,
   Opt extends FromSchemaOptions = FromSchemaDefaultOptions,
-  W extends $JSONSchema7 = S extends O.Object ? Writable<S> : S,
+  W extends $JSONSchema7 = Writable<S>,
 > = M.$Resolve<ParseSchema<W, ParseOptions<W, Opt>>>;
