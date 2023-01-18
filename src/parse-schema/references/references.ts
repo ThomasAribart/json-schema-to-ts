@@ -1,7 +1,7 @@
 import type { M } from "ts-algebra";
-import type { L, S } from "ts-toolbelt";
 
 import type { JSONSchema7 } from "~/definitions";
+import type { Join, Pop, Split } from "~/type-utils";
 
 import type { ParseSchemaOptions } from "../index";
 import type { ReferenceSchema } from "./index";
@@ -19,7 +19,7 @@ export type ParseExternalReferenceSchema<
   ? ParseExternalReferenceWithIdSchema<O, A, P, R>
   : M.Never;
 
-type ParseDomain<R extends string> = S.Join<L.Pop<S.Split<R, "/">>, "/">;
+type ParseDomain<R extends string> = Join<Pop<Split<R, "/">>, "/">;
 
 type IdSchema = JSONSchema7 & { $id: string };
 
@@ -29,7 +29,7 @@ type ParseExternalReferenceWithIdSchema<
   P extends string | undefined,
   R extends JSONSchema7,
   D extends string = ParseDomain<O["rootSchema"]["$id"]>,
-  C extends string = S.Join<[D, A], "/">,
+  C extends string = Join<[D, A], "/">,
 > = C extends keyof O["references"]
   ? ParseReference<O["references"][C], O, P, R>
   : M.Never;
