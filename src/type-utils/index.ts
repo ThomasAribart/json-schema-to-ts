@@ -2,6 +2,8 @@ export type { And } from "./and";
 export type { Compute } from "./compute";
 export type { DoesExtend } from "./extends";
 export type { DeepGet } from "./get";
+export type { If } from "./if";
+export type { Key } from "./key";
 export type { Join } from "./join";
 export type { Narrow } from "./narrow";
 export type { Pop } from "./pop";
