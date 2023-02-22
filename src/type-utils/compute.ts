@@ -1,9 +1,33 @@
-export type Compute<A> = A extends Promise<infer T>
-  ? Promise<Compute<T>>
-  : A extends (...args: infer P) => infer R
-  ? (...args: Compute<P>) => Compute<R>
-  : A extends Set<infer V>
-  ? Set<Compute<V>>
-  : A extends object
-  ? { [key in keyof A]: Compute<A[key]> }
-  : A;
+import type { DoesExtend } from "./extends";
+import type { If } from "./if";
+import type { Key } from "./key";
+
+export type Compute<A, Seen = never> = A extends
+  | Function
+  | Error
+  | Date
+  | { readonly [Symbol.toStringTag]: string }
+  | RegExp
+  | Generator
+  ? A
+  : If<
+      DoesExtend<Seen, A>,
+      A,
+      A extends Array<unknown>
+        ? A extends Array<Record<Key, unknown>>
+          ? Array<
+              {
+                [K in keyof A[number]]: Compute<A[number][K], A | Seen>;
+              } & unknown
+            >
+          : A
+        : A extends ReadonlyArray<unknown>
+        ? A extends ReadonlyArray<Record<string | number | symbol, unknown>>
+          ? ReadonlyArray<
+              {
+                [K in keyof A[number]]: Compute<A[number][K], A | Seen>;
+              } & unknown
+            >
+          : A
+        : { [K in keyof A]: Compute<A[K], A | Seen> } & unknown
+    >;

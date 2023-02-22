@@ -5,4 +5,4 @@
  * @param B Type
  * @return Boolean
  */
-export type DoesExtend<A, B> = A extends B ? true : false;
+export type DoesExtend<A, B> = [A] extends [B] ? true : false;
