@@ -1,4 +1,4 @@
-import { M } from 'https://cdn.skypack.dev/ts-algebra@^1.1.1?dts';
+import { M } from 'https://cdn.skypack.dev/ts-algebra@^1.2.0?dts';
 import { JSONSchema7 as JSONSchema7$2, JSONSchema7TypeName } from 'https://cdn.skypack.dev/@types/json-schema@^7.0.9?dts';
 
 declare type DeserializationPattern = {
