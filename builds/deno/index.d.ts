@@ -32,7 +32,6 @@ declare type JSONSchema7$1 = boolean | (Omit<JSONSchema7$2, "const" | "enum" | "
     };
     examples?: unknown[];
     default?: unknown;
-    [key: string]: unknown;
 });
 declare type JSONSchema7Reference$1 = JSONSchema7$1 & {
     $id: string;
@@ -324,6 +323,6 @@ declare const asConst: <A>(narrowed: Narrow<A>) => Narrow<A>;
 declare type JSONSchema7 = JSONSchema7$1 | DeepReadonly<JSONSchema7$1>;
 declare type JSONSchema7Reference = JSONSchema7Reference$1 | DeepReadonly<JSONSchema7Reference$1>;
 declare type JSONSchema = JSONSchema7;
-declare type FromSchema<S extends JSONSchema, Opt extends FromSchemaOptions = FromSchemaDefaultOptions, W extends JSONSchema7$1 = DeepWritable<S>> = M.$Resolve<ParseSchema<W, ParseOptions<W, Opt>>>;
+declare type FromSchema<S extends JSONSchema, Opt extends FromSchemaOptions = FromSchemaDefaultOptions, W extends JSONSchema7$1 = S extends Record<string | number | symbol, unknown> ? DeepWritable<S> : S> = M.$Resolve<ParseSchema<W, ParseOptions<W, Opt>>>;
 
 export { $Compiler, $Validator, Compiler, DeserializationPattern, FromSchema, FromSchemaDefaultOptions, FromSchemaOptions, JSONSchema, JSONSchema7, JSONSchema7Reference, Validator, asConst, wrapCompilerAsTypeGuard, wrapValidatorAsTypeGuard };
