@@ -47,5 +47,7 @@ export type JSONSchema = JSONSchema7;
 export type FromSchema<
   S extends JSONSchema,
   Opt extends FromSchemaOptions = FromSchemaDefaultOptions,
-  W extends $JSONSchema7 = Writable<S>,
+  W extends $JSONSchema7 = S extends Record<string | number | symbol, unknown>
+    ? Writable<S>
+    : S,
 > = M.$Resolve<ParseSchema<W, ParseOptions<W, Opt>>>;
