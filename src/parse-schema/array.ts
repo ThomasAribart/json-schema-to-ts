@@ -26,16 +26,14 @@ export type ParseArraySchema<
 type ParseTuple<
   S extends JSONSchema7[],
   O extends ParseSchemaOptions,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  R extends any[] = [],
 > = S extends [infer H, ...infer T]
   ? // TODO increase TS version and use "extends" in Array https://devblogs.microsoft.com/typescript/announcing-typescript-4-8/#improved-inference-for-infer-types-in-template-string-types
     H extends JSONSchema7
     ? T extends JSONSchema7[]
-      ? ParseTuple<T, O, [ParseSchema<H, O>, ...R]>
+      ? [...ParseTuple<T, O>, ParseSchema<H, O>]
       : never
     : never
-  : R;
+  : [];
 
 type FromTreeTuple<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
