@@ -1,7 +1,11 @@
 import type { M } from "ts-algebra";
 import type { A } from "ts-toolbelt";
 
-import type { FromSchema } from "~/index";
+import type {
+  ExtendedJSONSchema,
+  FromExtendedSchema,
+  FromSchema,
+} from "~/index";
 import type { ParseOptions } from "~/parse-options";
 
 import type { DeserializeSchema } from "./deserialize";
@@ -101,3 +105,56 @@ const assertDoubleSerialized: A.Equals<
   Date & { brand: "event-id" }
 > = 1;
 assertDoubleSerialized;
+
+// Extended
+
+type Extension = { customId: string };
+type Extended = ExtendedJSONSchema<Extension>;
+
+const extendedSchema: Extended = {
+  customId: "foo",
+};
+extendedSchema;
+
+const extendedObjectSchema: Extended = {
+  type: "object",
+  properties: {
+    foo: { customId: "foo" },
+  },
+};
+extendedObjectSchema;
+
+const invalidSchema: Extended = {
+  // @ts-expect-error
+  badId: "bar",
+};
+invalidSchema;
+
+const assertExtendedSerialized: A.Equals<
+  FromExtendedSchema<
+    Extension,
+    {
+      type: "object";
+      properties: {
+        foo: { customId: "foo" };
+        bar: { customId: "bar" };
+      };
+      required: ["foo", "bar"];
+      additionalProperties: false;
+    },
+    {
+      deserialize: [
+        {
+          pattern: { customId: "foo" };
+          output: string;
+        },
+        {
+          pattern: { customId: "bar" };
+          output: number;
+        },
+      ];
+    }
+  >,
+  { foo: string; bar: number }
+> = 1;
+assertExtendedSerialized;

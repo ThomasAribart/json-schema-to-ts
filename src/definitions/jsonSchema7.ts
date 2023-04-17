@@ -1,9 +1,12 @@
-import type { JSONSchema7 as $JSONSchema7 } from "json-schema";
+import type { JSONSchema7 as OriginalJSONSchema7 } from "json-schema";
+
+export const $JSONSchema7 = Symbol();
+export type $JSONSchema7 = typeof $JSONSchema7;
 
 export type JSONSchema7 =
   | boolean
   | (Omit<
-      $JSONSchema7,
+      OriginalJSONSchema7,
       | "const"
       | "enum"
       | "items"
@@ -25,6 +28,7 @@ export type JSONSchema7 =
       | "examples"
       | "default"
     > & {
+      [$JSONSchema7]?: $JSONSchema7;
       const?: unknown;
       enum?: unknown;
       items?: JSONSchema7 | JSONSchema7[];

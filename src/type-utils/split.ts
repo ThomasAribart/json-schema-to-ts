@@ -3,10 +3,7 @@ import { Pop } from "./pop";
 type RecSplit<
   S extends string,
   D extends string = "",
-  R extends string[] = [],
-> = S extends `${infer BS}${D}${infer AS}`
-  ? RecSplit<AS, D, [...R, BS]>
-  : [...R, S];
+> = S extends `${infer BS}${D}${infer AS}` ? [BS, ...RecSplit<AS, D>] : [S];
 
 export type Split<
   S extends string,

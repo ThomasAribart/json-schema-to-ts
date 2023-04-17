@@ -6,7 +6,10 @@ declare type DeserializationPattern = {
     output: unknown;
 };
 
+declare const $JSONSchema7: unique symbol;
+declare type $JSONSchema7 = typeof $JSONSchema7;
 declare type JSONSchema7$1 = boolean | (Omit<JSONSchema7$2, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions" | "examples" | "default"> & {
+    [$JSONSchema7]?: $JSONSchema7;
     const?: unknown;
     enum?: unknown;
     items?: JSONSchema7$1 | JSONSchema7$1[];
@@ -37,10 +40,61 @@ declare type JSONSchema7Reference$1 = JSONSchema7$1 & {
     $id: string;
 };
 
+declare type JSONSchema7Extension = Record<string, unknown>;
+declare type ExtendedJSONSchema7$1<E extends JSONSchema7Extension = JSONSchema7Extension> = boolean | (Omit<JSONSchema7$2, "const" | "enum" | "items" | "additionalItems" | "contains" | "properties" | "patternProperties" | "additionalProperties" | "dependencies" | "propertyNames" | "if" | "then" | "else" | "allOf" | "anyOf" | "oneOf" | "not" | "definitions" | "examples" | "default"> & {
+    const?: unknown;
+    enum?: unknown;
+    items?: ExtendedJSONSchema7$1<E> | ExtendedJSONSchema7$1<E>[];
+    additionalItems?: ExtendedJSONSchema7$1<E>;
+    contains?: ExtendedJSONSchema7$1<E>;
+    properties?: Record<string, ExtendedJSONSchema7$1<E>>;
+    patternProperties?: Record<string, ExtendedJSONSchema7$1<E>>;
+    additionalProperties?: ExtendedJSONSchema7$1<E>;
+    dependencies?: {
+        [key: string]: ExtendedJSONSchema7$1<E> | string[];
+    };
+    propertyNames?: ExtendedJSONSchema7$1<E>;
+    if?: ExtendedJSONSchema7$1<E>;
+    then?: ExtendedJSONSchema7$1<E>;
+    else?: ExtendedJSONSchema7$1<E>;
+    allOf?: ExtendedJSONSchema7$1<E>[];
+    anyOf?: ExtendedJSONSchema7$1<E>[];
+    oneOf?: ExtendedJSONSchema7$1<E>[];
+    not?: ExtendedJSONSchema7$1<E>;
+    nullable?: boolean;
+    definitions?: {
+        [key: string]: ExtendedJSONSchema7$1<E>;
+    };
+    examples?: unknown[];
+    default?: unknown;
+} & Partial<E>);
+declare type ExtendedJSONSchema7Reference$1<E extends JSONSchema7Extension = JSONSchema7Extension> = ExtendedJSONSchema7$1<E> & {
+    $id: string;
+};
+declare type UnextendJSONSchema7Tuple<E extends JSONSchema7Extension, S extends ExtendedJSONSchema7$1<E>[]> = S extends [infer H, ...infer T] ? H extends ExtendedJSONSchema7$1<E> ? T extends ExtendedJSONSchema7$1<E>[] ? [UnextendJSONSchema7<E, H>, ...UnextendJSONSchema7Tuple<E, T>] : never : never : [];
+declare type UnextendJSONSchema7Record<E extends JSONSchema7Extension, S extends Record<string, unknown>> = {
+    [key in keyof S]: S[key] extends ExtendedJSONSchema7$1<E> ? UnextendJSONSchema7<E, S[key]> : S[key];
+};
+declare type UnextendJSONSchema7<E extends JSONSchema7Extension, S extends ExtendedJSONSchema7$1<E>> = S extends boolean ? S : {
+    [key in $JSONSchema7 | keyof S]: key extends keyof S ? S extends {
+        [k in key]: ExtendedJSONSchema7$1<E>;
+    } ? UnextendJSONSchema7<E, S[key]> : S extends {
+        [k in key]: ExtendedJSONSchema7$1<E>[];
+    } ? number extends S[key]["length"] ? UnextendJSONSchema7<E, S[key][number]>[] : S[key] extends ExtendedJSONSchema7$1<E>[] ? UnextendJSONSchema7Tuple<E, S[key]> : never : S extends {
+        [k in key]: Record<string, unknown>;
+    } ? UnextendJSONSchema7Record<E, S[key]> : S[key] : key extends $JSONSchema7 ? $JSONSchema7 : never;
+};
+
 declare type FromSchemaOptions = {
     parseNotKeyword?: boolean;
     parseIfThenElseKeywords?: boolean;
     references?: JSONSchema7Reference[] | false;
+    deserialize?: DeserializationPattern[] | false;
+};
+declare type FromExtendedSchemaOptions<E extends JSONSchema7Extension> = {
+    parseNotKeyword?: boolean;
+    parseIfThenElseKeywords?: boolean;
+    references?: ExtendedJSONSchema7Reference$1<E>[] | false;
     deserialize?: DeserializationPattern[] | false;
 };
 declare type FromSchemaDefaultOptions = {
@@ -51,6 +105,8 @@ declare type FromSchemaDefaultOptions = {
 };
 
 declare type And<A, B> = A extends true ? B extends true ? true : false : false;
+
+declare type Cast<A, B> = A extends B ? A : never;
 
 declare type DoesExtend<A, B> = [A] extends [B] ? true : false;
 
@@ -87,7 +143,7 @@ declare type DeepReadonly<T> = T extends Record<string | number | symbol, any> ?
 
 declare type Reverse<L extends unknown[]> = L extends [infer H, ...infer T] ? [...Reverse<T>, H] : L;
 
-declare type RecSplit<S extends string, D extends string = "", R extends string[] = []> = S extends `${infer BS}${D}${infer AS}` ? RecSplit<AS, D, [...R, BS]> : [...R, S];
+declare type RecSplit<S extends string, D extends string = ""> = S extends `${infer BS}${D}${infer AS}` ? [BS, ...RecSplit<AS, D>] : [S];
 declare type Split<S extends string, D extends string = "", R extends string[] = RecSplit<S, D>> = D extends "" ? Pop<R> : R;
 
 declare type Tail<L extends unknown[]> = L extends readonly [] ? L : L extends readonly [unknown?, ...infer T] ? T : L;
@@ -153,7 +209,7 @@ declare type TupleSchema = JSONSchema7$1 & {
     items: JSONSchema7$1[];
 };
 declare type ParseArraySchema<S extends ArraySchema, O extends ParseSchemaOptions> = S extends SimpleArraySchema ? M.$Array<ParseSchema<S["items"], O>> : S extends TupleSchema ? M.$Union<FromTreeTuple<ParseTuple<S["items"], O>, S, O>> : M.$Array;
-declare type ParseTuple<S extends JSONSchema7$1[], O extends ParseSchemaOptions, R extends any[] = []> = S extends [infer H, ...infer T] ? H extends JSONSchema7$1 ? T extends JSONSchema7$1[] ? ParseTuple<T, O, [ParseSchema<H, O>, ...R]> : never : never : R;
+declare type ParseTuple<S extends JSONSchema7$1[], O extends ParseSchemaOptions> = S extends [infer H, ...infer T] ? H extends JSONSchema7$1 ? T extends JSONSchema7$1[] ? [...ParseTuple<T, O>, ParseSchema<H, O>] : never : never : [];
 declare type FromTreeTuple<T extends any[], S extends ArraySchema, O extends ParseSchemaOptions> = ApplyAdditionalItems<ApplyBoundaries<T, S extends {
     minItems: number;
 } ? S["minItems"] : 0, S extends {
@@ -321,8 +377,12 @@ declare const wrapValidatorAsTypeGuard: ValidatorWrapper;
 declare const asConst: <A>(narrowed: Narrow<A>) => Narrow<A>;
 
 declare type JSONSchema7 = JSONSchema7$1 | DeepReadonly<JSONSchema7$1>;
+declare type ExtendedJSONSchema7<E extends JSONSchema7Extension> = ExtendedJSONSchema7$1<E> | DeepReadonly<ExtendedJSONSchema7$1<E>>;
 declare type JSONSchema7Reference = JSONSchema7Reference$1 | DeepReadonly<JSONSchema7Reference$1>;
+declare type ExtendedJSONSchema7Reference<E extends JSONSchema7Extension> = ExtendedJSONSchema7Reference$1<E> | DeepReadonly<ExtendedJSONSchema7Reference$1<E>>;
 declare type JSONSchema = JSONSchema7;
+declare type ExtendedJSONSchema<E extends JSONSchema7Extension> = ExtendedJSONSchema7<E>;
 declare type FromSchema<S extends JSONSchema, Opt extends FromSchemaOptions = FromSchemaDefaultOptions, W extends JSONSchema7$1 = S extends Record<string | number | symbol, unknown> ? DeepWritable<S> : S> = M.$Resolve<ParseSchema<W, ParseOptions<W, Opt>>>;
+declare type FromExtendedSchema<E extends JSONSchema7Extension, S extends ExtendedJSONSchema<E>, Opt extends FromExtendedSchemaOptions<E> = FromSchemaDefaultOptions, W extends ExtendedJSONSchema7$1<E> = Cast<S extends Record<string | number | symbol, unknown> ? DeepWritable<S> : S, ExtendedJSONSchema7$1<E>>> = FromSchema<Cast<UnextendJSONSchema7<E, W>, JSONSchema>, Opt>;
 
-export { $Compiler, $Validator, Compiler, DeserializationPattern, FromSchema, FromSchemaDefaultOptions, FromSchemaOptions, JSONSchema, JSONSchema7, JSONSchema7Reference, Validator, asConst, wrapCompilerAsTypeGuard, wrapValidatorAsTypeGuard };
+export { $Compiler, $Validator, Compiler, DeserializationPattern, ExtendedJSONSchema, ExtendedJSONSchema7, ExtendedJSONSchema7Reference, FromExtendedSchema, FromExtendedSchemaOptions, FromSchema, FromSchemaDefaultOptions, FromSchemaOptions, JSONSchema, JSONSchema7, JSONSchema7Extension, JSONSchema7Reference, Validator, asConst, wrapCompilerAsTypeGuard, wrapValidatorAsTypeGuard };
