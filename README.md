@@ -166,6 +166,7 @@ type Address = FromSchema<typeof addressSchema>;
   - [Definitions](#definitions)
   - [References](#references)
 - [Deserialization](#deserialization)
+- [Extensions](#extensions)
 - [Typeguards](#typeguards)
   - [Validators](#validators)
   - [Compilers](#compilers)
@@ -763,6 +764,41 @@ type User = FromSchema<
 //  email: Email;
 //  birthDate: Date;
 // }
+```
+
+## Extensions
+
+If you need to extend the JSON Schema spec with custom properties, use the `ExtendedJSONSchema` and `FromExtendedSchema` types to benefit from `json-schema-to-ts`:
+
+```typescript
+import type { ExtendedJSONSchema, FromExtendedSchema } from "json-schema-to-ts";
+
+type CustomProps = {
+  numberType: "int" | "float" | "bigInt";
+};
+
+const bigIntSchema = {
+  type: "number",
+  numberType: "bigInt",
+  // 👇 Ensures mySchema is correct (includes extension)
+} as const satisfies ExtendedJSONSchema<CustomProps>;
+
+type BigInt = FromExtendedSchema<
+  CustomProps,
+  typeof bigIntSchema,
+  {
+    // 👇 Works very well with the deserialize option!
+    deserialize: [
+      {
+        pattern: {
+          type: "number";
+          numberType: "bigInt";
+        };
+        output: bigint;
+      },
+    ];
+  }
+>;
 ```
 
 ## Typeguards
