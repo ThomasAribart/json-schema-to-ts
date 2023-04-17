@@ -85,6 +85,21 @@ type Dog = FromSchema<typeof dogSchema>;
 // => Will work as well 🙌
 ```
 
+Since TS 4.9, you can also use the `satisfies` operator to benefit from type-checking and autocompletion:
+
+```typescript
+import type { JSONSchema } from "json-schema-to-ts";
+
+const dogSchema = {
+  // Type-checked and autocompleted 🙌
+  type: "object"
+  ...
+} as const satisfies JSONSchema
+
+type Dog = FromSchema<typeof dogSchema>
+// => Still work 🙌
+```
+
 ## Why use `json-schema-to-ts`?
 
 If you're looking for runtime validation with added types, libraries like [yup](https://github.com/jquense/yup), [zod](https://github.com/vriad/zod) or [runtypes](https://github.com/pelotom/runtypes) may suit your needs while being easier to use!
@@ -739,7 +754,7 @@ type User = FromSchema<
           format: "date-time";
         };
         output: Date;
-      }
+      },
     ];
   }
 >;
@@ -904,6 +919,5 @@ const compile = wrapCompilerAsTypeGuard<
 ## Frequently Asked Questions
 
 - [Does `json-schema-to-ts` work on _.json_ file schemas?](./documentation/FAQs/does-json-schema-to-ts-work-on-json-file-schemas.md)
-- [Can I assign `JSONSchema` to my schema and use `FromSchema` at the same time?](./documentation/FAQs/can-i-assign-jsonschema-to-my-schema-and-use-fromschema-at-the-same-time.md)
 - [Will `json-schema-to-ts` impact the performances of my IDE/compiler?](./documentation/FAQs/will-json-schema-to-ts-impact-the-performances-of-my-ide-compiler.md)
 - [I get a `type instantiation is excessively deep and potentially infinite` error, what should I do?](./documentation/FAQs/i-get-a-type-instantiation-is-excessively-deep-and-potentially-infinite-error-what-should-i-do.md)
