@@ -1,0 +1,36 @@
+name: 🎯 Test PR
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [16, 18]
+        typescript: [
+            "~4.5.5",
+            "~4.7.4",
+            "~4.8.3",
+            "~4.9.5",
+            # TODO: Fix FromSchema in those versions
+            # "~5.0.4",
+            # "latest",
+          ]
+    name: Node ${{ matrix.node }} / TS ${{ matrix.typescript }}
+    steps:
+      - name: "Checkout latest code"
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Set up node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Install dependencies
+        run: yarn
+      - name: Install TS at correct version
+        run: yarn add --dev typescript@${{ matrix.typescript }}
+      - name: Run tests
+        run: yarn test
