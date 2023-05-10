@@ -75,7 +75,7 @@ declare type UnextendJSONSchema7Tuple<E extends JSONSchema7Extension, S extends 
 declare type UnextendJSONSchema7Record<E extends JSONSchema7Extension, S extends Record<string, unknown>> = {
     [key in keyof S]: S[key] extends ExtendedJSONSchema7$1<E> ? UnextendJSONSchema7<E, S[key]> : S[key];
 };
-declare type UnextendJSONSchema7<E extends JSONSchema7Extension, S extends ExtendedJSONSchema7$1<E>> = S extends boolean ? S : {
+declare type UnextendJSONSchema7<E extends JSONSchema7Extension, S> = S extends boolean ? S : {
     [key in $JSONSchema7 | keyof S]: key extends keyof S ? S extends {
         [k in key]: ExtendedJSONSchema7$1<E>;
     } ? UnextendJSONSchema7<E, S[key]> : S extends {
@@ -105,8 +105,6 @@ declare type FromSchemaDefaultOptions = {
 };
 
 declare type And<A, B> = A extends true ? B extends true ? true : false : false;
-
-declare type Cast<A, B> = A extends B ? A : never;
 
 declare type DoesExtend<A, B> = [A] extends [B] ? true : false;
 
@@ -383,6 +381,6 @@ declare type ExtendedJSONSchema7Reference<E extends JSONSchema7Extension> = Exte
 declare type JSONSchema = JSONSchema7;
 declare type ExtendedJSONSchema<E extends JSONSchema7Extension> = ExtendedJSONSchema7<E>;
 declare type FromSchema<S extends JSONSchema, Opt extends FromSchemaOptions = FromSchemaDefaultOptions, W extends JSONSchema7$1 = S extends Record<string | number | symbol, unknown> ? DeepWritable<S> : S> = M.$Resolve<ParseSchema<W, ParseOptions<W, Opt>>>;
-declare type FromExtendedSchema<E extends JSONSchema7Extension, S extends ExtendedJSONSchema<E>, Opt extends FromExtendedSchemaOptions<E> = FromSchemaDefaultOptions, W extends ExtendedJSONSchema7$1<E> = Cast<S extends Record<string | number | symbol, unknown> ? DeepWritable<S> : S, ExtendedJSONSchema7$1<E>>> = FromSchema<Cast<UnextendJSONSchema7<E, W>, JSONSchema>, Opt>;
+declare type FromExtendedSchema<E extends JSONSchema7Extension, S extends ExtendedJSONSchema<E>, Opt extends FromExtendedSchemaOptions<E> = FromSchemaDefaultOptions, U = UnextendJSONSchema7<E, S>> = U extends JSONSchema ? FromSchema<U, Opt> : never;
 
 export { $Compiler, $Validator, Compiler, DeserializationPattern, ExtendedJSONSchema, ExtendedJSONSchema7, ExtendedJSONSchema7Reference, FromExtendedSchema, FromExtendedSchemaOptions, FromSchema, FromSchemaDefaultOptions, FromSchemaOptions, JSONSchema, JSONSchema7, JSONSchema7Extension, JSONSchema7Reference, Validator, asConst, wrapCompilerAsTypeGuard, wrapValidatorAsTypeGuard };
