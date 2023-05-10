@@ -34,7 +34,6 @@ type BigInt = FromExtendedSchema<
   CustomProps,
   typeof bigIntSchema,
   {
-    // 👇 Works very well with the deserialize option!
     deserialize: [
       {
         pattern: {
@@ -49,3 +48,32 @@ type BigInt = FromExtendedSchema<
 type AssertBigInt = A.Equals<BigInt, bigint>;
 const assertBigInt: AssertBigInt = 1;
 assertBigInt;
+
+const nestedSchema = {
+  type: "object",
+  properties: {
+    nested: {
+      numberType: "bigInt",
+    },
+  },
+  required: ["nested"],
+  additionalProperties: false,
+} as const;
+
+type NestedBigInt = FromExtendedSchema<
+  CustomProps,
+  typeof nestedSchema,
+  {
+    deserialize: [
+      {
+        pattern: {
+          numberType: "bigInt";
+        };
+        output: bigint;
+      },
+    ];
+  }
+>;
+type AssertNestedBigInt = A.Equals<NestedBigInt, { nested: bigint }>;
+const assertNestedBigInt: AssertNestedBigInt = 1;
+assertNestedBigInt;
