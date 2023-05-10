@@ -1,5 +1,4 @@
 export type { And } from "./and";
-export type { Cast } from "./cast";
 export type { Compute } from "./compute";
 export type { DoesExtend } from "./extends";
 export type { DeepGet } from "./get";

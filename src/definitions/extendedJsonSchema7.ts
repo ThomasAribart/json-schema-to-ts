@@ -88,7 +88,7 @@ type UnextendJSONSchema7Record<
 
 export type UnextendJSONSchema7<
   E extends JSONSchema7Extension,
-  S extends ExtendedJSONSchema7<E>,
+  S,
 > = S extends boolean
   ? S
   : {

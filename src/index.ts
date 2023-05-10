@@ -13,7 +13,7 @@ import type {
 } from "./definitions";
 import type { ParseOptions } from "./parse-options";
 import type { ParseSchema } from "./parse-schema";
-import type { Cast, Readonly, Writable } from "./type-utils";
+import type { Readonly, Writable } from "./type-utils";
 
 export type {
   DeserializationPattern,
@@ -88,8 +88,5 @@ export type FromExtendedSchema<
   E extends JSONSchema7Extension,
   S extends ExtendedJSONSchema<E>,
   Opt extends FromExtendedSchemaOptions<E> = FromSchemaDefaultOptions,
-  W extends $ExtendedJSONSchema7<E> = Cast<
-    S extends Record<string | number | symbol, unknown> ? Writable<S> : S,
-    $ExtendedJSONSchema7<E>
-  >,
-> = FromSchema<Cast<UnextendJSONSchema7<E, W>, JSONSchema>, Opt>;
+  U = UnextendJSONSchema7<E, S>,
+> = U extends JSONSchema ? FromSchema<U, Opt> : never;
