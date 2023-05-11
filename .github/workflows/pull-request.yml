@@ -3,26 +3,29 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
 
+env:
+  CI: true
+
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node: [16, 18]
-        typescript: ["~4.5.5", "~4.7.4", "~4.8.3", "~4.9.5", "~5.0.4", "latest"]
+        typescript: ["~4.5.5", "~4.6.4", "~4.7.4", "~4.8.3", "~4.9.5", "~5.0.4"]
     name: Node ${{ matrix.node }} / TS ${{ matrix.typescript }}
     steps:
-      - name: "Checkout latest code"
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      - name: Set up node
-        uses: actions/setup-node@v3
+          # We need to fetch all branches and commits so that Nx affected has a base to compare against.
+          fetch-depth: 0
+
+      - name: Install node_modules
+        uses: ./.github/actions/install-node-modules
         with:
           node-version: ${{ matrix.node }}
-      - name: Install dependencies
-        run: yarn
-      - name: Install TS at correct version
-        run: yarn add --dev typescript@${{ matrix.typescript }}
+          typescript-version: ${{ matrix.typescript }}
+
       - name: Run tests
         run: yarn test
