@@ -1,3 +1,9 @@
+name: 🚀 Release to NPM
+
+on:
+  release:
+    types: [published]
+
 env:
   CI: true
 
