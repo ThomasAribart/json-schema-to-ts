@@ -17,7 +17,8 @@
     "build": "rm -rf lib && yarn build-cjs && yarn build-esm && yarn build-types",
     "build-cjs": "NODE_ENV=cjs yarn transpile --out-dir lib/cjs --source-maps",
     "build-esm": "NODE_ENV=esm yarn transpile --out-dir lib/esm --source-maps",
-    "build-types": "ttsc -p tsconfig.build.json"
+    "build-types": "ttsc -p tsconfig.build.json",
+    "set-package-version": "ts-node scripts/setPackageVersion"
   },
   "dependencies": {
     "@babel/runtime": "^7.18.3",
@@ -54,6 +55,7 @@
     "rollup-plugin-import-map": "^2.2.2",
     "rollup-plugin-typescript-paths": "^1.4.0",
     "ts-jest": "^28.0.2",
+    "ts-node": "^10.9.1",
     "ts-toolbelt": "^9.6.0",
     "ts-unused-exports": "^8.0.0",
     "ttypescript": "^1.5.13",

@@ -1,0 +1,48 @@
+env:
+  CI: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [16, 18]
+        typescript: ["~4.5.5", "~4.6.4", "~4.7.4", "~4.8.3", "~4.9.5", "~5.0.4"]
+    name: Node ${{ matrix.node }} / TS ${{ matrix.typescript }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install node_modules
+        uses: ./.github/actions/install-node-modules
+        with:
+          node-version: ${{ matrix.node }}
+          typescript-version: ${{ matrix.typescript }}
+
+      - name: Run tests
+        run: yarn test
+
+  deploy:
+    name: Deploy
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install node_modules
+        uses: ./.github/actions/install-node-modules
+        with:
+          node-version: 18
+          typescript-version: ~5.0.4
+
+      - name: Set package version
+        run: yarn set-package-version ${{ github.event.release.tag_name }}
+
+      - name: Clear lib directory
+        run: rm -rf lib
+
+      - name: Clear builds directory
+        run: rm -rf builds
+
+      - name: Build
+        run: yarn build
+
+      - name: Building deno build
+        run: yarn rollup -c
