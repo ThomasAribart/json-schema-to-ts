@@ -30,6 +30,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy
+    needs: build-and-test
     steps:
       - uses: actions/checkout@v3
 
@@ -37,10 +38,7 @@ jobs:
         uses: ./.github/actions/install-node-modules
         with:
           node-version: 18
-          typescript-version: ~5.0.4
-
-      - name: Set package version
-        run: yarn set-package-version ${{ github.event.release.tag_name }}
+          typescript-version: ~4.9.5
 
       - name: Clear lib directory
         run: rm -rf lib
@@ -48,8 +46,14 @@ jobs:
       - name: Clear builds directory
         run: rm -rf builds
 
+      - name: Set package version
+        run: yarn set-package-version ${{ github.event.release.tag_name }}
+
       - name: Build
         run: yarn build
 
       - name: Building deno build
         run: yarn rollup -c
+
+      - name: Commit
+        run: git add . && git commit -m "${{ github.event.release.tag_name }} release"
