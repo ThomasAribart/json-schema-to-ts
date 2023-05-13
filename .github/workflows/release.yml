@@ -28,6 +28,7 @@ jobs:
         run: yarn test
 
   deploy:
+    runs-on: ubuntu-latest
     name: Deploy
     steps:
       - uses: actions/checkout@v3
