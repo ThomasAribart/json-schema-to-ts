@@ -61,3 +61,8 @@ jobs:
         with:
           default_author: github_actions
           message: "${{ github.event.release.tag_name }} release"
+
+      - uses: JS-DevTools/npm-publish@v2
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          strategy: upgrade
