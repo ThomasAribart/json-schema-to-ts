@@ -2,9 +2,11 @@ name: Install Node Dependencies
 description: Install dependencies using yarn
 inputs:
   node-version:
+    description: Node version to use
     required: true
   typescript-version:
-    required: true
+    description: TS version to use
+    default: "default"
 runs:
   using: composite
   steps:
@@ -37,6 +39,6 @@ runs:
       run: if [ '${{ steps.sync-node-modules-cache.outputs.cache-hit }}' != 'true' ]; then yarn install --immutable; fi
       shell: bash
 
-    - name: Override TS with correct version
-      run: if [ '${{ steps.sync-node-modules-cache.outputs.cache-hit }}' != 'true' ]; then yarn add --dev typescript@${{ inputs.typescript-version }}; fi
+    - name: Override TS with specified version
+      run: if [ '${{ inputs.typescript-version }}' != 'default' ] && [ '${{ steps.sync-node-modules-cache.outputs.cache-hit }}' != 'true' ]; then yarn add --dev typescript@${{ inputs.typescript-version }}; fi
       shell: bash
