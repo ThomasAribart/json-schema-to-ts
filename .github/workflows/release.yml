@@ -40,7 +40,6 @@ jobs:
         uses: ./.github/actions/install-node-modules
         with:
           node-version: 18
-          typescript-version: ~4.9.5
 
       - name: Clear lib directory
         run: rm -rf lib
