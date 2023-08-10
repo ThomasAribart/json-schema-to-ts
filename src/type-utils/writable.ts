@@ -4,6 +4,12 @@
  * @param TYPE Type
  * @return Type
  */
-export type DeepWritable<TYPE> = {
-  -readonly [KEY in keyof TYPE]: DeepWritable<TYPE[KEY]>;
-};
+export type DeepWritable<TYPE> = TYPE extends unknown[]
+  ? TYPE extends [infer HEAD, ...infer TAIL]
+    ? [DeepWritable<HEAD>, ...DeepWritable<TAIL>]
+    : TYPE extends (infer VALUES)[]
+    ? DeepWritable<VALUES>[]
+    : never
+  : {
+      -readonly [KEY in keyof TYPE]: DeepWritable<TYPE[KEY]>;
+    };
