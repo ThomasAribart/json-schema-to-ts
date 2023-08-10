@@ -10,9 +10,14 @@ export type ReferenceSchema = JSONSchema7 & {
 };
 
 export type ParseReferenceSchema<
-  Sc extends ReferenceSchema,
-  O extends ParseSchemaOptions,
-  R extends string[] = Split<Sc["$ref"], "#">,
-> = R[0] extends ""
-  ? ParseDefinitionSchema<Sc, O, R[1]>
-  : ParseExternalReferenceSchema<Sc, O, R[0], R[1]>;
+  REF_SCHEMA extends ReferenceSchema,
+  OPTIONS extends ParseSchemaOptions,
+  REF_AND_DEFINITION extends string[] = Split<REF_SCHEMA["$ref"], "#">,
+> = REF_AND_DEFINITION[0] extends ""
+  ? ParseDefinitionSchema<REF_SCHEMA, OPTIONS, REF_AND_DEFINITION[1]>
+  : ParseExternalReferenceSchema<
+      REF_SCHEMA,
+      OPTIONS,
+      REF_AND_DEFINITION[0],
+      REF_AND_DEFINITION[1]
+    >;

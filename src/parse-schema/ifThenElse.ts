@@ -12,20 +12,29 @@ export type IfThenElseSchema = JSONSchema7 & {
 };
 
 export type ParseIfThenElseSchema<
-  S extends IfThenElseSchema,
-  O extends ParseSchemaOptions,
-  R extends JSONSchema7 = Omit<S, "if" | "then" | "else">,
-  I extends JSONSchema7 = MergeSubSchema<R, S["if"]>,
-  T = S extends { then: JSONSchema7 }
+  SCHEMA extends IfThenElseSchema,
+  OPTIONS extends ParseSchemaOptions,
+  REST_SCHEMA extends JSONSchema7 = Omit<SCHEMA, "if" | "then" | "else">,
+  IF_SCHEMA extends JSONSchema7 = MergeSubSchema<REST_SCHEMA, SCHEMA["if"]>,
+  PARSED_THEN_SCHEMA = SCHEMA extends { then: JSONSchema7 }
     ? M.$Intersect<
-        ParseSchema<I, O>,
-        ParseSchema<MergeSubSchema<R, S["then"]>, O>
+        ParseSchema<IF_SCHEMA, OPTIONS>,
+        ParseSchema<MergeSubSchema<REST_SCHEMA, SCHEMA["then"]>, OPTIONS>
       >
-    : ParseSchema<I, O>,
-  E = S extends { else: JSONSchema7 }
+    : ParseSchema<IF_SCHEMA, OPTIONS>,
+  PARSED_ELSE_SCHEMA = SCHEMA extends { else: JSONSchema7 }
     ? M.$Intersect<
-        M.$Exclude<ParseSchema<R, O>, ParseSchema<I, O>>,
-        ParseSchema<MergeSubSchema<R, S["else"]>, O>
+        M.$Exclude<
+          ParseSchema<REST_SCHEMA, OPTIONS>,
+          ParseSchema<IF_SCHEMA, OPTIONS>
+        >,
+        ParseSchema<MergeSubSchema<REST_SCHEMA, SCHEMA["else"]>, OPTIONS>
       >
-    : M.$Exclude<ParseSchema<R, O>, ParseSchema<I, O>>,
-> = M.$Intersect<M.$Union<T | E>, ParseSchema<R, O>>;
+    : M.$Exclude<
+        ParseSchema<REST_SCHEMA, OPTIONS>,
+        ParseSchema<IF_SCHEMA, OPTIONS>
+      >,
+> = M.$Intersect<
+  M.$Union<PARSED_THEN_SCHEMA | PARSED_ELSE_SCHEMA>,
+  ParseSchema<REST_SCHEMA, OPTIONS>
+>;

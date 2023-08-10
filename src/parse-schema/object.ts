@@ -7,57 +7,66 @@ import type { ParseSchema, ParseSchemaOptions } from "./index";
 export type ObjectSchema = JSONSchema7 & { type: "object" };
 
 export type ParseObjectSchema<
-  S extends ObjectSchema,
-  O extends ParseSchemaOptions,
-> = S extends { properties: Record<string, JSONSchema7> }
+  SCHEMA extends ObjectSchema,
+  OPTIONS extends ParseSchemaOptions,
+> = SCHEMA extends { properties: Record<string, JSONSchema7> }
   ? M.$Object<
       {
-        [key in keyof S["properties"]]: ParseSchema<S["properties"][key], O>;
+        [KEY in keyof SCHEMA["properties"]]: ParseSchema<
+          SCHEMA["properties"][KEY],
+          OPTIONS
+        >;
       },
-      GetRequired<S>,
-      GetOpenProps<S, O>
+      GetRequired<SCHEMA>,
+      GetOpenProps<SCHEMA, OPTIONS>
     >
-  : M.$Object<{}, GetRequired<S>, GetOpenProps<S, O>>;
+  : M.$Object<{}, GetRequired<SCHEMA>, GetOpenProps<SCHEMA, OPTIONS>>;
 
-type GetRequired<S extends ObjectSchema> = S extends {
+type GetRequired<SCHEMA extends ObjectSchema> = SCHEMA extends {
   required: ReadonlyArray<string>;
 }
-  ? S["required"][number]
+  ? SCHEMA["required"][number]
   : never;
 
 type GetOpenProps<
-  S extends ObjectSchema,
-  O extends ParseSchemaOptions,
-> = S extends { additionalProperties: JSONSchema7 }
-  ? S extends { patternProperties: Record<string, JSONSchema7> }
+  SCHEMA extends ObjectSchema,
+  OPTIONS extends ParseSchemaOptions,
+> = SCHEMA extends { additionalProperties: JSONSchema7 }
+  ? SCHEMA extends { patternProperties: Record<string, JSONSchema7> }
     ? AdditionalAndPatternProps<
-        S["additionalProperties"],
-        S["patternProperties"],
-        O
+        SCHEMA["additionalProperties"],
+        SCHEMA["patternProperties"],
+        OPTIONS
       >
-    : ParseSchema<S["additionalProperties"], O>
-  : S extends { patternProperties: Record<string, JSONSchema7> }
-  ? PatternProps<S["patternProperties"], O>
+    : ParseSchema<SCHEMA["additionalProperties"], OPTIONS>
+  : SCHEMA extends { patternProperties: Record<string, JSONSchema7> }
+  ? PatternProps<SCHEMA["patternProperties"], OPTIONS>
   : M.Any;
 
 type PatternProps<
-  P extends Record<string, JSONSchema7>,
-  O extends ParseSchemaOptions,
+  PATTERN_PROPERTY_SCHEMAS extends Record<string, JSONSchema7>,
+  OPTIONS extends ParseSchemaOptions,
 > = M.$Union<
   {
-    [key in keyof P]: ParseSchema<P[key], O>;
-  }[keyof P]
+    [KEY in keyof PATTERN_PROPERTY_SCHEMAS]: ParseSchema<
+      PATTERN_PROPERTY_SCHEMAS[KEY],
+      OPTIONS
+    >;
+  }[keyof PATTERN_PROPERTY_SCHEMAS]
 >;
 
 type AdditionalAndPatternProps<
-  A extends JSONSchema7,
-  P extends Record<string, JSONSchema7>,
-  O extends ParseSchemaOptions,
-> = A extends boolean
-  ? PatternProps<P, O>
+  ADDITIONAL_ITEMS_SCHEMA extends JSONSchema7,
+  PATTERN_PROPERTY_SCHEMAS extends Record<string, JSONSchema7>,
+  OPTIONS extends ParseSchemaOptions,
+> = ADDITIONAL_ITEMS_SCHEMA extends boolean
+  ? PatternProps<PATTERN_PROPERTY_SCHEMAS, OPTIONS>
   : M.$Union<
-      | ParseSchema<A, O>
+      | ParseSchema<ADDITIONAL_ITEMS_SCHEMA, OPTIONS>
       | {
-          [key in keyof P]: ParseSchema<P[key], O>;
-        }[keyof P]
+          [KEY in keyof PATTERN_PROPERTY_SCHEMAS]: ParseSchema<
+            PATTERN_PROPERTY_SCHEMAS[KEY],
+            OPTIONS
+          >;
+        }[keyof PATTERN_PROPERTY_SCHEMAS]
     >;

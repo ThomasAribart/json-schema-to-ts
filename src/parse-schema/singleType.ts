@@ -10,20 +10,20 @@ import type { ParseObjectSchema, ObjectSchema } from "./object";
 export type SingleTypeSchema = JSONSchema7 & { type: JSONSchema7TypeName };
 
 export type ParseSingleTypeSchema<
-  S extends SingleTypeSchema,
-  O extends ParseSchemaOptions,
-> = S extends { type: "null" }
+  SCHEMA extends SingleTypeSchema,
+  OPTIONS extends ParseSchemaOptions,
+> = SCHEMA extends { type: "null" }
   ? M.Primitive<null>
-  : S extends { type: "boolean" }
+  : SCHEMA extends { type: "boolean" }
   ? M.Primitive<boolean>
-  : S extends { type: "integer" }
+  : SCHEMA extends { type: "integer" }
   ? M.Primitive<number>
-  : S extends { type: "number" }
+  : SCHEMA extends { type: "number" }
   ? M.Primitive<number>
-  : S extends { type: "string" }
+  : SCHEMA extends { type: "string" }
   ? M.Primitive<string>
-  : S extends ArraySchema
-  ? ParseArraySchema<S, O>
-  : S extends ObjectSchema
-  ? ParseObjectSchema<S, O>
+  : SCHEMA extends ArraySchema
+  ? ParseArraySchema<SCHEMA, OPTIONS>
+  : SCHEMA extends ObjectSchema
+  ? ParseObjectSchema<SCHEMA, OPTIONS>
   : M.Never;

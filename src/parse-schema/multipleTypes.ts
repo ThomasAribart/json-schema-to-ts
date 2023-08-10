@@ -8,25 +8,29 @@ import type { ParseSchema, ParseSchemaOptions } from "./index";
 export type MultipleTypesSchema = JSONSchema7 & { type: JSONSchema7TypeName[] };
 
 export type ParseMultipleTypesSchema<
-  P extends MultipleTypesSchema,
-  O extends ParseSchemaOptions,
-> = M.$Union<RecurseOnMixedSchema<P["type"], P, O>>;
+  SCHEMA extends MultipleTypesSchema,
+  OPTIONS extends ParseSchemaOptions,
+> = M.$Union<RecurseOnMixedSchema<SCHEMA["type"], SCHEMA, OPTIONS>>;
 
 type RecurseOnMixedSchema<
-  S extends JSONSchema7TypeName[],
-  P extends MultipleTypesSchema,
-  O extends ParseSchemaOptions,
-  R = never,
-> = S extends [infer H, ...infer T]
+  TYPES extends JSONSchema7TypeName[],
+  ROOT_SCHEMA extends MultipleTypesSchema,
+  OPTIONS extends ParseSchemaOptions,
+  RESULT = never,
+> = TYPES extends [infer TYPES_HEAD, ...infer TYPES_TAIL]
   ? // TODO increase TS version and use "extends" in Array https://devblogs.microsoft.com/typescript/announcing-typescript-4-8/#improved-inference-for-infer-types-in-template-string-types
-    H extends JSONSchema7TypeName
-    ? T extends JSONSchema7TypeName[]
+    TYPES_HEAD extends JSONSchema7TypeName
+    ? TYPES_TAIL extends JSONSchema7TypeName[]
       ? RecurseOnMixedSchema<
-          T,
-          P,
-          O,
-          R | ParseSchema<Omit<P, "type"> & { type: H }, O>
+          TYPES_TAIL,
+          ROOT_SCHEMA,
+          OPTIONS,
+          | RESULT
+          | ParseSchema<
+              Omit<ROOT_SCHEMA, "type"> & { type: TYPES_HEAD },
+              OPTIONS
+            >
         >
       : never
     : never
-  : R;
+  : RESULT;

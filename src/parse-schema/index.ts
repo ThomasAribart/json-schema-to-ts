@@ -28,49 +28,49 @@ export type ParseSchemaOptions = {
 };
 
 export type ParseSchema<
-  S extends JSONSchema7,
-  O extends ParseSchemaOptions,
-  P = JSONSchema7 extends S
+  SCHEMA extends JSONSchema7,
+  OPTIONS extends ParseSchemaOptions,
+  RESULT = JSONSchema7 extends SCHEMA
     ? M.Any
-    : S extends true | string
+    : SCHEMA extends true | string
     ? M.Any
-    : S extends false
+    : SCHEMA extends false
     ? M.Never
-    : S extends NullableSchema
-    ? ParseNullableSchema<S, O>
-    : S extends ReferenceSchema
-    ? ParseReferenceSchema<S, O>
+    : SCHEMA extends NullableSchema
+    ? ParseNullableSchema<SCHEMA, OPTIONS>
+    : SCHEMA extends ReferenceSchema
+    ? ParseReferenceSchema<SCHEMA, OPTIONS>
     : And<
-        DoesExtend<O["parseIfThenElseKeywords"], true>,
-        DoesExtend<S, IfThenElseSchema>
+        DoesExtend<OPTIONS["parseIfThenElseKeywords"], true>,
+        DoesExtend<SCHEMA, IfThenElseSchema>
       > extends true
     ? // TOIMPROVE: Not cast here (rather use a ParseNonIfThenElseSchema twice)
-      S extends IfThenElseSchema
-      ? ParseIfThenElseSchema<S, O>
+      SCHEMA extends IfThenElseSchema
+      ? ParseIfThenElseSchema<SCHEMA, OPTIONS>
       : never
     : And<
-        DoesExtend<O["parseNotKeyword"], true>,
-        DoesExtend<S, NotSchema>
+        DoesExtend<OPTIONS["parseNotKeyword"], true>,
+        DoesExtend<SCHEMA, NotSchema>
       > extends true
     ? // TOIMPROVE: Not cast here (rather use a ParseNonNotSchema twice)
-      S extends NotSchema
-      ? ParseNotSchema<S, O>
+      SCHEMA extends NotSchema
+      ? ParseNotSchema<SCHEMA, OPTIONS>
       : never
-    : S extends AllOfSchema
-    ? ParseAllOfSchema<S, O>
-    : S extends OneOfSchema
-    ? ParseOneOfSchema<S, O>
-    : S extends AnyOfSchema
-    ? ParseAnyOfSchema<S, O>
-    : S extends EnumSchema
-    ? ParseEnumSchema<S, O>
-    : S extends ConstSchema
-    ? ParseConstSchema<S, O>
-    : S extends MultipleTypesSchema
-    ? ParseMultipleTypesSchema<S, O>
-    : S extends SingleTypeSchema
-    ? ParseSingleTypeSchema<S, O>
+    : SCHEMA extends AllOfSchema
+    ? ParseAllOfSchema<SCHEMA, OPTIONS>
+    : SCHEMA extends OneOfSchema
+    ? ParseOneOfSchema<SCHEMA, OPTIONS>
+    : SCHEMA extends AnyOfSchema
+    ? ParseAnyOfSchema<SCHEMA, OPTIONS>
+    : SCHEMA extends EnumSchema
+    ? ParseEnumSchema<SCHEMA, OPTIONS>
+    : SCHEMA extends ConstSchema
+    ? ParseConstSchema<SCHEMA, OPTIONS>
+    : SCHEMA extends MultipleTypesSchema
+    ? ParseMultipleTypesSchema<SCHEMA, OPTIONS>
+    : SCHEMA extends SingleTypeSchema
+    ? ParseSingleTypeSchema<SCHEMA, OPTIONS>
     : M.Any,
-> = O extends { deserialize: DeserializationPattern[] }
-  ? M.$Intersect<DeserializeSchema<S, O>, P>
-  : P;
+> = OPTIONS extends { deserialize: DeserializationPattern[] }
+  ? M.$Intersect<DeserializeSchema<SCHEMA, OPTIONS>, RESULT>
+  : RESULT;

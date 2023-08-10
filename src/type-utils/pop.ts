@@ -1,5 +1,5 @@
-export type Pop<L extends unknown[]> = L extends
-  | readonly [...infer LBody, unknown]
-  | readonly [...infer LBody, unknown?]
-  ? LBody
-  : L;
+export type Pop<ARRAY extends unknown[]> = ARRAY extends
+  | readonly [...infer ARRAY_BODY, unknown]
+  | readonly [...infer ARRAY_BODY, unknown?]
+  ? ARRAY_BODY
+  : ARRAY;

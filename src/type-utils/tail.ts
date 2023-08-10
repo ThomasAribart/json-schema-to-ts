@@ -1,5 +1,5 @@
-export type Tail<L extends unknown[]> = L extends readonly []
-  ? L
-  : L extends readonly [unknown?, ...infer T]
-  ? T
-  : L;
+export type Tail<ARRAY extends unknown[]> = ARRAY extends readonly []
+  ? ARRAY
+  : ARRAY extends readonly [unknown?, ...infer ARRAY_TAIL]
+  ? ARRAY_TAIL
+  : ARRAY;

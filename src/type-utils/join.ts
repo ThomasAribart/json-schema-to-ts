@@ -1,10 +1,13 @@
-export type Join<S extends string[], D extends string = ","> = S extends []
+export type Join<
+  STRINGS extends string[],
+  SEPARATOR extends string = ",",
+> = STRINGS extends []
   ? ""
-  : S extends [string]
-  ? `${S[0]}`
-  : S extends [string, ...infer T]
-  ? T extends string[]
+  : STRINGS extends [string]
+  ? `${STRINGS[0]}`
+  : STRINGS extends [string, ...infer STRINGS_TAIL]
+  ? STRINGS_TAIL extends string[]
     ? // TODO increase TS version and use "extends" in Array https://devblogs.microsoft.com/typescript/announcing-typescript-4-8/#improved-inference-for-infer-types-in-template-string-types
-      `${S[0]}${D}${Join<T, D>}`
+      `${STRINGS[0]}${SEPARATOR}${Join<STRINGS_TAIL, SEPARATOR>}`
     : never
   : string;

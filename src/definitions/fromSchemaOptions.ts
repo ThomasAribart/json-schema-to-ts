@@ -18,12 +18,13 @@ export type FromSchemaOptions = {
 /**
  * FromExtendedSchema options constraints
  */
-export type FromExtendedSchemaOptions<E extends JSONSchema7Extension> = {
-  parseNotKeyword?: boolean;
-  parseIfThenElseKeywords?: boolean;
-  references?: ExtendedJSONSchema7Reference<E>[] | false;
-  deserialize?: DeserializationPattern[] | false;
-};
+export type FromExtendedSchemaOptions<EXTENSION extends JSONSchema7Extension> =
+  {
+    parseNotKeyword?: boolean;
+    parseIfThenElseKeywords?: boolean;
+    references?: ExtendedJSONSchema7Reference<EXTENSION>[] | false;
+    deserialize?: DeserializationPattern[] | false;
+  };
 
 /**
  * FromSchema default options
