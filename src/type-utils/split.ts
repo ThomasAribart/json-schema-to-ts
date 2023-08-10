@@ -1,12 +1,14 @@
-import { Pop } from "./pop";
+import type { Pop } from "./pop";
 
-type RecSplit<
-  S extends string,
-  D extends string = "",
-> = S extends `${infer BS}${D}${infer AS}` ? [BS, ...RecSplit<AS, D>] : [S];
+type RecursiveSplit<
+  STRING extends string,
+  SEPARATOR extends string = "",
+> = STRING extends `${infer BEFORE}${SEPARATOR}${infer AFTER}`
+  ? [BEFORE, ...RecursiveSplit<AFTER, SEPARATOR>]
+  : [STRING];
 
 export type Split<
-  S extends string,
-  D extends string = "",
-  R extends string[] = RecSplit<S, D>,
-> = D extends "" ? Pop<R> : R;
+  STRING extends string,
+  SEPARATOR extends string = "",
+  RESULT extends string[] = RecursiveSplit<STRING, SEPARATOR>,
+> = SEPARATOR extends "" ? Pop<RESULT> : RESULT;

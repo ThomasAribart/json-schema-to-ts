@@ -19,11 +19,13 @@ type AllTypes = M.Union<
 >;
 
 export type ParseNotSchema<
-  S extends NotSchema,
-  O extends ParseSchemaOptions,
-  P = ParseSchema<Omit<S, "not">, O>,
-  E = M.$Exclude<
-    P extends M.AnyType ? M.$Intersect<AllTypes, P> : P,
-    ParseSchema<MergeSubSchema<Omit<S, "not">, S["not"]>, O>
+  SCHEMA extends NotSchema,
+  OPTIONS extends ParseSchemaOptions,
+  PARSED_REST_SCHEMA = ParseSchema<Omit<SCHEMA, "not">, OPTIONS>,
+  EXCLUSION = M.$Exclude<
+    PARSED_REST_SCHEMA extends M.AnyType
+      ? M.$Intersect<AllTypes, PARSED_REST_SCHEMA>
+      : PARSED_REST_SCHEMA,
+    ParseSchema<MergeSubSchema<Omit<SCHEMA, "not">, SCHEMA["not"]>, OPTIONS>
   >,
-> = E extends M.Never ? P : E;
+> = EXCLUSION extends M.Never ? PARSED_REST_SCHEMA : EXCLUSION;

@@ -2,32 +2,38 @@ import type { DoesExtend } from "./extends";
 import type { If } from "./if";
 import type { Key } from "./key";
 
-export type Compute<A, Seen = never> = A extends
+export type Compute<TYPE, SEEN = never> = TYPE extends
   | Function
   | Error
   | Date
   | { readonly [Symbol.toStringTag]: string }
   | RegExp
   | Generator
-  ? A
+  ? TYPE
   : If<
-      DoesExtend<Seen, A>,
-      A,
-      A extends Array<unknown>
-        ? A extends Array<Record<Key, unknown>>
+      DoesExtend<SEEN, TYPE>,
+      TYPE,
+      TYPE extends Array<unknown>
+        ? TYPE extends Array<Record<Key, unknown>>
           ? Array<
               {
-                [K in keyof A[number]]: Compute<A[number][K], A | Seen>;
+                [KEY in keyof TYPE[number]]: Compute<
+                  TYPE[number][KEY],
+                  TYPE | SEEN
+                >;
               } & unknown
             >
-          : A
-        : A extends ReadonlyArray<unknown>
-        ? A extends ReadonlyArray<Record<string | number | symbol, unknown>>
+          : TYPE
+        : TYPE extends ReadonlyArray<unknown>
+        ? TYPE extends ReadonlyArray<Record<string | number | symbol, unknown>>
           ? ReadonlyArray<
               {
-                [K in keyof A[number]]: Compute<A[number][K], A | Seen>;
+                [KEY in keyof TYPE[number]]: Compute<
+                  TYPE[number][KEY],
+                  TYPE | SEEN
+                >;
               } & unknown
             >
-          : A
-        : { [K in keyof A]: Compute<A[K], A | Seen> } & unknown
+          : TYPE
+        : { [KEY in keyof TYPE]: Compute<TYPE[KEY], TYPE | SEEN> } & unknown
     >;

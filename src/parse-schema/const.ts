@@ -9,18 +9,21 @@ import type { SingleTypeSchema } from "./singleType";
 export type ConstSchema = JSONSchema7 & { const: unknown };
 
 export type ParseConstSchema<
-  S extends ConstSchema,
-  O extends ParseSchemaOptions,
-> = S extends SingleTypeSchema
-  ? IntersectConstAndTypeSchema<S, O>
-  : S extends MultipleTypesSchema
-  ? IntersectConstAndTypeSchema<S, O>
-  : ParseConst<S>;
+  SCHEMA extends ConstSchema,
+  OPTIONS extends ParseSchemaOptions,
+> = SCHEMA extends SingleTypeSchema
+  ? IntersectConstAndTypeSchema<SCHEMA, OPTIONS>
+  : SCHEMA extends MultipleTypesSchema
+  ? IntersectConstAndTypeSchema<SCHEMA, OPTIONS>
+  : ParseConst<SCHEMA>;
 
 type IntersectConstAndTypeSchema<
-  S extends ConstSchema & (SingleTypeSchema | MultipleTypesSchema),
-  O extends ParseSchemaOptions,
+  SCHEMA extends ConstSchema & (SingleTypeSchema | MultipleTypesSchema),
+  OPTIONS extends ParseSchemaOptions,
   // TOIMPROVE: Directly use ParseMultipleTypeSchema and ParseSingleTypeSchema
-> = M.$Intersect<ParseConst<S>, ParseSchema<Omit<S, "const">, O>>;
+> = M.$Intersect<
+  ParseConst<SCHEMA>,
+  ParseSchema<Omit<SCHEMA, "const">, OPTIONS>
+>;
 
 type ParseConst<S extends ConstSchema> = M.Const<S["const"]>;

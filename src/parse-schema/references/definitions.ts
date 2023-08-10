@@ -3,7 +3,12 @@ import type { ReferenceSchema } from "./index";
 import type { ParseReference } from "./utils";
 
 export type ParseDefinitionSchema<
-  S extends ReferenceSchema,
-  O extends ParseSchemaOptions,
-  P extends string,
-> = ParseReference<O["rootSchema"], O, P, Omit<S, "$ref">>;
+  REF_SCHEMA extends ReferenceSchema,
+  OPTIONS extends ParseSchemaOptions,
+  DEFINITION extends string,
+> = ParseReference<
+  OPTIONS["rootSchema"],
+  OPTIONS,
+  DEFINITION,
+  Omit<REF_SCHEMA, "$ref">
+>;

@@ -1,11 +1,11 @@
-export type Narrow<A> = A extends Promise<infer T>
-  ? Promise<Narrow<T>>
-  : A extends (...args: infer P) => infer R
-  ? (...args: Narrow<P>) => Narrow<R>
-  : A extends []
+export type Narrow<INPUT> = INPUT extends Promise<infer AWAITED>
+  ? Promise<Narrow<AWAITED>>
+  : INPUT extends (...args: infer ARGS) => infer RETURN
+  ? (...args: Narrow<ARGS>) => Narrow<RETURN>
+  : INPUT extends []
   ? []
-  : A extends object
-  ? { [key in keyof A]: Narrow<A[key]> }
-  : A extends string | number | boolean | bigint
-  ? A
+  : INPUT extends object
+  ? { [KEY in keyof INPUT]: Narrow<INPUT[KEY]> }
+  : INPUT extends string | number | boolean | bigint
+  ? INPUT
   : never;

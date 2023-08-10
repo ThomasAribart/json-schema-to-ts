@@ -15,103 +15,118 @@ type SimpleArraySchema = JSONSchema7 & {
 type TupleSchema = JSONSchema7 & { type: "array"; items: JSONSchema7[] };
 
 export type ParseArraySchema<
-  S extends ArraySchema,
-  O extends ParseSchemaOptions,
-> = S extends SimpleArraySchema
-  ? M.$Array<ParseSchema<S["items"], O>>
-  : S extends TupleSchema
-  ? M.$Union<FromTreeTuple<ParseTuple<S["items"], O>, S, O>>
+  SCHEMA extends ArraySchema,
+  OPTIONS extends ParseSchemaOptions,
+> = SCHEMA extends SimpleArraySchema
+  ? M.$Array<ParseSchema<SCHEMA["items"], OPTIONS>>
+  : SCHEMA extends TupleSchema
+  ? M.$Union<
+      FromTreeTuple<ParseTuple<SCHEMA["items"], OPTIONS>, SCHEMA, OPTIONS>
+    >
   : M.$Array;
 
 type ParseTuple<
-  S extends JSONSchema7[],
-  O extends ParseSchemaOptions,
-> = S extends [infer H, ...infer T]
+  ITEM_SCHEMAS extends JSONSchema7[],
+  OPTIONS extends ParseSchemaOptions,
+> = ITEM_SCHEMAS extends [infer ITEM_SCHEMAS_HEAD, ...infer ITEM_SCHEMAS_TAIL]
   ? // TODO increase TS version and use "extends" in Array https://devblogs.microsoft.com/typescript/announcing-typescript-4-8/#improved-inference-for-infer-types-in-template-string-types
-    H extends JSONSchema7
-    ? T extends JSONSchema7[]
-      ? [...ParseTuple<T, O>, ParseSchema<H, O>]
+    ITEM_SCHEMAS_HEAD extends JSONSchema7
+    ? ITEM_SCHEMAS_TAIL extends JSONSchema7[]
+      ? [
+          ...ParseTuple<ITEM_SCHEMAS_TAIL, OPTIONS>,
+          ParseSchema<ITEM_SCHEMAS_HEAD, OPTIONS>,
+        ]
       : never
     : never
   : [];
 
 type FromTreeTuple<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  T extends any[],
-  S extends ArraySchema,
-  O extends ParseSchemaOptions,
+  PARSED_ITEM_SCHEMAS extends any[],
+  ROOT_SCHEMA extends ArraySchema,
+  OPTIONS extends ParseSchemaOptions,
 > = ApplyAdditionalItems<
-  ApplyBoundaries<
-    T,
-    S extends { minItems: number } ? S["minItems"] : 0,
-    S extends { maxItems: number } ? S["maxItems"] : undefined
+  ApplyMinMax<
+    PARSED_ITEM_SCHEMAS,
+    ROOT_SCHEMA extends { minItems: number } ? ROOT_SCHEMA["minItems"] : 0,
+    ROOT_SCHEMA extends { maxItems: number }
+      ? ROOT_SCHEMA["maxItems"]
+      : undefined
   >,
-  S extends { additionalItems: JSONSchema7 } ? S["additionalItems"] : true,
-  O
+  ROOT_SCHEMA extends { additionalItems: JSONSchema7 }
+    ? ROOT_SCHEMA["additionalItems"]
+    : true,
+  OPTIONS
 >;
 
-type ApplyBoundaries<
+type ApplyMinMax<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  T extends any[],
-  Min extends number,
-  Max extends number | undefined,
-  R = never,
-  HasMin extends boolean = false,
-  HasMax extends boolean = false,
+  RECURSED_PARSED_ITEM_SCHEMAS extends any[],
+  MIN extends number,
+  MAX extends number | undefined,
+  RESULT = never,
+  HAS_ENCOUNTERED_MIN extends boolean = false,
+  HAS_ENCOUNTERED_MAX extends boolean = false,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  C extends any[] = T,
+  INITIAL_PARSED_ITEM_SCHEMAS extends any[] = RECURSED_PARSED_ITEM_SCHEMAS,
 > = {
   stop: {
-    result: Max extends undefined
-      ? R | M.$Tuple<Reverse<T>>
-      : HasMax extends true
-      ? R | M.$Tuple<Reverse<T>>
-      : Max extends T["length"]
-      ? M.$Tuple<Reverse<T>>
-      : IsLongerThan<Tail<T>, Max> extends true
+    result: MAX extends undefined
+      ? RESULT | M.$Tuple<Reverse<RECURSED_PARSED_ITEM_SCHEMAS>>
+      : HAS_ENCOUNTERED_MAX extends true
+      ? RESULT | M.$Tuple<Reverse<RECURSED_PARSED_ITEM_SCHEMAS>>
+      : MAX extends RECURSED_PARSED_ITEM_SCHEMAS["length"]
+      ? M.$Tuple<Reverse<RECURSED_PARSED_ITEM_SCHEMAS>>
+      : IsLongerThan<Tail<RECURSED_PARSED_ITEM_SCHEMAS>, MAX> extends true
       ? never
-      : R | M.$Tuple<Reverse<T>>;
-    hasEncounteredMin: DoesExtend<Min, T["length"]>;
-    hasEncounteredMax: HasMax extends true
+      : RESULT | M.$Tuple<Reverse<RECURSED_PARSED_ITEM_SCHEMAS>>;
+    hasEncounteredMin: DoesExtend<MIN, RECURSED_PARSED_ITEM_SCHEMAS["length"]>;
+    hasEncounteredMax: HAS_ENCOUNTERED_MAX extends true
       ? true
-      : Max extends T["length"]
+      : MAX extends RECURSED_PARSED_ITEM_SCHEMAS["length"]
       ? true
-      : IsLongerThan<Tail<T>, Max>;
-    completeTuple: C;
+      : IsLongerThan<Tail<RECURSED_PARSED_ITEM_SCHEMAS>, MAX>;
+    completeTuple: INITIAL_PARSED_ITEM_SCHEMAS;
   };
-  continue: ApplyBoundaries<
-    Tail<T>,
-    Min,
-    Max,
-    T["length"] extends Max ? M.$Tuple<Reverse<T>> : R | M.$Tuple<Reverse<T>>,
-    HasMin extends true ? true : DoesExtend<Min, T["length"]>,
-    HasMax extends true ? true : DoesExtend<Max, T["length"]>,
-    C
+  continue: ApplyMinMax<
+    Tail<RECURSED_PARSED_ITEM_SCHEMAS>,
+    MIN,
+    MAX,
+    RECURSED_PARSED_ITEM_SCHEMAS["length"] extends MAX
+      ? M.$Tuple<Reverse<RECURSED_PARSED_ITEM_SCHEMAS>>
+      : RESULT | M.$Tuple<Reverse<RECURSED_PARSED_ITEM_SCHEMAS>>,
+    HAS_ENCOUNTERED_MIN extends true
+      ? true
+      : DoesExtend<MIN, RECURSED_PARSED_ITEM_SCHEMAS["length"]>,
+    HAS_ENCOUNTERED_MAX extends true
+      ? true
+      : DoesExtend<MAX, RECURSED_PARSED_ITEM_SCHEMAS["length"]>,
+    INITIAL_PARSED_ITEM_SCHEMAS
   >;
-}[Min extends T["length"]
+}[MIN extends RECURSED_PARSED_ITEM_SCHEMAS["length"]
   ? "stop"
   : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  T extends [any, ...any[]]
+  RECURSED_PARSED_ITEM_SCHEMAS extends [any, ...any[]]
   ? "continue"
   : "stop"];
 
 type IsLongerThan<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  T extends any[],
-  N extends number | undefined,
-  R extends boolean = false,
+  TUPLE extends any[],
+  LENGTH extends number | undefined,
+  RESULT extends boolean = false,
 > = {
-  continue: N extends undefined
+  continue: LENGTH extends undefined
     ? false
-    : T["length"] extends N
+    : TUPLE["length"] extends LENGTH
     ? true
-    : IsLongerThan<Tail<T>, N>;
-  stop: T["length"] extends N ? true : R;
+    : IsLongerThan<Tail<TUPLE>, LENGTH>;
+  stop: TUPLE["length"] extends LENGTH ? true : RESULT;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}[T extends [any, ...any[]] ? "continue" : "stop"];
+}[TUPLE extends [any, ...any[]] ? "continue" : "stop"];
 
 type ApplyAdditionalItems<
-  R extends {
+  APPLY_MIN_MAX_RESULT extends {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     result: any;
     hasEncounteredMin: boolean;
@@ -119,20 +134,30 @@ type ApplyAdditionalItems<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     completeTuple: any[];
   },
-  A extends JSONSchema7,
-  O extends ParseSchemaOptions,
-> = R extends { hasEncounteredMax: true }
-  ? R extends { hasEncounteredMin: true }
-    ? R["result"]
+  ADDITIONAL_ITEMS_SCHEMA extends JSONSchema7,
+  OPTIONS extends ParseSchemaOptions,
+> = APPLY_MIN_MAX_RESULT extends { hasEncounteredMax: true }
+  ? APPLY_MIN_MAX_RESULT extends { hasEncounteredMin: true }
+    ? APPLY_MIN_MAX_RESULT["result"]
     : M.Never
-  : A extends false
-  ? R extends { hasEncounteredMin: true }
-    ? R["result"]
+  : ADDITIONAL_ITEMS_SCHEMA extends false
+  ? APPLY_MIN_MAX_RESULT extends { hasEncounteredMin: true }
+    ? APPLY_MIN_MAX_RESULT["result"]
     : M.Never
-  : A extends true
-  ? R extends { hasEncounteredMin: true }
-    ? R["result"] | M.$Tuple<Reverse<R["completeTuple"]>, M.Any>
-    : M.$Tuple<Reverse<R["completeTuple"]>, M.Any>
-  : R["hasEncounteredMin"] extends true
-  ? R["result"] | M.$Tuple<Reverse<R["completeTuple"]>, ParseSchema<A, O>>
-  : M.$Tuple<Reverse<R["completeTuple"]>, ParseSchema<A, O>>;
+  : ADDITIONAL_ITEMS_SCHEMA extends true
+  ? APPLY_MIN_MAX_RESULT extends { hasEncounteredMin: true }
+    ?
+        | APPLY_MIN_MAX_RESULT["result"]
+        | M.$Tuple<Reverse<APPLY_MIN_MAX_RESULT["completeTuple"]>, M.Any>
+    : M.$Tuple<Reverse<APPLY_MIN_MAX_RESULT["completeTuple"]>, M.Any>
+  : APPLY_MIN_MAX_RESULT["hasEncounteredMin"] extends true
+  ?
+      | APPLY_MIN_MAX_RESULT["result"]
+      | M.$Tuple<
+          Reverse<APPLY_MIN_MAX_RESULT["completeTuple"]>,
+          ParseSchema<ADDITIONAL_ITEMS_SCHEMA, OPTIONS>
+        >
+  : M.$Tuple<
+      Reverse<APPLY_MIN_MAX_RESULT["completeTuple"]>,
+      ParseSchema<ADDITIONAL_ITEMS_SCHEMA, OPTIONS>
+    >;

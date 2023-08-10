@@ -1,7 +1,9 @@
 /**
  * Recursively sets all type properties as writable (non-readonly)
  *
- * @param T Type
+ * @param TYPE Type
  * @return Type
  */
-export type DeepWritable<T> = { -readonly [P in keyof T]: DeepWritable<T[P]> };
+export type DeepWritable<TYPE> = {
+  -readonly [KEY in keyof TYPE]: DeepWritable<TYPE[KEY]>;
+};

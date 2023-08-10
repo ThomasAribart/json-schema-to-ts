@@ -13,4 +13,4 @@ import type { Narrow } from "~/type-utils";
  * // => { foo: "bar" }
  * ```
  */
-export const asConst = <A>(narrowed: Narrow<A>): Narrow<A> => narrowed;
+export const asConst = <INPUT>(input: Narrow<INPUT>): Narrow<INPUT> => input;

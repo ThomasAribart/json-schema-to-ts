@@ -8,28 +8,46 @@ import type { ReferenceSchema } from "./index";
 import type { ParseReference } from "./utils";
 
 export type ParseExternalReferenceSchema<
-  Sc extends ReferenceSchema,
-  O extends ParseSchemaOptions,
-  A extends string,
-  P extends string | undefined,
-  R extends JSONSchema7 = Omit<Sc, "$ref">,
-> = A extends keyof O["references"]
-  ? ParseReference<O["references"][A], O, P, R>
-  : O extends { rootSchema: IdSchema }
-  ? ParseExternalReferenceWithIdSchema<O, A, P, R>
+  REF_SCHEMA extends ReferenceSchema,
+  OPTIONS extends ParseSchemaOptions,
+  REFERENCE extends string,
+  DEFINITION extends string | undefined,
+  REST_SCHEMA extends JSONSchema7 = Omit<REF_SCHEMA, "$ref">,
+> = REFERENCE extends keyof OPTIONS["references"]
+  ? ParseReference<
+      OPTIONS["references"][REFERENCE],
+      OPTIONS,
+      DEFINITION,
+      REST_SCHEMA
+    >
+  : OPTIONS extends { rootSchema: IdSchema }
+  ? ParseExternalReferenceWithIdSchema<
+      OPTIONS,
+      REFERENCE,
+      DEFINITION,
+      REST_SCHEMA
+    >
   : M.Never;
 
-type ParseDomain<R extends string> = Join<Pop<Split<R, "/">>, "/">;
+type ParseDomain<REFERENCE extends string> = Join<
+  Pop<Split<REFERENCE, "/">>,
+  "/"
+>;
 
 type IdSchema = JSONSchema7 & { $id: string };
 
 type ParseExternalReferenceWithIdSchema<
-  O extends ParseSchemaOptions & { rootSchema: IdSchema },
-  A extends string,
-  P extends string | undefined,
-  R extends JSONSchema7,
-  D extends string = ParseDomain<O["rootSchema"]["$id"]>,
-  C extends string = Join<[D, A], "/">,
-> = C extends keyof O["references"]
-  ? ParseReference<O["references"][C], O, P, R>
+  OPTIONS extends ParseSchemaOptions & { rootSchema: IdSchema },
+  REFERENCE extends string,
+  DEFINITION extends string | undefined,
+  REST_SCHEMA extends JSONSchema7,
+  DOMAIN extends string = ParseDomain<OPTIONS["rootSchema"]["$id"]>,
+  COMPLETE_REFERENCE extends string = Join<[DOMAIN, REFERENCE], "/">,
+> = COMPLETE_REFERENCE extends keyof OPTIONS["references"]
+  ? ParseReference<
+      OPTIONS["references"][COMPLETE_REFERENCE],
+      OPTIONS,
+      DEFINITION,
+      REST_SCHEMA
+    >
   : M.Never;

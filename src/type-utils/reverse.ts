@@ -1,3 +1,6 @@
-export type Reverse<L extends unknown[]> = L extends [infer H, ...infer T]
-  ? [...Reverse<T>, H]
-  : L;
+export type Reverse<ARRAY extends unknown[]> = ARRAY extends [
+  infer ARRAY_HEAD,
+  ...infer ARRAY_TAIL,
+]
+  ? [...Reverse<ARRAY_TAIL>, ARRAY_HEAD]
+  : ARRAY;
