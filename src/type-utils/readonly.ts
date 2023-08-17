@@ -1,8 +1,7 @@
 /**
  * Recursively sets all type properties as readonly
- *
  * @param TYPE Type
- * @return Type
+ * @returns Type
  */
 export type DeepReadonly<TYPE> = TYPE extends Record<
   string | number | symbol,

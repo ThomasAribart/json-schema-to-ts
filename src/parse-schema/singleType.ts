@@ -3,9 +3,9 @@ import type { M } from "ts-algebra";
 
 import type { JSONSchema7 } from "~/definitions";
 
-import type { ParseArraySchema, ArraySchema } from "./array";
+import type { ArraySchema, ParseArraySchema } from "./array";
 import type { ParseSchemaOptions } from "./index";
-import type { ParseObjectSchema, ObjectSchema } from "./object";
+import type { ObjectSchema, ParseObjectSchema } from "./object";
 
 export type SingleTypeSchema = JSONSchema7 & { type: JSONSchema7TypeName };
 

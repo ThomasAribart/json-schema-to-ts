@@ -1,6 +1,6 @@
 import type { M } from "ts-algebra";
 
-import type { JSONSchema7, DeserializationPattern } from "~/definitions";
+import type { DeserializationPattern, JSONSchema7 } from "~/definitions";
 
 import type { ParseSchemaOptions } from "./index";
 

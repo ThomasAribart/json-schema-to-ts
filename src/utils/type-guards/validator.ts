@@ -1,8 +1,8 @@
 import type {
   FromSchema,
-  JSONSchema,
-  FromSchemaOptions,
   FromSchemaDefaultOptions,
+  FromSchemaOptions,
+  JSONSchema,
 } from "~/index";
 
 /**
@@ -36,6 +36,9 @@ export type Validator<
   ...validationOptions: V
 ) => data is T;
 
+/**
+ * Type definition for wrapValidatorAsTypeGuard
+ */
 type ValidatorWrapper = <
   O extends FromSchemaOptions = FromSchemaDefaultOptions,
   V extends unknown[] = [],
@@ -45,6 +48,8 @@ type ValidatorWrapper = <
 
 /**
  * Adds type guarding to any validator function (doesn't modify it)
+ * @param validator Validator function
+ * @returns Validator function with type guarding
  */
 export const wrapValidatorAsTypeGuard: ValidatorWrapper =
   <

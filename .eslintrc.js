@@ -1,11 +1,36 @@
 module.exports = {
+  plugins: ["prefer-arrow", "import", "prettier", "unused-imports", "jsdoc"],
   extends: [
     "eslint:recommended",
     "plugin:import/recommended",
     "plugin:prettier/recommended",
     "prettier",
+    "plugin:jsdoc/recommended",
   ],
   rules: {
+    "jsdoc/require-jsdoc": [
+      "warn",
+      {
+        contexts: [
+          "TSTypeAliasDeclaration",
+          "TSInterfaceDeclaration",
+          "TSMethodSignature",
+          "TSPropertySignature",
+          "TSDeclareFunction",
+          "TSEnumDeclaration",
+        ],
+        require: {
+          ArrowFunctionExpression: true,
+          ClassDeclaration: true,
+          ClassExpression: true,
+          FunctionDeclaration: true,
+          FunctionExpression: true,
+          MethodDefinition: true,
+        },
+      },
+    ],
+    "jsdoc/require-param-type": "off",
+    "jsdoc/require-returns-type": "off",
     "prettier/prettier": "error",
     "import/extensions": "off",
     "import/no-unresolved": ["error", { caseSensitiveStrict: true }],
@@ -67,6 +92,12 @@ module.exports = {
     curly: ["error", "all"],
     "arrow-body-style": ["error", "as-needed"],
   },
+  settings: {
+    jsdoc: {
+      ignorePrivate: true,
+      ignoreInternal: true,
+    },
+  },
   root: true,
   env: {
     es6: true,
@@ -74,7 +105,6 @@ module.exports = {
     jest: true,
     browser: true,
   },
-  plugins: ["prefer-arrow", "import", "prettier", "unused-imports"],
   parserOptions: {
     ecmaVersion: 9,
     sourceType: "module",
@@ -117,6 +147,13 @@ module.exports = {
         // But a bug can occur and prettier can provide an invalid code (missing closing parenthesis)
         // More details here: https://github.com/prettier/eslint-plugin-prettier#arrow-body-style-and-prefer-arrow-callback-issue
         "arrow-body-style": ["error", "as-needed"],
+      },
+    },
+    {
+      files: ["**/*.test.ts", "scripts/*.ts"],
+      rules: {
+        "max-lines": ["off"],
+        "jsdoc/require-jsdoc": ["off"],
       },
     },
   ],

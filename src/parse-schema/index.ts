@@ -8,15 +8,15 @@ import type { AnyOfSchema, ParseAnyOfSchema } from "./anyOf";
 import type { ConstSchema, ParseConstSchema } from "./const";
 import type { DeserializeSchema } from "./deserialize";
 import type { EnumSchema, ParseEnumSchema } from "./enum";
-import type { ParseIfThenElseSchema, IfThenElseSchema } from "./ifThenElse";
+import type { IfThenElseSchema, ParseIfThenElseSchema } from "./ifThenElse";
 import type {
   MultipleTypesSchema,
   ParseMultipleTypesSchema,
 } from "./multipleTypes";
-import type { ParseNotSchema, NotSchema } from "./not";
+import type { NotSchema, ParseNotSchema } from "./not";
 import type { NullableSchema, ParseNullableSchema } from "./nullable";
 import type { OneOfSchema, ParseOneOfSchema } from "./oneOf";
-import type { ReferenceSchema, ParseReferenceSchema } from "./references";
+import type { ParseReferenceSchema, ReferenceSchema } from "./references";
 import type { ParseSingleTypeSchema, SingleTypeSchema } from "./singleType";
 
 export type ParseSchemaOptions = {

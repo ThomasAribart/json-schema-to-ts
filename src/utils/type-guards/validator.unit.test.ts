@@ -3,7 +3,7 @@ import type { A } from "ts-toolbelt";
 import type { JSONSchema } from "~/index";
 
 import { ajv } from "./ajv.util.test";
-import { petSchema, Pet } from "./schema.util.test";
+import { Pet, petSchema } from "./schema.util.test";
 import { $Validator, wrapValidatorAsTypeGuard } from "./validator";
 
 const $validate: $Validator = (schema, data) => ajv.validate(schema, data);

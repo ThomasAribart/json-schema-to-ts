@@ -1,9 +1,9 @@
 import type { Narrow } from "~/type-utils";
 
 /**
- * Returns the input parameter without muting it, but narrowing its inferred type.
- *
- * _(Similar to using the_ `as const` _statement functionnally)_
+ * Returns the input parameter without muting it, but narrowing its inferred type. Similar to using the `as const` statement functionnally.
+ * @param input Input
+ * @returns Input, narrowly typed
  *
  * ```ts
  * const object = { foo: "bar" }

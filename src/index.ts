@@ -1,15 +1,15 @@
 import type { M } from "ts-algebra";
 
 import type {
-  JSONSchema7 as WritableJSONSchema7,
-  JSONSchema7Reference as WritableJSONSchema7Reference,
+  FromExtendedSchemaOptions,
+  FromSchemaDefaultOptions,
+  FromSchemaOptions,
   JSONSchema7Extension,
+  UnextendJSONSchema7,
   ExtendedJSONSchema7 as WritableExtendedJSONSchema7,
   ExtendedJSONSchema7Reference as WritableExtendedJSONSchema7Reference,
-  UnextendJSONSchema7,
-  FromSchemaOptions,
-  FromSchemaDefaultOptions,
-  FromExtendedSchemaOptions,
+  JSONSchema7 as WritableJSONSchema7,
+  JSONSchema7Reference as WritableJSONSchema7Reference,
 } from "./definitions";
 import type { ParseOptions } from "./parse-options";
 import type { ParseSchema } from "./parse-schema";
@@ -70,7 +70,6 @@ export type ExtendedJSONSchema<EXTENSION extends JSONSchema7Extension> =
 
 /**
  * Given a JSON schema defined with the `as const` statement, infers the type of valid instances
- *
  * @param S JSON schema
  */
 export type FromSchema<
@@ -88,7 +87,6 @@ export type FromSchema<
 
 /**
  * Given an extended JSON schema defined with the `as const` statement, infers the type of valid instances
- *
  * @param SCHEMA JSON schema
  */
 export type FromExtendedSchema<

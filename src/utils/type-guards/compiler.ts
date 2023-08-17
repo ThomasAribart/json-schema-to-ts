@@ -1,8 +1,8 @@
 import type {
   FromSchema,
-  JSONSchema,
-  FromSchemaOptions,
   FromSchemaDefaultOptions,
+  FromSchemaOptions,
+  JSONSchema,
 } from "~/index";
 
 /**
@@ -34,6 +34,9 @@ export type Compiler<
   ...compilingOptions: C
 ) => (data: unknown, ...validationOptions: V) => data is T;
 
+/**
+ * Type definition for `wrapCompilerAsTypeGuard`
+ */
 type CompilerWrapper = <
   O extends FromSchemaOptions = FromSchemaDefaultOptions,
   C extends unknown[] = [],
@@ -44,6 +47,8 @@ type CompilerWrapper = <
 
 /**
  * Adds type guarding to any compiler function (doesn't modify it)
+ * @param compiler Compiler function
+ * @returns Compiler function with type guarding
  */
 export const wrapCompilerAsTypeGuard: CompilerWrapper =
   <
