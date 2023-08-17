@@ -1,8 +1,8 @@
 import type {
-  JSONSchema7,
-  FromSchemaOptions,
-  FromSchemaDefaultOptions,
   DeserializationPattern,
+  FromSchemaDefaultOptions,
+  FromSchemaOptions,
+  JSONSchema7,
 } from "./definitions";
 import type { JSONSchema7Reference } from "./index";
 import type { Writable } from "./type-utils";

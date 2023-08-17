@@ -1,5 +1,5 @@
 import typescript from "@rollup/plugin-typescript";
-import { join, basename } from "path";
+import { basename, join } from "path";
 import dts from "rollup-plugin-dts";
 import { rollupImportMapPlugin } from "rollup-plugin-import-map";
 

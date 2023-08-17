@@ -1,8 +1,8 @@
 import type {
   FromSchema,
-  JSONSchema,
-  FromSchemaOptions,
   FromSchemaDefaultOptions,
+  FromSchemaOptions,
+  JSONSchema,
 } from "~/index";
 
 /**

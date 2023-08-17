@@ -1,7 +1,7 @@
 import type { M } from "ts-algebra";
 
 import type { JSONSchema7 } from "~/definitions";
-import type { And, DoesExtend, Tail, Not } from "~/type-utils";
+import type { And, DoesExtend, Not, Tail } from "~/type-utils";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 

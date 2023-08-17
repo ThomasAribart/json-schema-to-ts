@@ -1,15 +1,15 @@
 import type { M } from "ts-algebra";
 
 import type {
-  JSONSchema7 as WritableJSONSchema7,
-  JSONSchema7Reference as WritableJSONSchema7Reference,
+  FromExtendedSchemaOptions,
+  FromSchemaDefaultOptions,
+  FromSchemaOptions,
   JSONSchema7Extension,
+  UnextendJSONSchema7,
   ExtendedJSONSchema7 as WritableExtendedJSONSchema7,
   ExtendedJSONSchema7Reference as WritableExtendedJSONSchema7Reference,
-  UnextendJSONSchema7,
-  FromSchemaOptions,
-  FromSchemaDefaultOptions,
-  FromExtendedSchemaOptions,
+  JSONSchema7 as WritableJSONSchema7,
+  JSONSchema7Reference as WritableJSONSchema7Reference,
 } from "./definitions";
 import type { ParseOptions } from "./parse-options";
 import type { ParseSchema } from "./parse-schema";

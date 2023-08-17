@@ -4,7 +4,7 @@ import type { JSONSchema } from "~/index";
 
 import { ajv } from "./ajv.util.test";
 import { $Compiler, wrapCompilerAsTypeGuard } from "./compiler";
-import { petSchema, Pet } from "./schema.util.test";
+import { Pet, petSchema } from "./schema.util.test";
 
 const $compile: $Compiler = schema => ajv.compile(schema);
 const compile = wrapCompilerAsTypeGuard($compile);

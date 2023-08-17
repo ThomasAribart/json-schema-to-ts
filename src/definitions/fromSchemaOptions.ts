@@ -2,8 +2,8 @@ import type { JSONSchema7Reference } from "~/index";
 
 import type { DeserializationPattern } from "./deserializationPattern";
 import type {
-  JSONSchema7Extension,
   ExtendedJSONSchema7Reference,
+  JSONSchema7Extension,
 } from "./extendedJsonSchema7";
 
 /**
