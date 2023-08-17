@@ -1,11 +1,15 @@
 module.exports = {
+  plugins: ["prefer-arrow", "import", "prettier", "unused-imports", "jsdoc"],
   extends: [
     "eslint:recommended",
     "plugin:import/recommended",
     "plugin:prettier/recommended",
     "prettier",
+    "plugin:jsdoc/recommended",
   ],
   rules: {
+    "jsdoc/require-param-type": "off",
+    "jsdoc/require-returns-type": "off",
     "prettier/prettier": "error",
     "import/extensions": "off",
     "import/no-unresolved": ["error", { caseSensitiveStrict: true }],
@@ -74,7 +78,6 @@ module.exports = {
     jest: true,
     browser: true,
   },
-  plugins: ["prefer-arrow", "import", "prettier", "unused-imports"],
   parserOptions: {
     ecmaVersion: 9,
     sourceType: "module",

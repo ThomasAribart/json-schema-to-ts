@@ -44,6 +44,8 @@ type CompilerWrapper = <
 
 /**
  * Adds type guarding to any compiler function (doesn't modify it)
+ * @param compiler Compiler function
+ * @returns Compiler function with type guarding
  */
 export const wrapCompilerAsTypeGuard: CompilerWrapper =
   <

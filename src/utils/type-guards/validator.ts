@@ -45,6 +45,8 @@ type ValidatorWrapper = <
 
 /**
  * Adds type guarding to any validator function (doesn't modify it)
+ * @param validator Validator function
+ * @returns Validator function with type guarding
  */
 export const wrapValidatorAsTypeGuard: ValidatorWrapper =
   <

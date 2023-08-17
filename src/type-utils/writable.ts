@@ -1,8 +1,7 @@
 /**
  * Recursively sets all type properties as writable (non-readonly)
- *
  * @param TYPE Type
- * @return Type
+ * @returns Type
  */
 export type DeepWritable<TYPE> = TYPE extends unknown[]
   ? TYPE extends [infer HEAD, ...infer TAIL]
