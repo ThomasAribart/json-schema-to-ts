@@ -36,6 +36,9 @@ export type Validator<
   ...validationOptions: V
 ) => data is T;
 
+/**
+ * Type definition for wrapValidatorAsTypeGuard
+ */
 type ValidatorWrapper = <
   O extends FromSchemaOptions = FromSchemaDefaultOptions,
   V extends unknown[] = [],
