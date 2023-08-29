@@ -27,14 +27,14 @@ jobs:
       - name: Run tests
         run: yarn test
 
-  deploy:
+  publish:
     runs-on: ubuntu-latest
-    name: Deploy
+    name: Publish
     needs: build-and-test
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: master
+          ref: main
 
       - name: Install node_modules
         uses: ./.github/actions/install-node-modules
