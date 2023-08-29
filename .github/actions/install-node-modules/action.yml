@@ -7,6 +7,7 @@ inputs:
   typescript-version:
     description: TS version to use
     default: "default"
+
 runs:
   using: composite
   steps:

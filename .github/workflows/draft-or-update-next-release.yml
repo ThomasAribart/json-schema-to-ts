@@ -7,7 +7,7 @@ on:
       - main
 
 jobs:
-  prepare-deployment:
+  draft-or-update-next-release:
     name: 📝 Draft or update next release
     runs-on: ubuntu-latest
     timeout-minutes: 30

@@ -15,7 +15,7 @@ module.exports = {
           "TSTypeAliasDeclaration",
           "TSInterfaceDeclaration",
           "TSMethodSignature",
-          "TSPropertySignature",
+          // "TSPropertySignature",
           "TSDeclareFunction",
           "TSEnumDeclaration",
         ],
@@ -70,13 +70,6 @@ module.exports = {
     "no-restricted-imports": [
       "error",
       {
-        patterns: [
-          {
-            group: ["@apdupius/*/*"],
-            message:
-              "import of internal modules must be done at the root level.",
-          },
-        ],
         paths: [
           {
             name: "lodash",
