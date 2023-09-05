@@ -1,3 +1,10 @@
+/**
+ * Returns the (recursively) nested value of an object for a given path. Returns `DEFAULT` if no value is found.
+ * @param OBJECT Object
+ * @param PATH string[]
+ * @param DEFAULT Type
+ * @returns Type
+ */
 export type DeepGet<
   OBJECT,
   PATH extends string[],
