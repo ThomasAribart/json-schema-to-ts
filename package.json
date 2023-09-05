@@ -24,7 +24,7 @@
   "dependencies": {
     "@babel/runtime": "^7.18.3",
     "@types/json-schema": "^7.0.9",
-    "ts-algebra": "^1.2.0"
+    "ts-algebra": "^1.2.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.6",
