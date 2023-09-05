@@ -2,8 +2,16 @@ import type { JSONSchema7 as OriginalJSONSchema7 } from "json-schema";
 
 import { $JSONSchema7 } from "./jsonSchema7";
 
+/**
+ * JSON Schema extension (i.e. additional custom fields)
+ */
 export type JSONSchema7Extension = Record<string, unknown>;
 
+/**
+ * Extended JSON Schema type constraint
+ * @param EXTENSION JSONSchema7Extension
+ * @returns Type
+ */
 export type ExtendedJSONSchema7<
   EXTENSION extends JSONSchema7Extension = JSONSchema7Extension,
 > =
@@ -62,10 +70,21 @@ export type ExtendedJSONSchema7<
       default?: unknown;
     } & Partial<EXTENSION>);
 
+/**
+ * Extended JSON Schema with reference type constraint
+ * @param EXTENSION JSONSchema7Extension
+ * @returns Type
+ */
 export type ExtendedJSONSchema7Reference<
   EXTENSION extends JSONSchema7Extension = JSONSchema7Extension,
 > = ExtendedJSONSchema7<EXTENSION> & { $id: string };
 
+/**
+ * Unextends a tuple of extended JSON Schemas
+ * @param EXTENSION JSONSchema7Extension
+ * @param EXTENDED_SCHEMAS ExtendedJSONSchema[]
+ * @returns ExtendedJSONSchema[]
+ */
 type UnextendJSONSchema7Tuple<
   EXTENSION extends JSONSchema7Extension,
   EXTENDED_SCHEMAS extends ExtendedJSONSchema7<EXTENSION>[],
@@ -83,15 +102,27 @@ type UnextendJSONSchema7Tuple<
     : never
   : [];
 
+/**
+ * Unextends a record of extended JSON Schemas
+ * @param EXTENSION JSONSchema7Extension
+ * @param EXTENDED_SCHEMA_RECORD Record<string, ExtendedJSONSchema>
+ * @returns Record<string, ExtendedJSONSchema>
+ */
 type UnextendJSONSchema7Record<
   EXTENSION extends JSONSchema7Extension,
-  SCHEMA_RECORD extends Record<string, unknown>,
+  EXTENDED_SCHEMA_RECORD extends Record<string, unknown>,
 > = {
-  [KEY in keyof SCHEMA_RECORD]: SCHEMA_RECORD[KEY] extends ExtendedJSONSchema7<EXTENSION>
-    ? UnextendJSONSchema7<EXTENSION, SCHEMA_RECORD[KEY]>
-    : SCHEMA_RECORD[KEY];
+  [KEY in keyof EXTENDED_SCHEMA_RECORD]: EXTENDED_SCHEMA_RECORD[KEY] extends ExtendedJSONSchema7<EXTENSION>
+    ? UnextendJSONSchema7<EXTENSION, EXTENDED_SCHEMA_RECORD[KEY]>
+    : EXTENDED_SCHEMA_RECORD[KEY];
 };
 
+/**
+ * Given an extended JSON Schema, recursively appends the `$JSONSchema7` symbol as optional property to have it actually extend the JSONSchema type constraint at all time
+ * @param EXTENSION JSONSchema7Extension
+ * @param EXTENDED_SCHEMA_RECORD ExtendedJSONSchema
+ * @returns ExtendedJSONSchema
+ */
 export type UnextendJSONSchema7<
   EXTENSION extends JSONSchema7Extension,
   EXTENDED_SCHEMA,

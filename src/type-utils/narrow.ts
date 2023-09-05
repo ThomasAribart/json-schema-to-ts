@@ -1,3 +1,8 @@
+/**
+ * Used to narrow the inferred generic type of a function
+ * @param INPUT Type
+ * @returns Type
+ */
 export type Narrow<INPUT> = INPUT extends Promise<infer AWAITED>
   ? Promise<Narrow<AWAITED>>
   : INPUT extends (...args: infer ARGS) => infer RETURN

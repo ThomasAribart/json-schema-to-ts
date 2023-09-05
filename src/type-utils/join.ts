@@ -1,3 +1,9 @@
+/**
+ * Join a tuple of strings together
+ * @param STRINGS String[]
+ * @param SEPARATOR String
+ * @returns String
+ */
 export type Join<
   STRINGS extends string[],
   SEPARATOR extends string = ",",
