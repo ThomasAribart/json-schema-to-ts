@@ -1,8 +1,14 @@
 import type { JSONSchema7 as OriginalJSONSchema7 } from "json-schema";
 
-export const $JSONSchema7 = Symbol();
+export const $JSONSchema7 = Symbol("$JSONSchema7");
+/**
+ * Symbol used to make extended JSON schemas actually extend the JSONSchema type constraint at all time
+ */
 export type $JSONSchema7 = typeof $JSONSchema7;
 
+/**
+ * JSON Schema type constraint
+ */
 export type JSONSchema7 =
   | boolean
   | (Omit<
@@ -28,6 +34,7 @@ export type JSONSchema7 =
       | "examples"
       | "default"
     > & {
+      // Needed to have extended JSON schemas actually extend the JSONSchema type constraint at all time
       [$JSONSchema7]?: $JSONSchema7;
       const?: unknown;
       enum?: unknown;
@@ -60,4 +67,7 @@ export type JSONSchema7 =
       default?: unknown;
     });
 
+/**
+ * JSON Schema with reference type constraint
+ */
 export type JSONSchema7Reference = JSONSchema7 & { $id: string };
