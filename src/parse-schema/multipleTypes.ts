@@ -5,6 +5,13 @@ import type { JSONSchema7 } from "~/definitions";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 
+/**
+ * JSON schemas of type unions
+ * @example
+ * const typeUnionSchema = {
+ *  type: ["number", "string"]
+ * }
+ */
 export type MultipleTypesSchema = JSONSchema7 & { type: JSONSchema7TypeName[] };
 
 export type ParseMultipleTypesSchema<

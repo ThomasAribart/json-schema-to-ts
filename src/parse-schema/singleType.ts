@@ -3,10 +3,17 @@ import type { M } from "ts-algebra";
 
 import type { JSONSchema7 } from "~/definitions";
 
-import type { ArraySchema, ParseArraySchema } from "./array";
+import type { ArrayOrTupleSchema, ParseArrayOrTupleSchema } from "./array";
 import type { ParseSchemaOptions } from "./index";
 import type { ObjectSchema, ParseObjectSchema } from "./object";
 
+/**
+ * JSON schemas of any type
+ * @example
+ * const typeUnionSchema = {
+ *  type: ["number", "string"]
+ * }
+ */
 export type SingleTypeSchema = JSONSchema7 & { type: JSONSchema7TypeName };
 
 export type ParseSingleTypeSchema<
@@ -22,8 +29,8 @@ export type ParseSingleTypeSchema<
   ? M.Primitive<number>
   : SCHEMA extends { type: "string" }
   ? M.Primitive<string>
-  : SCHEMA extends ArraySchema
-  ? ParseArraySchema<SCHEMA, OPTIONS>
+  : SCHEMA extends ArrayOrTupleSchema
+  ? ParseArrayOrTupleSchema<SCHEMA, OPTIONS>
   : SCHEMA extends ObjectSchema
   ? ParseObjectSchema<SCHEMA, OPTIONS>
   : M.Never;

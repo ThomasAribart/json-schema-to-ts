@@ -5,6 +5,16 @@ import type { JSONSchema7 } from "~/definitions";
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 import type { MergeSubSchema } from "./utils";
 
+/**
+ * JSON schemas of JSON schema intersections
+ * @example
+ * const intersectionSchema = {
+ *  allOf: [
+ *    { type: "number" },
+ *    { enum: [1, 2, "foo"] }
+ *  ]
+ * }
+ */
 export type AllOfSchema = JSONSchema7 & { allOf: JSONSchema7[] };
 
 export type ParseAllOfSchema<

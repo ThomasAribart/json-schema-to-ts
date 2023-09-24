@@ -19,14 +19,38 @@ import type { OneOfSchema, ParseOneOfSchema } from "./oneOf";
 import type { ParseReferenceSchema, ReferenceSchema } from "./references";
 import type { ParseSingleTypeSchema, SingleTypeSchema } from "./singleType";
 
+/**
+ * Type constraint for the ParseSchema options
+ */
 export type ParseSchemaOptions = {
+  /**
+   * Wether to parse negated schemas or not (false by default)
+   */
   parseNotKeyword: boolean;
+  /**
+   * Wether to parse ifThenElse schemas or not (false by default)
+   */
   parseIfThenElseKeywords: boolean;
+  /**
+   * The initial schema provided to ParseSchema
+   */
   rootSchema: JSONSchema7;
+  /**
+   * To refer external schemas by ids
+   */
   references: Record<string, JSONSchema7>;
+  /**
+   * To override inferred types if some pattern is matched
+   */
   deserialize: DeserializationPattern[] | false;
 };
 
+/**
+ * Recursively parse a JSON schema to a meta-type. Check the [ts-algebra documentation](https://github.com/ThomasAribart/ts-algebra) for more informations on how meta-types work.
+ * @param SCHEMA JSON schema
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
 export type ParseSchema<
   SCHEMA extends JSONSchema7,
   OPTIONS extends ParseSchemaOptions,
@@ -44,16 +68,14 @@ export type ParseSchema<
         DoesExtend<OPTIONS["parseIfThenElseKeywords"], true>,
         DoesExtend<SCHEMA, IfThenElseSchema>
       > extends true
-    ? // TOIMPROVE: Not cast here (rather use a ParseNonIfThenElseSchema twice)
-      SCHEMA extends IfThenElseSchema
+    ? SCHEMA extends IfThenElseSchema
       ? ParseIfThenElseSchema<SCHEMA, OPTIONS>
       : never
     : And<
         DoesExtend<OPTIONS["parseNotKeyword"], true>,
         DoesExtend<SCHEMA, NotSchema>
       > extends true
-    ? // TOIMPROVE: Not cast here (rather use a ParseNonNotSchema twice)
-      SCHEMA extends NotSchema
+    ? SCHEMA extends NotSchema
       ? ParseNotSchema<SCHEMA, OPTIONS>
       : never
     : SCHEMA extends AllOfSchema

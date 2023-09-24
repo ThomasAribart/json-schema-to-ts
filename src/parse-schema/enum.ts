@@ -4,6 +4,13 @@ import type { JSONSchema7 } from "~/definitions";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 
+/**
+ * JSON schemas of enums (i.e. types with finite cardinalities)
+ * @example
+ * const enumSchema = {
+ *  enum: ["foo", "bar"]
+ * }
+ */
 export type EnumSchema = JSONSchema7 & { enum: unknown[] };
 
 export type ParseEnumSchema<

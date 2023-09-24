@@ -70,7 +70,7 @@ export type ExtendedJSONSchema<EXTENSION extends JSONSchema7Extension> =
 
 /**
  * Given a JSON schema defined with the `as const` statement, infers the type of valid instances
- * @param S JSON schema
+ * @param SCHEMA JSON schema
  */
 export type FromSchema<
   SCHEMA extends JSONSchema,

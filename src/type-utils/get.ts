@@ -1,7 +1,7 @@
 /**
  * Returns the (recursively) nested value of an object for a given path. Returns `DEFAULT` if no value is found.
  * @param OBJECT Object
- * @param PATH string[]
+ * @param PATH String[]
  * @param DEFAULT Type
  * @returns Type
  */
