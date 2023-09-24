@@ -5,6 +5,16 @@ import type { JSONSchema7 } from "~/definitions";
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 import type { MergeSubSchema } from "./utils";
 
+/**
+ * JSON schemas of JSON schema unions
+ * @example
+ * const unionSchema = {
+ *  anyOf: [
+ *    { type: "number" },
+ *    { type: "string" }
+ *  ]
+ * }
+ */
 export type AnyOfSchema = JSONSchema7 & { anyOf: JSONSchema7[] };
 
 export type ParseAnyOfSchema<

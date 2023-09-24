@@ -5,6 +5,16 @@ import type { JSONSchema7 } from "~/definitions";
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 import type { MergeSubSchema } from "./utils";
 
+/**
+ * JSON schemas of exclusive JSON schema unions
+ * @example
+ * const exclusiveUnionSchema = {
+ *  oneOf: [
+ *    { type: "number" },
+ *    { enum: [1, 2, "foo"] } // => 1 & 2 are not valid
+ *  ]
+ * }
+ */
 export type OneOfSchema = JSONSchema7 & { oneOf: JSONSchema7[] };
 
 export type ParseOneOfSchema<

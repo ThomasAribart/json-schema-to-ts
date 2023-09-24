@@ -5,6 +5,16 @@ import type { JSONSchema7 } from "~/definitions";
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 import type { MergeSubSchema } from "./utils";
 
+/**
+ * JSON schemas of JSON schema exclusions
+ * @example
+ * const exclusionSchema = {
+ *  type: "string",
+ *  not: {
+ *    enum: ["Bummer", "Silly", "Lazy sod !"]
+ *  }
+ * }
+ */
 export type NotSchema = JSONSchema7 & {
   not: JSONSchema7;
 };

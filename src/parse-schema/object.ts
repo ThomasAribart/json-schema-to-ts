@@ -4,6 +4,18 @@ import type { JSONSchema7 } from "~/definitions";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 
+/**
+ * JSON schemas of objects
+ * @example
+ * const objectSchema = {
+ *  type: "object",
+ *  properties: {
+ *    color: {
+ *      type: "string"
+ *    }
+ *  }
+ * }
+ */
 export type ObjectSchema = JSONSchema7 & { type: "object" };
 
 export type ParseObjectSchema<

@@ -4,6 +4,14 @@ import type { JSONSchema7 } from "~/definitions";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 
+/**
+ * JSON schemas of nullable types
+ * @example
+ * const nullableSchema = {
+ *  type: "string",
+ *  nullable: true
+ * }
+ */
 export type NullableSchema = JSONSchema7 & { nullable: boolean };
 
 export type ParseNullableSchema<

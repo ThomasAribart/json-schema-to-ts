@@ -6,6 +6,13 @@ import type { ParseSchema, ParseSchemaOptions } from "./index";
 import type { MultipleTypesSchema } from "./multipleTypes";
 import type { SingleTypeSchema } from "./singleType";
 
+/**
+ * JSON schemas of constants (i.e. types with cardinalities of 1)
+ * @example
+ * const constSchema = {
+ *  const: "foo"
+ * }
+ */
 export type ConstSchema = JSONSchema7 & { const: unknown };
 
 export type ParseConstSchema<

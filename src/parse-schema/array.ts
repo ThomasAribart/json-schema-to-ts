@@ -5,19 +5,45 @@ import type { And, DoesExtend, Not, Tail } from "~/type-utils";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 
-export type ArraySchema = JSONSchema7 & { type: "array" };
+/**
+ * JSON schemas of arrays or tuples
+ * @example
+ * const arraySchema = {
+ *  type: "array",
+ *  items: { type: "string" }
+ * }
+ *
+ * const tupleSchema = {
+ *  type: "array",
+ *  items: [{ type: "string" }]
+ * }
+ */
+export type ArrayOrTupleSchema = JSONSchema7 & { type: "array" };
 
-type SimpleArraySchema = JSONSchema7 & {
-  type: "array";
-  items: JSONSchema7;
-};
+/**
+ * JSON schemas of arrays
+ * @example
+ * const arraySchema = {
+ *  type: "array",
+ *  items: { type: "string" }
+ * }
+ */
+type ArraySchema = JSONSchema7 & { type: "array"; items: JSONSchema7 };
 
+/**
+ * JSON schemas of tuples
+ * @example
+ * const arraySchema = {
+ *  type: "array",
+ *  items: [{ type: "string" }]
+ * }
+ */
 type TupleSchema = JSONSchema7 & { type: "array"; items: JSONSchema7[] };
 
-export type ParseArraySchema<
-  SCHEMA extends ArraySchema,
+export type ParseArrayOrTupleSchema<
+  SCHEMA extends ArrayOrTupleSchema,
   OPTIONS extends ParseSchemaOptions,
-> = SCHEMA extends SimpleArraySchema
+> = SCHEMA extends ArraySchema
   ? M.$Array<ParseSchema<SCHEMA["items"], OPTIONS>>
   : SCHEMA extends TupleSchema
   ? M.$Union<
@@ -47,7 +73,7 @@ type ParseTupleItems<
 type ApplyMinMaxAndAdditionalItems<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   PARSED_ITEM_SCHEMAS extends any[],
-  ROOT_SCHEMA extends ArraySchema,
+  ROOT_SCHEMA extends ArrayOrTupleSchema,
   OPTIONS extends ParseSchemaOptions,
 > = ApplyAdditionalItems<
   ApplyMinMax<

@@ -5,6 +5,26 @@ import type { JSONSchema7 } from "~/definitions";
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 import type { MergeSubSchema } from "./utils";
 
+/**
+ * JSON schemas of conditionally applied JSON schemas
+ * @example
+ * const conditionalSchema = {
+ *  type: "object",
+ *  if: {
+ *    properties: {
+ *      petKind: {
+ *        const: "dog"
+ *      }
+ *    }
+ *  },
+ *  then: {
+ *    required: ["bark"]
+ *  },
+ *  else: {
+ *    required: ["meow"]
+ *  }
+ * }
+ */
 export type IfThenElseSchema = JSONSchema7 & {
   if: JSONSchema7;
   then?: JSONSchema7;

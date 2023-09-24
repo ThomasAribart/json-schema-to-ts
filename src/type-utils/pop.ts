@@ -1,6 +1,6 @@
 /**
- * Remove an item out of a union
- * @param UNION Union
+ * Remove an item out of a array
+ * @param ARRAY Array
  * @returns Type
  */
 export type Pop<ARRAY extends unknown[]> = ARRAY extends
