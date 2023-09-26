@@ -5,25 +5,33 @@ import type { DeserializationPattern, JSONSchema7 } from "~/definitions";
 import type { ParseSchemaOptions } from "./index";
 
 export type DeserializeSchema<
-  S extends JSONSchema7,
-  O extends Omit<ParseSchemaOptions, "deserialize"> & {
+  SCHEMA extends JSONSchema7,
+  OPTIONS extends Omit<ParseSchemaOptions, "deserialize"> & {
     deserialize: DeserializationPattern[];
   },
-> = RecurseOnDeserializationPatterns<S, O["deserialize"]>;
+> = RecurseOnDeserializationPatterns<SCHEMA, OPTIONS["deserialize"]>;
 
 type RecurseOnDeserializationPatterns<
-  S extends JSONSchema7,
-  P extends DeserializationPattern[],
-  R = M.Any,
-> = P extends [infer H, ...infer T]
+  SCHEMA extends JSONSchema7,
+  DESERIALIZATION_PATTERNS extends DeserializationPattern[],
+  RESULT = M.Any,
+> = DESERIALIZATION_PATTERNS extends [
+  infer DESERIALIZATION_PATTERNS_HEAD,
+  ...infer DESERIALIZATION_PATTERNS_TAIL,
+]
   ? // TODO increase TS version and use "extends" in Array https://devblogs.microsoft.com/typescript/announcing-typescript-4-8/#improved-inference-for-infer-types-in-template-string-types
-    H extends DeserializationPattern
-    ? T extends DeserializationPattern[]
+    DESERIALIZATION_PATTERNS_HEAD extends DeserializationPattern
+    ? DESERIALIZATION_PATTERNS_TAIL extends DeserializationPattern[]
       ? RecurseOnDeserializationPatterns<
-          S,
-          T,
-          S extends H["pattern"] ? M.$Intersect<M.Any<true, H["output"]>, R> : R
+          SCHEMA,
+          DESERIALIZATION_PATTERNS_TAIL,
+          SCHEMA extends DESERIALIZATION_PATTERNS_HEAD["pattern"]
+            ? M.$Intersect<
+                M.Any<true, DESERIALIZATION_PATTERNS_HEAD["output"]>,
+                RESULT
+              >
+            : RESULT
         >
       : never
     : never
-  : R;
+  : RESULT;

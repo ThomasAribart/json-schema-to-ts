@@ -3,8 +3,6 @@ import type { M } from "ts-algebra";
 import type { JSONSchema7 } from "~/definitions";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
-import type { MultipleTypesSchema } from "./multipleTypes";
-import type { SingleTypeSchema } from "./singleType";
 
 /**
  * JSON schemas of constants (i.e. types with cardinalities of 1)
@@ -15,22 +13,28 @@ import type { SingleTypeSchema } from "./singleType";
  */
 export type ConstSchema = JSONSchema7 & { const: unknown };
 
+/**
+ * Recursively parses a constant JSON schema to a meta-type.
+ *
+ * Check the [ts-algebra documentation](https://github.com/ThomasAribart/ts-algebra) for more informations on how meta-types work.
+ * @param CONST_SCHEMA JSONSchema (constant)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
 export type ParseConstSchema<
-  SCHEMA extends ConstSchema,
+  CONST_SCHEMA extends ConstSchema,
   OPTIONS extends ParseSchemaOptions,
-> = SCHEMA extends SingleTypeSchema
-  ? IntersectConstAndTypeSchema<SCHEMA, OPTIONS>
-  : SCHEMA extends MultipleTypesSchema
-  ? IntersectConstAndTypeSchema<SCHEMA, OPTIONS>
-  : ParseConst<SCHEMA>;
-
-type IntersectConstAndTypeSchema<
-  SCHEMA extends ConstSchema & (SingleTypeSchema | MultipleTypesSchema),
-  OPTIONS extends ParseSchemaOptions,
-  // TOIMPROVE: Directly use ParseMultipleTypeSchema and ParseSingleTypeSchema
 > = M.$Intersect<
-  ParseConst<SCHEMA>,
-  ParseSchema<Omit<SCHEMA, "const">, OPTIONS>
+  ParseConst<CONST_SCHEMA>,
+  ParseSchema<Omit<CONST_SCHEMA, "const">, OPTIONS>
 >;
 
-type ParseConst<S extends ConstSchema> = M.Const<S["const"]>;
+/**
+ * Parses a constant JSON schema to a meta-type.
+ * @param CONST_SCHEMA JSONSchema (constant)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
+type ParseConst<CONST_SCHEMA extends ConstSchema> = M.Const<
+  CONST_SCHEMA["const"]
+>;

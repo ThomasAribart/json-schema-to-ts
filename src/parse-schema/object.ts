@@ -18,43 +18,72 @@ import type { ParseSchema, ParseSchemaOptions } from "./index";
  */
 export type ObjectSchema = JSONSchema7 & { type: "object" };
 
+/**
+ * Parses an object JSON schema to a meta-type.
+ *
+ * Check the [ts-algebra documentation](https://github.com/ThomasAribart/ts-algebra) for more informations on how meta-types work.
+ * @param OBJECT_SCHEMA JSONSchema (object type)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
 export type ParseObjectSchema<
-  SCHEMA extends ObjectSchema,
+  OBJECT_SCHEMA extends ObjectSchema,
   OPTIONS extends ParseSchemaOptions,
-> = SCHEMA extends { properties: Record<string, JSONSchema7> }
+> = OBJECT_SCHEMA extends { properties: Record<string, JSONSchema7> }
   ? M.$Object<
       {
-        [KEY in keyof SCHEMA["properties"]]: ParseSchema<
-          SCHEMA["properties"][KEY],
+        [KEY in keyof OBJECT_SCHEMA["properties"]]: ParseSchema<
+          OBJECT_SCHEMA["properties"][KEY],
           OPTIONS
         >;
       },
-      GetRequired<SCHEMA>,
-      GetOpenProps<SCHEMA, OPTIONS>
+      GetRequired<OBJECT_SCHEMA>,
+      GetOpenProps<OBJECT_SCHEMA, OPTIONS>
     >
-  : M.$Object<{}, GetRequired<SCHEMA>, GetOpenProps<SCHEMA, OPTIONS>>;
+  : M.$Object<
+      {},
+      GetRequired<OBJECT_SCHEMA>,
+      GetOpenProps<OBJECT_SCHEMA, OPTIONS>
+    >;
 
-type GetRequired<SCHEMA extends ObjectSchema> = SCHEMA extends {
+/**
+ * Extracts the required keys of an object JSON schema
+ * @param OBJECT_SCHEMA JSONSchema (object type)
+ * @returns String
+ */
+type GetRequired<OBJECT_SCHEMA extends ObjectSchema> = OBJECT_SCHEMA extends {
   required: ReadonlyArray<string>;
 }
-  ? SCHEMA["required"][number]
+  ? OBJECT_SCHEMA["required"][number]
   : never;
 
+/**
+ * Extracts and parses the additional and pattern properties (if any exists) of an object JSON schema
+ * @param OBJECT_SCHEMA JSONSchema (object type)
+ * @param OPTIONS Parsing options
+ * @returns String
+ */
 type GetOpenProps<
-  SCHEMA extends ObjectSchema,
+  OBJECT_SCHEMA extends ObjectSchema,
   OPTIONS extends ParseSchemaOptions,
-> = SCHEMA extends { additionalProperties: JSONSchema7 }
-  ? SCHEMA extends { patternProperties: Record<string, JSONSchema7> }
+> = OBJECT_SCHEMA extends { additionalProperties: JSONSchema7 }
+  ? OBJECT_SCHEMA extends { patternProperties: Record<string, JSONSchema7> }
     ? AdditionalAndPatternProps<
-        SCHEMA["additionalProperties"],
-        SCHEMA["patternProperties"],
+        OBJECT_SCHEMA["additionalProperties"],
+        OBJECT_SCHEMA["patternProperties"],
         OPTIONS
       >
-    : ParseSchema<SCHEMA["additionalProperties"], OPTIONS>
-  : SCHEMA extends { patternProperties: Record<string, JSONSchema7> }
-  ? PatternProps<SCHEMA["patternProperties"], OPTIONS>
+    : ParseSchema<OBJECT_SCHEMA["additionalProperties"], OPTIONS>
+  : OBJECT_SCHEMA extends { patternProperties: Record<string, JSONSchema7> }
+  ? PatternProps<OBJECT_SCHEMA["patternProperties"], OPTIONS>
   : M.Any;
 
+/**
+ * Extracts and parses the pattern properties of an object JSON schema
+ * @param PATTERN_PROPERTY_SCHEMAS Record<string, JSONSchema>
+ * @param OPTIONS Parsing options
+ * @returns String
+ */
 type PatternProps<
   PATTERN_PROPERTY_SCHEMAS extends Record<string, JSONSchema7>,
   OPTIONS extends ParseSchemaOptions,
@@ -67,14 +96,21 @@ type PatternProps<
   }[keyof PATTERN_PROPERTY_SCHEMAS]
 >;
 
+/**
+ * Extracts, parses and unify the additional and pattern properties of an object JSON schema into a single meta-type
+ * @param ADDITIONAL_PROPERTIES_SCHEMA JSONSchema
+ * @param PATTERN_PROPERTY_SCHEMAS Record<string, JSONSchema>
+ * @param OPTIONS Parsing options
+ * @returns String
+ */
 type AdditionalAndPatternProps<
-  ADDITIONAL_ITEMS_SCHEMA extends JSONSchema7,
+  ADDITIONAL_PROPERTIES_SCHEMA extends JSONSchema7,
   PATTERN_PROPERTY_SCHEMAS extends Record<string, JSONSchema7>,
   OPTIONS extends ParseSchemaOptions,
-> = ADDITIONAL_ITEMS_SCHEMA extends boolean
+> = ADDITIONAL_PROPERTIES_SCHEMA extends boolean
   ? PatternProps<PATTERN_PROPERTY_SCHEMAS, OPTIONS>
   : M.$Union<
-      | ParseSchema<ADDITIONAL_ITEMS_SCHEMA, OPTIONS>
+      | ParseSchema<ADDITIONAL_PROPERTIES_SCHEMA, OPTIONS>
       | {
           [KEY in keyof PATTERN_PROPERTY_SCHEMAS]: ParseSchema<
             PATTERN_PROPERTY_SCHEMAS[KEY],

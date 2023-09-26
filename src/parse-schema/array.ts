@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import type { M } from "ts-algebra";
 
 import type { JSONSchema7 } from "~/definitions";
@@ -40,21 +41,35 @@ type ArraySchema = JSONSchema7 & { type: "array"; items: JSONSchema7 };
  */
 type TupleSchema = JSONSchema7 & { type: "array"; items: JSONSchema7[] };
 
+/**
+ * Recursively parses an array or tuple JSON schema to a meta-type.
+ *
+ * Check the [ts-algebra documentation](https://github.com/ThomasAribart/ts-algebra) for more informations on how meta-types work.
+ * @param ARRAY_OR_TUPLE_SCHEMA JSONSchema (array or tuple type)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
 export type ParseArrayOrTupleSchema<
-  SCHEMA extends ArrayOrTupleSchema,
+  ARRAY_OR_TUPLE_SCHEMA extends ArrayOrTupleSchema,
   OPTIONS extends ParseSchemaOptions,
-> = SCHEMA extends ArraySchema
-  ? M.$Array<ParseSchema<SCHEMA["items"], OPTIONS>>
-  : SCHEMA extends TupleSchema
+> = ARRAY_OR_TUPLE_SCHEMA extends ArraySchema
+  ? M.$Array<ParseSchema<ARRAY_OR_TUPLE_SCHEMA["items"], OPTIONS>>
+  : ARRAY_OR_TUPLE_SCHEMA extends TupleSchema
   ? M.$Union<
       ApplyMinMaxAndAdditionalItems<
-        ParseTupleItems<SCHEMA["items"], OPTIONS>,
-        SCHEMA,
+        ParseTupleItems<ARRAY_OR_TUPLE_SCHEMA["items"], OPTIONS>,
+        ARRAY_OR_TUPLE_SCHEMA,
         OPTIONS
       >
     >
   : M.$Array;
 
+/**
+ * Parses the items of a tuple JSON schema to a meta-type.
+ * @param ITEM_SCHEMAS JSONSchema[]
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
 type ParseTupleItems<
   ITEM_SCHEMAS extends JSONSchema7[],
   OPTIONS extends ParseSchemaOptions,
@@ -146,6 +161,12 @@ type ApplyMinMax<
       completeTuple: INITIAL_PARSED_ITEM_SCHEMAS;
     };
 
+/**
+ * Returns `true` if the provided tuple has a length higher than or equal to the provided length, returns `false` otherwise (or if `LENGTH` is `undefined`).
+ * @param TUPLE unknown[]
+ * @param LENGTH number | undefined
+ * @returns Meta-type
+ */
 type IsLongerThan<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TUPLE extends any[],

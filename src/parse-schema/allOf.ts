@@ -17,37 +17,55 @@ import type { MergeSubSchema } from "./utils";
  */
 export type AllOfSchema = JSONSchema7 & { allOf: JSONSchema7[] };
 
+/**
+ * Recursively parses a JSON schema intersection to a meta-type.
+ *
+ * Check the [ts-algebra documentation](https://github.com/ThomasAribart/ts-algebra) for more informations on how meta-types work.
+ * @param ALL_OF_SCHEMA JSONSchema (exclusive schema union)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
 export type ParseAllOfSchema<
-  SCHEMA extends AllOfSchema,
+  ALL_OF_SCHEMA extends AllOfSchema,
   OPTIONS extends ParseSchemaOptions,
 > = RecurseOnAllOfSchema<
-  SCHEMA["allOf"],
-  SCHEMA,
+  ALL_OF_SCHEMA["allOf"],
+  ALL_OF_SCHEMA,
   OPTIONS,
-  ParseSchema<Omit<SCHEMA, "allOf">, OPTIONS>
+  ParseSchema<Omit<ALL_OF_SCHEMA, "allOf">, OPTIONS>
 >;
 
+/**
+ * Recursively parses a tuple of JSON schemas to the intersection of its parsed meta-types (merged with root schema).
+ * @param SUB_SCHEMAS JSONSchema[]
+ * @param ROOT_ALL_OF_SCHEMA Root JSONSchema (schema union)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
 type RecurseOnAllOfSchema<
   SUB_SCHEMAS extends JSONSchema7[],
-  ROOT_SCHEMA extends AllOfSchema,
+  ROOT_ALL_OF_SCHEMA extends AllOfSchema,
   OPTIONS extends ParseSchemaOptions,
-  PARSED_ROOT_SCHEMA,
+  PARSED_ROOT_ALL_OF_SCHEMA,
 > = SUB_SCHEMAS extends [infer SUB_SCHEMAS_HEAD, ...infer SUB_SCHEMAS_TAIL]
   ? // TODO increase TS version and use "extends" in Array https://devblogs.microsoft.com/typescript/announcing-typescript-4-8/#improved-inference-for-infer-types-in-template-string-types
     SUB_SCHEMAS_HEAD extends JSONSchema7
     ? SUB_SCHEMAS_TAIL extends JSONSchema7[]
       ? RecurseOnAllOfSchema<
           SUB_SCHEMAS_TAIL,
-          ROOT_SCHEMA,
+          ROOT_ALL_OF_SCHEMA,
           OPTIONS,
           M.$Intersect<
             ParseSchema<
-              MergeSubSchema<Omit<ROOT_SCHEMA, "allOf">, SUB_SCHEMAS_HEAD>,
+              MergeSubSchema<
+                Omit<ROOT_ALL_OF_SCHEMA, "allOf">,
+                SUB_SCHEMAS_HEAD
+              >,
               OPTIONS
             >,
-            PARSED_ROOT_SCHEMA
+            PARSED_ROOT_ALL_OF_SCHEMA
           >
         >
       : never
     : never
-  : PARSED_ROOT_SCHEMA;
+  : PARSED_ROOT_ALL_OF_SCHEMA;

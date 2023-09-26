@@ -17,14 +17,31 @@ import type { MergeSubSchema } from "./utils";
  */
 export type OneOfSchema = JSONSchema7 & { oneOf: JSONSchema7[] };
 
+/**
+ * Recursively parses an exclusive JSON schema union to a meta-type.
+ *
+ * Check the [ts-algebra documentation](https://github.com/ThomasAribart/ts-algebra) for more informations on how meta-types work.
+ * @param ONE_OF_SCHEMA JSONSchema (exclusive schema union)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
 export type ParseOneOfSchema<
-  SCHEMA extends OneOfSchema,
+  ONE_OF_SCHEMA extends OneOfSchema,
   OPTIONS extends ParseSchemaOptions,
-> = M.$Union<RecurseOnOneOfSchema<SCHEMA["oneOf"], SCHEMA, OPTIONS>>;
+> = M.$Union<
+  RecurseOnOneOfSchema<ONE_OF_SCHEMA["oneOf"], ONE_OF_SCHEMA, OPTIONS>
+>;
 
+/**
+ * Recursively parses a tuple of JSON schemas to the union of its parsed meta-types (merged with root schema).
+ * @param SUB_SCHEMAS JSONSchema[]
+ * @param ROOT_ONE_OF_SCHEMA Root JSONSchema (exclusive schema union)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
 type RecurseOnOneOfSchema<
   SUB_SCHEMAS extends JSONSchema7[],
-  ROOT_SCHEMA extends OneOfSchema,
+  ROOT_ONE_OF_SCHEMA extends OneOfSchema,
   OPTIONS extends ParseSchemaOptions,
   RESULT = never,
 > = SUB_SCHEMAS extends [infer SUB_SCHEMAS_HEAD, ...infer SUB_SCHEMAS_TAIL]
@@ -33,13 +50,16 @@ type RecurseOnOneOfSchema<
     ? SUB_SCHEMAS_TAIL extends JSONSchema7[]
       ? RecurseOnOneOfSchema<
           SUB_SCHEMAS_TAIL,
-          ROOT_SCHEMA,
+          ROOT_ONE_OF_SCHEMA,
           OPTIONS,
           | RESULT
           | M.$Intersect<
-              ParseSchema<Omit<ROOT_SCHEMA, "oneOf">, OPTIONS>,
+              ParseSchema<Omit<ROOT_ONE_OF_SCHEMA, "oneOf">, OPTIONS>,
               ParseSchema<
-                MergeSubSchema<Omit<ROOT_SCHEMA, "oneOf">, SUB_SCHEMAS_HEAD>,
+                MergeSubSchema<
+                  Omit<ROOT_ONE_OF_SCHEMA, "oneOf">,
+                  SUB_SCHEMAS_HEAD
+                >,
                 OPTIONS
               >
             >
