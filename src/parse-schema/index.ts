@@ -46,7 +46,7 @@ export type ParseSchemaOptions = {
 };
 
 /**
- * Recursively parse a JSON schema to a meta-type. Check the [ts-algebra documentation](https://github.com/ThomasAribart/ts-algebra) for more informations on how meta-types work.
+ * Recursively parses a JSON schema to a meta-type. Check the [ts-algebra documentation](https://github.com/ThomasAribart/ts-algebra) for more informations on how meta-types work.
  * @param SCHEMA JSON schema
  * @param OPTIONS Parsing options
  * @returns Meta-type

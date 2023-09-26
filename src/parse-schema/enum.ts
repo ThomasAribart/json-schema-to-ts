@@ -13,9 +13,28 @@ import type { ParseSchema, ParseSchemaOptions } from "./index";
  */
 export type EnumSchema = JSONSchema7 & { enum: unknown[] };
 
+/**
+ * Recursively parses an enum JSON schema to a meta-type.
+ *
+ * Check the [ts-algebra documentation](https://github.com/ThomasAribart/ts-algebra) for more informations on how meta-types work.
+ * @param ENUM_SCHEMA JSONSchema (enum)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
 export type ParseEnumSchema<
-  SCHEMA extends EnumSchema,
+  ENUM_SCHEMA extends EnumSchema,
   OPTIONS extends ParseSchemaOptions,
-> = M.$Intersect<ParseEnum<SCHEMA>, ParseSchema<Omit<SCHEMA, "enum">, OPTIONS>>;
+> = M.$Intersect<
+  ParseEnum<ENUM_SCHEMA>,
+  ParseSchema<Omit<ENUM_SCHEMA, "enum">, OPTIONS>
+>;
 
-type ParseEnum<SCHEMA extends EnumSchema> = M.Enum<SCHEMA["enum"][number]>;
+/**
+ * Parses an enum JSON schema to a meta-type.
+ * @param ENUM_SCHEMA JSONSchema (enum)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
+type ParseEnum<ENUM_SCHEMA extends EnumSchema> = M.Enum<
+  ENUM_SCHEMA["enum"][number]
+>;

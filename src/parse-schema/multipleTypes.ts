@@ -14,14 +14,31 @@ import type { ParseSchema, ParseSchemaOptions } from "./index";
  */
 export type MultipleTypesSchema = JSONSchema7 & { type: JSONSchema7TypeName[] };
 
+/**
+ * Recursively parses a multiple type JSON schema to a meta-type.
+ *
+ * Check the [ts-algebra documentation](https://github.com/ThomasAribart/ts-algebra) for more informations on how meta-types work.
+ * @param MULTI_TYPE_SCHEMA JSONSchema (single type)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
 export type ParseMultipleTypesSchema<
-  SCHEMA extends MultipleTypesSchema,
+  MULTI_TYPE_SCHEMA extends MultipleTypesSchema,
   OPTIONS extends ParseSchemaOptions,
-> = M.$Union<RecurseOnMixedSchema<SCHEMA["type"], SCHEMA, OPTIONS>>;
+> = M.$Union<
+  RecurseOnMixedSchema<MULTI_TYPE_SCHEMA["type"], MULTI_TYPE_SCHEMA, OPTIONS>
+>;
 
+/**
+ * Recursively parses a multiple type JSON schema to the union of its types (merged with root schema).
+ * @param TYPES JSONSchema7Type[]
+ * @param ROOT_MULTI_TYPE_SCHEMA Root JSONSchema (multiple types)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
 type RecurseOnMixedSchema<
   TYPES extends JSONSchema7TypeName[],
-  ROOT_SCHEMA extends MultipleTypesSchema,
+  ROOT_MULTI_TYPE_SCHEMA extends MultipleTypesSchema,
   OPTIONS extends ParseSchemaOptions,
   RESULT = never,
 > = TYPES extends [infer TYPES_HEAD, ...infer TYPES_TAIL]
@@ -30,11 +47,11 @@ type RecurseOnMixedSchema<
     ? TYPES_TAIL extends JSONSchema7TypeName[]
       ? RecurseOnMixedSchema<
           TYPES_TAIL,
-          ROOT_SCHEMA,
+          ROOT_MULTI_TYPE_SCHEMA,
           OPTIONS,
           | RESULT
           | ParseSchema<
-              Omit<ROOT_SCHEMA, "type"> & { type: TYPES_HEAD },
+              Omit<ROOT_MULTI_TYPE_SCHEMA, "type"> & { type: TYPES_HEAD },
               OPTIONS
             >
         >

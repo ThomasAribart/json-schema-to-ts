@@ -17,14 +17,31 @@ import type { MergeSubSchema } from "./utils";
  */
 export type AnyOfSchema = JSONSchema7 & { anyOf: JSONSchema7[] };
 
+/**
+ * Recursively parses a JSON schema union to a meta-type.
+ *
+ * Check the [ts-algebra documentation](https://github.com/ThomasAribart/ts-algebra) for more informations on how meta-types work.
+ * @param ANY_OF_SCHEMA JSONSchema (schema union)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
 export type ParseAnyOfSchema<
-  SCHEMA extends AnyOfSchema,
+  ANY_OF_SCHEMA extends AnyOfSchema,
   OPTIONS extends ParseSchemaOptions,
-> = M.$Union<RecurseOnAnyOfSchema<SCHEMA["anyOf"], SCHEMA, OPTIONS>>;
+> = M.$Union<
+  RecurseOnAnyOfSchema<ANY_OF_SCHEMA["anyOf"], ANY_OF_SCHEMA, OPTIONS>
+>;
 
+/**
+ * Recursively parses a tuple of JSON schemas to the union of its parsed meta-types (merged with root schema).
+ * @param SUB_SCHEMAS JSONSchema[]
+ * @param ROOT_ANY_OF_SCHEMA Root JSONSchema (schema union)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
 type RecurseOnAnyOfSchema<
   SUB_SCHEMAS extends JSONSchema7[],
-  ROOT_SCHEMA extends AnyOfSchema,
+  ROOT_ANY_OF_SCHEMA extends AnyOfSchema,
   OPTIONS extends ParseSchemaOptions,
   RESULT = never,
 > = SUB_SCHEMAS extends [infer SUB_SCHEMAS_HEAD, ...infer SUB_SCHEMAS_TAIL]
@@ -33,13 +50,16 @@ type RecurseOnAnyOfSchema<
     ? SUB_SCHEMAS_TAIL extends JSONSchema7[]
       ? RecurseOnAnyOfSchema<
           SUB_SCHEMAS_TAIL,
-          ROOT_SCHEMA,
+          ROOT_ANY_OF_SCHEMA,
           OPTIONS,
           | RESULT
           | M.$Intersect<
-              ParseSchema<Omit<ROOT_SCHEMA, "anyOf">, OPTIONS>,
+              ParseSchema<Omit<ROOT_ANY_OF_SCHEMA, "anyOf">, OPTIONS>,
               ParseSchema<
-                MergeSubSchema<Omit<ROOT_SCHEMA, "anyOf">, SUB_SCHEMAS_HEAD>,
+                MergeSubSchema<
+                  Omit<ROOT_ANY_OF_SCHEMA, "anyOf">,
+                  SUB_SCHEMAS_HEAD
+                >,
                 OPTIONS
               >
             >

@@ -15,22 +15,44 @@ import type { SingleTypeSchema } from "./singleType";
  */
 export type ConstSchema = JSONSchema7 & { const: unknown };
 
+/**
+ * Recursively parses a constant JSON schema to a meta-type.
+ *
+ * Check the [ts-algebra documentation](https://github.com/ThomasAribart/ts-algebra) for more informations on how meta-types work.
+ * @param CONST_SCHEMA JSONSchema (constant)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
 export type ParseConstSchema<
-  SCHEMA extends ConstSchema,
+  CONST_SCHEMA extends ConstSchema,
   OPTIONS extends ParseSchemaOptions,
-> = SCHEMA extends SingleTypeSchema
-  ? IntersectConstAndTypeSchema<SCHEMA, OPTIONS>
-  : SCHEMA extends MultipleTypesSchema
-  ? IntersectConstAndTypeSchema<SCHEMA, OPTIONS>
-  : ParseConst<SCHEMA>;
+> = CONST_SCHEMA extends SingleTypeSchema
+  ? IntersectConstAndTypeSchema<CONST_SCHEMA, OPTIONS>
+  : CONST_SCHEMA extends MultipleTypesSchema
+  ? IntersectConstAndTypeSchema<CONST_SCHEMA, OPTIONS>
+  : ParseConst<CONST_SCHEMA>;
 
+/**
+ * Intersects the parsed meta-type of a constant JSON schema to the rest of the schema (only when a `type` keyword has been used).
+ * @param CONST_SCHEMA JSONSchema (constant & single/multiple type)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
 type IntersectConstAndTypeSchema<
-  SCHEMA extends ConstSchema & (SingleTypeSchema | MultipleTypesSchema),
+  CONST_SCHEMA extends ConstSchema & (SingleTypeSchema | MultipleTypesSchema),
   OPTIONS extends ParseSchemaOptions,
   // TOIMPROVE: Directly use ParseMultipleTypeSchema and ParseSingleTypeSchema
 > = M.$Intersect<
-  ParseConst<SCHEMA>,
-  ParseSchema<Omit<SCHEMA, "const">, OPTIONS>
+  ParseConst<CONST_SCHEMA>,
+  ParseSchema<Omit<CONST_SCHEMA, "const">, OPTIONS>
 >;
 
-type ParseConst<S extends ConstSchema> = M.Const<S["const"]>;
+/**
+ * Parses a constant JSON schema to a meta-type.
+ * @param CONST_SCHEMA JSONSchema (constant)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
+type ParseConst<CONST_SCHEMA extends ConstSchema> = M.Const<
+  CONST_SCHEMA["const"]
+>;
