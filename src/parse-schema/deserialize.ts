@@ -4,6 +4,12 @@ import type { DeserializationPattern, JSONSchema7 } from "~/definitions";
 
 import type { ParseSchemaOptions } from "./index";
 
+/**
+ * Apply deserialization patterns to a JSON schema
+ * @param SCHEMA JSONSchema
+ * @param OPTIONS Parsing options (with deserialization patterns)
+ * @returns Meta-type
+ */
 export type DeserializeSchema<
   SCHEMA extends JSONSchema7,
   OPTIONS extends Omit<ParseSchemaOptions, "deserialize"> & {
@@ -11,6 +17,12 @@ export type DeserializeSchema<
   },
 > = RecurseOnDeserializationPatterns<SCHEMA, OPTIONS["deserialize"]>;
 
+/**
+ * Recursively apply deserialization patterns to a JSON schema
+ * @param SCHEMA JSONSchema
+ * @param DESERIALIZATION_PATTERNS DeserializationPattern[]
+ * @returns Meta-type
+ */
 type RecurseOnDeserializationPatterns<
   SCHEMA extends JSONSchema7,
   DESERIALIZATION_PATTERNS extends DeserializationPattern[],

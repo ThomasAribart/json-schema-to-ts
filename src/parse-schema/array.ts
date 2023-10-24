@@ -68,7 +68,7 @@ export type ParseArrayOrTupleSchema<
  * Parses the items of a tuple JSON schema to a meta-type.
  * @param ITEM_SCHEMAS JSONSchema[]
  * @param OPTIONS Parsing options
- * @returns Meta-type
+ * @returns Meta-type[]
  */
 type ParseTupleItems<
   ITEM_SCHEMAS extends JSONSchema7[],
@@ -85,6 +85,13 @@ type ParseTupleItems<
     : never
   : [];
 
+/**
+ * Apply `minItems` and `maxItems` to a parsed tuple type and append `additionalItems` if needed.
+ * @param PARSED_ITEM_SCHEMAS Meta-type[]
+ * @param ROOT_SCHEMA JSONSchema
+ * @param OPTIONS Parsing options
+ * @returns Meta-type union
+ */
 type ApplyMinMaxAndAdditionalItems<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   PARSED_ITEM_SCHEMAS extends any[],
@@ -104,6 +111,19 @@ type ApplyMinMaxAndAdditionalItems<
   OPTIONS
 >;
 
+/**
+ * Apply `minItems` and `maxItems` to a parsed tuple type, by recursing from full tuple length to `minItems` (defaulted to 0)
+ *
+ * Returns not only the result as a meta-type, but also some meta-data useful to `ApplyAdditionalItems`:
+ * - result: Union of possible tuples
+ * - hasEncounteredMin: If tuple with `minItems` length has been met during recursion
+ * - hasEncounteredMax: If tuple with `maxItems` length has been met during recursion
+ * - completeTuple: Original complete tuple
+ * @param PARSED_ITEM_SCHEMAS Meta-type[]
+ * @param ROOT_SCHEMA JSONSchema
+ * @param OPTIONS Parsing options
+ * @returns ApplyMinMaxResults
+ */
 type ApplyMinMax<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   RECURSED_PARSED_ITEM_SCHEMAS extends any[],
@@ -165,7 +185,7 @@ type ApplyMinMax<
  * Returns `true` if the provided tuple has a length higher than or equal to the provided length, returns `false` otherwise (or if `LENGTH` is `undefined`).
  * @param TUPLE unknown[]
  * @param LENGTH number | undefined
- * @returns Meta-type
+ * @returns Boolean
  */
 type IsLongerThan<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -181,6 +201,13 @@ type IsLongerThan<
   ? IsLongerThan<TUPLE_TAIL, LENGTH>
   : RESULT;
 
+/**
+ * Append `additionalItems` if needed, and filter some `minItems` & `maxItems` edge cases.
+ * @param APPLY_MIN_MAX_RESULT ApplyMinMaxResults
+ * @param ADDITIONAL_ITEMS_SCHEMA JSONSchema
+ * @param OPTIONS Parsing options
+ * @returns Meta-type union
+ */
 type ApplyAdditionalItems<
   APPLY_MIN_MAX_RESULT extends {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -195,25 +222,33 @@ type ApplyAdditionalItems<
 > = APPLY_MIN_MAX_RESULT extends { hasEncounteredMax: true }
   ? APPLY_MIN_MAX_RESULT extends { hasEncounteredMin: true }
     ? APPLY_MIN_MAX_RESULT["result"]
-    : M.Never
+    : // NOTE: Min MUST have been encountered as it is defaulted to 0.
+      // Here, only possibility is that `maxItems > minItems` which means non-representable type
+      M.Never
   : ADDITIONAL_ITEMS_SCHEMA extends false
   ? APPLY_MIN_MAX_RESULT extends { hasEncounteredMin: true }
     ? APPLY_MIN_MAX_RESULT["result"]
-    : M.Never
+    : // NOTE: Min MUST have been encountered as it is defaulted to 0.
+      // Here, only possibility is that `minItems > items.length` which means non-representable type as `additionalItems` are denied
+      M.Never
   : ADDITIONAL_ITEMS_SCHEMA extends true
   ? APPLY_MIN_MAX_RESULT extends { hasEncounteredMin: true }
     ?
         | APPLY_MIN_MAX_RESULT["result"]
         | M.$Tuple<APPLY_MIN_MAX_RESULT["completeTuple"], M.Any>
-    : M.$Tuple<APPLY_MIN_MAX_RESULT["completeTuple"], M.Any>
-  : APPLY_MIN_MAX_RESULT["hasEncounteredMin"] extends true
+    : // NOTE: Min MUST have been encountered as it is defaulted to 0.
+      // Here, only possibility is that `minItems > items.length` so we can just append `M.Any` to complete tuple
+      M.$Tuple<APPLY_MIN_MAX_RESULT["completeTuple"], M.Any>
+  : APPLY_MIN_MAX_RESULT extends { hasEncounteredMin: true }
   ?
       | APPLY_MIN_MAX_RESULT["result"]
       | M.$Tuple<
           APPLY_MIN_MAX_RESULT["completeTuple"],
           ParseSchema<ADDITIONAL_ITEMS_SCHEMA, OPTIONS>
         >
-  : M.$Tuple<
+  : // NOTE: Min MUST have been encountered as it is defaulted to 0.
+    // Here, only possibility is that `minItems > items.length` so we can just append parsed schema to complete tuple
+    M.$Tuple<
       APPLY_MIN_MAX_RESULT["completeTuple"],
       ParseSchema<ADDITIONAL_ITEMS_SCHEMA, OPTIONS>
     >;
