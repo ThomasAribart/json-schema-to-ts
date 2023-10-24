@@ -2,7 +2,7 @@ import type { A } from "ts-toolbelt";
 
 import type { FromSchemaDefaultOptions } from "~/definitions";
 
-import type { ParseOptions, ParseReferences } from "./parse-options";
+import type { IndexReferencesById, ParseOptions } from "./parse-options";
 
 // ParseReferences
 
@@ -11,12 +11,10 @@ type NumberReference = { $id: "number"; type: "number" };
 type ObjectReference = { $id: "object"; type: "object" };
 type AllReferences = [StringReference, NumberReference, ObjectReference];
 
-type ReceivedReferences = ParseReferences<AllReferences>;
+type ReceivedReferences = IndexReferencesById<AllReferences>;
 type ExpectedReferences = {
   string: StringReference;
-} & {
   number: NumberReference;
-} & {
   object: ObjectReference;
 };
 
@@ -33,7 +31,7 @@ type ExpectedOptions = {
   parseIfThenElseKeywords: FromSchemaDefaultOptions["parseIfThenElseKeywords"];
   deserialize: FromSchemaDefaultOptions["deserialize"];
   rootSchema: RootSchema;
-  references: ParseReferences<AllReferences>;
+  references: IndexReferencesById<AllReferences>;
 };
 
 const assertOptions: A.Equals<ReceivedOptions, ExpectedOptions> = 1;

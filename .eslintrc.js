@@ -9,7 +9,7 @@ module.exports = {
   ],
   rules: {
     "jsdoc/require-jsdoc": [
-      "warn",
+      "error",
       {
         contexts: [
           "TSTypeAliasDeclaration",

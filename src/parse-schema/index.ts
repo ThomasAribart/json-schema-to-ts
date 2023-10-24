@@ -16,7 +16,7 @@ import type {
 import type { NotSchema, ParseNotSchema } from "./not";
 import type { NullableSchema, ParseNullableSchema } from "./nullable";
 import type { OneOfSchema, ParseOneOfSchema } from "./oneOf";
-import type { ParseReferenceSchema, ReferenceSchema } from "./references";
+import type { ParseReferenceSchema, ReferencingSchema } from "./references";
 import type { ParseSingleTypeSchema, SingleTypeSchema } from "./singleType";
 
 /**
@@ -62,7 +62,7 @@ export type ParseSchema<
     ? M.Never
     : SCHEMA extends NullableSchema
     ? ParseNullableSchema<SCHEMA, OPTIONS>
-    : SCHEMA extends ReferenceSchema
+    : SCHEMA extends ReferencingSchema
     ? ParseReferenceSchema<SCHEMA, OPTIONS>
     : And<
         DoesExtend<OPTIONS["parseIfThenElseKeywords"], true>,

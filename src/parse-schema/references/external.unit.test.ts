@@ -57,7 +57,7 @@ describe("References", () => {
     });
   });
 
-  describe("Re-using domain", () => {
+  describe("Re-using directory", () => {
     const userSchema = {
       $id: "http://example.com/schemas/user.json",
       $ref: "person.json",

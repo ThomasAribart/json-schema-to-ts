@@ -2,22 +2,40 @@ import type { JSONSchema7 } from "~/definitions";
 import type { Split } from "~/type-utils/split";
 
 import type { ParseSchemaOptions } from "../index";
-import type { ParseDefinitionSchema } from "./definitions";
-import type { ParseExternalReferenceSchema } from "./references";
+import type { ParseExternalReferenceSchema } from "./external";
+import type { ParseInternalReferenceSchema } from "./internal";
 
-export type ReferenceSchema = JSONSchema7 & {
+/**
+ * JSON schemas referencing other schemas
+ */
+export type ReferencingSchema = JSONSchema7 & {
   $ref: string;
 };
 
+/**
+ * Recursively parses a JSON referencing another schema to a meta-type.
+ *
+ * Check the [ts-algebra documentation](https://github.com/ThomasAribart/ts-algebra) for more informations on how meta-types work.
+ * @param REFERENCING_SCHEMA JSONSchema (referencing)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
 export type ParseReferenceSchema<
-  REF_SCHEMA extends ReferenceSchema,
+  REFERENCING_SCHEMA extends ReferencingSchema,
   OPTIONS extends ParseSchemaOptions,
-  REF_AND_DEFINITION extends string[] = Split<REF_SCHEMA["$ref"], "#">,
-> = REF_AND_DEFINITION[0] extends ""
-  ? ParseDefinitionSchema<REF_SCHEMA, OPTIONS, REF_AND_DEFINITION[1]>
-  : ParseExternalReferenceSchema<
-      REF_SCHEMA,
+  REFERENCE_ID_AND_PATH extends string[] = Split<
+    REFERENCING_SCHEMA["$ref"],
+    "#"
+  >,
+> = REFERENCE_ID_AND_PATH[0] extends ""
+  ? ParseInternalReferenceSchema<
+      REFERENCING_SCHEMA,
       OPTIONS,
-      REF_AND_DEFINITION[0],
-      REF_AND_DEFINITION[1]
+      REFERENCE_ID_AND_PATH[1]
+    >
+  : ParseExternalReferenceSchema<
+      REFERENCING_SCHEMA,
+      OPTIONS,
+      REFERENCE_ID_AND_PATH[0],
+      REFERENCE_ID_AND_PATH[1]
     >;
