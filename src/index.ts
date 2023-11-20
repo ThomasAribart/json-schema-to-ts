@@ -75,14 +75,8 @@ export type ExtendedJSONSchema<EXTENSION extends JSONSchema7Extension> =
 export type FromSchema<
   SCHEMA extends JSONSchema,
   OPTIONS extends FromSchemaOptions = FromSchemaDefaultOptions,
-  WRITABLE_SCHEMA extends WritableJSONSchema7 = SCHEMA extends Record<
-    string | number | symbol,
-    unknown
-  >
-    ? Writable<SCHEMA>
-    : SCHEMA,
 > = M.$Resolve<
-  ParseSchema<WRITABLE_SCHEMA, ParseOptions<WRITABLE_SCHEMA, OPTIONS>>
+  ParseSchema<Writable<SCHEMA>, ParseOptions<Writable<SCHEMA>, OPTIONS>>
 >;
 
 /**
