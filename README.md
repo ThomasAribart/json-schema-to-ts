@@ -956,4 +956,5 @@ const compile = wrapCompilerAsTypeGuard<
 
 - [Does `json-schema-to-ts` work on _.json_ file schemas?](./documentation/FAQs/does-json-schema-to-ts-work-on-json-file-schemas.md)
 - [Will `json-schema-to-ts` impact the performances of my IDE/compiler?](./documentation/FAQs/will-json-schema-to-ts-impact-the-performances-of-my-ide-compiler.md)
+- [How can I apply `FromSchema` on generics?](./documentation/FAQs/applying-from-schema-on-generics.md)
 - [I get a `type instantiation is excessively deep and potentially infinite` error, what should I do?](./documentation/FAQs/i-get-a-type-instantiation-is-excessively-deep-and-potentially-infinite-error-what-should-i-do.md)
