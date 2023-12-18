@@ -7,7 +7,6 @@ export type { Join } from "./join";
 export type { Narrow } from "./narrow";
 export type { Not } from "./not";
 export type { Pop } from "./pop";
-export type { DeepReadonly as Readonly } from "./readonly";
 export type { Split } from "./split";
 export type { Tail } from "./tail";
-export type { DeepWritable as Writable } from "./writable";
+export type { Writable } from "./writable";

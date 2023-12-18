@@ -14,7 +14,8 @@ import type { ObjectSchema, ParseObjectSchema } from "./object";
  *  type: "string"
  * }
  */
-export type SingleTypeSchema = JSONSchema7 & { type: JSONSchema7TypeName };
+export type SingleTypeSchema = JSONSchema7 &
+  Readonly<{ type: JSONSchema7TypeName }>;
 
 /**
  * Recursively parses a single type JSON schema to a meta-type.
@@ -27,18 +28,18 @@ export type SingleTypeSchema = JSONSchema7 & { type: JSONSchema7TypeName };
 export type ParseSingleTypeSchema<
   SINGLE_TYPE_SCHEMA extends SingleTypeSchema,
   OPTIONS extends ParseSchemaOptions,
-> = SINGLE_TYPE_SCHEMA extends { type: "null" }
+> = SINGLE_TYPE_SCHEMA extends Readonly<{ type: "null" }>
   ? M.Primitive<null>
-  : SINGLE_TYPE_SCHEMA extends { type: "boolean" }
-  ? M.Primitive<boolean>
-  : SINGLE_TYPE_SCHEMA extends { type: "integer" }
-  ? M.Primitive<number>
-  : SINGLE_TYPE_SCHEMA extends { type: "number" }
-  ? M.Primitive<number>
-  : SINGLE_TYPE_SCHEMA extends { type: "string" }
-  ? M.Primitive<string>
-  : SINGLE_TYPE_SCHEMA extends ArrayOrTupleSchema
-  ? ParseArrayOrTupleSchema<SINGLE_TYPE_SCHEMA, OPTIONS>
-  : SINGLE_TYPE_SCHEMA extends ObjectSchema
-  ? ParseObjectSchema<SINGLE_TYPE_SCHEMA, OPTIONS>
-  : M.Never;
+  : SINGLE_TYPE_SCHEMA extends Readonly<{ type: "boolean" }>
+    ? M.Primitive<boolean>
+    : SINGLE_TYPE_SCHEMA extends Readonly<{ type: "integer" }>
+      ? M.Primitive<number>
+      : SINGLE_TYPE_SCHEMA extends Readonly<{ type: "number" }>
+        ? M.Primitive<number>
+        : SINGLE_TYPE_SCHEMA extends Readonly<{ type: "string" }>
+          ? M.Primitive<string>
+          : SINGLE_TYPE_SCHEMA extends ArrayOrTupleSchema
+            ? ParseArrayOrTupleSchema<SINGLE_TYPE_SCHEMA, OPTIONS>
+            : SINGLE_TYPE_SCHEMA extends ObjectSchema
+              ? ParseObjectSchema<SINGLE_TYPE_SCHEMA, OPTIONS>
+              : M.Never;

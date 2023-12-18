@@ -1,4 +1,7 @@
 /**
  * Constraint of the FromSchema `deserialize` option
  */
-export type DeserializationPattern = { pattern: unknown; output: unknown };
+export type DeserializationPattern = Readonly<{
+  pattern: unknown;
+  output: unknown;
+}>;

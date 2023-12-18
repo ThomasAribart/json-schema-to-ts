@@ -1,6 +1,7 @@
 import type { M } from "ts-algebra";
 
 import type { JSONSchema7 } from "~/definitions";
+import type { Writable } from "~/type-utils";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 
@@ -11,7 +12,7 @@ import type { ParseSchema, ParseSchemaOptions } from "./index";
  *  const: "foo"
  * }
  */
-export type ConstSchema = JSONSchema7 & { const: unknown };
+export type ConstSchema = JSONSchema7 & Readonly<{ const: unknown }>;
 
 /**
  * Recursively parses a constant JSON schema to a meta-type.
@@ -36,5 +37,5 @@ export type ParseConstSchema<
  * @returns Meta-type
  */
 type ParseConst<CONST_SCHEMA extends ConstSchema> = M.Const<
-  CONST_SCHEMA["const"]
+  Writable<CONST_SCHEMA["const"]>
 >;

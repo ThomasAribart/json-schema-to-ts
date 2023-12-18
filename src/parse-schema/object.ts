@@ -16,7 +16,7 @@ import type { ParseSchema, ParseSchemaOptions } from "./index";
  *  }
  * }
  */
-export type ObjectSchema = JSONSchema7 & { type: "object" };
+export type ObjectSchema = JSONSchema7 & Readonly<{ type: "object" }>;
 
 /**
  * Parses an object JSON schema to a meta-type.
@@ -29,7 +29,9 @@ export type ObjectSchema = JSONSchema7 & { type: "object" };
 export type ParseObjectSchema<
   OBJECT_SCHEMA extends ObjectSchema,
   OPTIONS extends ParseSchemaOptions,
-> = OBJECT_SCHEMA extends { properties: Record<string, JSONSchema7> }
+> = OBJECT_SCHEMA extends Readonly<{
+  properties: Readonly<Record<string, JSONSchema7>>;
+}>
   ? M.$Object<
       {
         [KEY in keyof OBJECT_SCHEMA["properties"]]: ParseSchema<
@@ -51,11 +53,10 @@ export type ParseObjectSchema<
  * @param OBJECT_SCHEMA JSONSchema (object type)
  * @returns String
  */
-type GetRequired<OBJECT_SCHEMA extends ObjectSchema> = OBJECT_SCHEMA extends {
-  required: ReadonlyArray<string>;
-}
-  ? OBJECT_SCHEMA["required"][number]
-  : never;
+type GetRequired<OBJECT_SCHEMA extends ObjectSchema> =
+  OBJECT_SCHEMA extends Readonly<{ required: ReadonlyArray<string> }>
+    ? OBJECT_SCHEMA["required"][number]
+    : never;
 
 /**
  * Extracts and parses the additional and pattern properties (if any exists) of an object JSON schema
@@ -66,17 +67,21 @@ type GetRequired<OBJECT_SCHEMA extends ObjectSchema> = OBJECT_SCHEMA extends {
 type GetOpenProps<
   OBJECT_SCHEMA extends ObjectSchema,
   OPTIONS extends ParseSchemaOptions,
-> = OBJECT_SCHEMA extends { additionalProperties: JSONSchema7 }
-  ? OBJECT_SCHEMA extends { patternProperties: Record<string, JSONSchema7> }
+> = OBJECT_SCHEMA extends Readonly<{ additionalProperties: JSONSchema7 }>
+  ? OBJECT_SCHEMA extends Readonly<{
+      patternProperties: Record<string, JSONSchema7>;
+    }>
     ? AdditionalAndPatternProps<
         OBJECT_SCHEMA["additionalProperties"],
         OBJECT_SCHEMA["patternProperties"],
         OPTIONS
       >
     : ParseSchema<OBJECT_SCHEMA["additionalProperties"], OPTIONS>
-  : OBJECT_SCHEMA extends { patternProperties: Record<string, JSONSchema7> }
-  ? PatternProps<OBJECT_SCHEMA["patternProperties"], OPTIONS>
-  : M.Any;
+  : OBJECT_SCHEMA extends Readonly<{
+        patternProperties: Record<string, JSONSchema7>;
+      }>
+    ? PatternProps<OBJECT_SCHEMA["patternProperties"], OPTIONS>
+    : M.Any;
 
 /**
  * Extracts and parses the pattern properties of an object JSON schema
@@ -85,7 +90,7 @@ type GetOpenProps<
  * @returns String
  */
 type PatternProps<
-  PATTERN_PROPERTY_SCHEMAS extends Record<string, JSONSchema7>,
+  PATTERN_PROPERTY_SCHEMAS extends Readonly<Record<string, JSONSchema7>>,
   OPTIONS extends ParseSchemaOptions,
 > = M.$Union<
   {
@@ -105,7 +110,7 @@ type PatternProps<
  */
 type AdditionalAndPatternProps<
   ADDITIONAL_PROPERTIES_SCHEMA extends JSONSchema7,
-  PATTERN_PROPERTY_SCHEMAS extends Record<string, JSONSchema7>,
+  PATTERN_PROPERTY_SCHEMAS extends Readonly<Record<string, JSONSchema7>>,
   OPTIONS extends ParseSchemaOptions,
 > = ADDITIONAL_PROPERTIES_SCHEMA extends boolean
   ? PatternProps<PATTERN_PROPERTY_SCHEMAS, OPTIONS>

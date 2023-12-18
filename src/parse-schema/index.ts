@@ -32,7 +32,7 @@ export type ParseSchemaOptions = {
    */
   parseIfThenElseKeywords: boolean;
   /**
-   * The initial schema provided to ParseSchema
+   * The initial schema provided to `ParseSchema`
    */
   rootSchema: JSONSchema7;
   /**
@@ -57,42 +57,42 @@ export type ParseSchema<
   RESULT = JSONSchema7 extends SCHEMA
     ? M.Any
     : SCHEMA extends true | string
-    ? M.Any
-    : SCHEMA extends false
-    ? M.Never
-    : SCHEMA extends NullableSchema
-    ? ParseNullableSchema<SCHEMA, OPTIONS>
-    : SCHEMA extends ReferencingSchema
-    ? ParseReferenceSchema<SCHEMA, OPTIONS>
-    : And<
-        DoesExtend<OPTIONS["parseIfThenElseKeywords"], true>,
-        DoesExtend<SCHEMA, IfThenElseSchema>
-      > extends true
-    ? SCHEMA extends IfThenElseSchema
-      ? ParseIfThenElseSchema<SCHEMA, OPTIONS>
-      : never
-    : And<
-        DoesExtend<OPTIONS["parseNotKeyword"], true>,
-        DoesExtend<SCHEMA, NotSchema>
-      > extends true
-    ? SCHEMA extends NotSchema
-      ? ParseNotSchema<SCHEMA, OPTIONS>
-      : never
-    : SCHEMA extends AllOfSchema
-    ? ParseAllOfSchema<SCHEMA, OPTIONS>
-    : SCHEMA extends OneOfSchema
-    ? ParseOneOfSchema<SCHEMA, OPTIONS>
-    : SCHEMA extends AnyOfSchema
-    ? ParseAnyOfSchema<SCHEMA, OPTIONS>
-    : SCHEMA extends EnumSchema
-    ? ParseEnumSchema<SCHEMA, OPTIONS>
-    : SCHEMA extends ConstSchema
-    ? ParseConstSchema<SCHEMA, OPTIONS>
-    : SCHEMA extends MultipleTypesSchema
-    ? ParseMultipleTypesSchema<SCHEMA, OPTIONS>
-    : SCHEMA extends SingleTypeSchema
-    ? ParseSingleTypeSchema<SCHEMA, OPTIONS>
-    : M.Any,
+      ? M.Any
+      : SCHEMA extends false
+        ? M.Never
+        : SCHEMA extends NullableSchema
+          ? ParseNullableSchema<SCHEMA, OPTIONS>
+          : SCHEMA extends ReferencingSchema
+            ? ParseReferenceSchema<SCHEMA, OPTIONS>
+            : And<
+                  DoesExtend<OPTIONS["parseIfThenElseKeywords"], true>,
+                  DoesExtend<SCHEMA, IfThenElseSchema>
+                > extends true
+              ? SCHEMA extends IfThenElseSchema
+                ? ParseIfThenElseSchema<SCHEMA, OPTIONS>
+                : never
+              : And<
+                    DoesExtend<OPTIONS["parseNotKeyword"], true>,
+                    DoesExtend<SCHEMA, NotSchema>
+                  > extends true
+                ? SCHEMA extends NotSchema
+                  ? ParseNotSchema<SCHEMA, OPTIONS>
+                  : never
+                : SCHEMA extends AllOfSchema
+                  ? ParseAllOfSchema<SCHEMA, OPTIONS>
+                  : SCHEMA extends OneOfSchema
+                    ? ParseOneOfSchema<SCHEMA, OPTIONS>
+                    : SCHEMA extends AnyOfSchema
+                      ? ParseAnyOfSchema<SCHEMA, OPTIONS>
+                      : SCHEMA extends EnumSchema
+                        ? ParseEnumSchema<SCHEMA, OPTIONS>
+                        : SCHEMA extends ConstSchema
+                          ? ParseConstSchema<SCHEMA, OPTIONS>
+                          : SCHEMA extends MultipleTypesSchema
+                            ? ParseMultipleTypesSchema<SCHEMA, OPTIONS>
+                            : SCHEMA extends SingleTypeSchema
+                              ? ParseSingleTypeSchema<SCHEMA, OPTIONS>
+                              : M.Any,
 > = OPTIONS extends { deserialize: DeserializationPattern[] }
   ? M.$Intersect<DeserializeSchema<SCHEMA, OPTIONS>, RESULT>
   : RESULT;

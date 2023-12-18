@@ -5,14 +5,14 @@ import type { JSONSchema7 } from "~/definitions";
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 
 /**
- * JSON schemas of nullable types
+ * JSON schemas of any type or `null`
  * @example
  * const nullableSchema = {
  *  type: "string",
  *  nullable: true
  * }
  */
-export type NullableSchema = JSONSchema7 & { nullable: boolean };
+export type NullableSchema = JSONSchema7 & Readonly<{ nullable: boolean }>;
 
 /**
  * Parses a nullable JSON schema to a meta-type.
@@ -26,6 +26,6 @@ export type ParseNullableSchema<
   NULLABLE_SCHEMA extends NullableSchema,
   OPTIONS extends ParseSchemaOptions,
   PARSED_REST_SCHEMA = ParseSchema<Omit<NULLABLE_SCHEMA, "nullable">, OPTIONS>,
-> = NULLABLE_SCHEMA extends { nullable: true }
+> = NULLABLE_SCHEMA extends Readonly<{ nullable: true }>
   ? M.$Union<M.Primitive<null> | PARSED_REST_SCHEMA>
   : PARSED_REST_SCHEMA;
