@@ -30,13 +30,13 @@ export type ParseExternalReferenceSchema<
       SUB_PATH
     >
   : OPTIONS extends { rootSchema: IdSchema }
-  ? ParseExternalReferenceWithoutDirectorySchema<
-      Omit<REF_SCHEMA, "$ref">,
-      OPTIONS,
-      EXTERNAL_REFERENCE_ID,
-      SUB_PATH
-    >
-  : M.Never;
+    ? ParseExternalReferenceWithoutDirectorySchema<
+        Omit<REF_SCHEMA, "$ref">,
+        OPTIONS,
+        EXTERNAL_REFERENCE_ID,
+        SUB_PATH
+      >
+    : M.Never;
 
 /**
  * Returns the directory of a reference.

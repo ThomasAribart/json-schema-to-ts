@@ -1,19 +1,16 @@
 import type { M } from "ts-algebra";
 
 import type {
+  ExtendedJSONSchema7,
   FromExtendedSchemaOptions,
   FromSchemaDefaultOptions,
   FromSchemaOptions,
+  JSONSchema7,
   JSONSchema7Extension,
   UnextendJSONSchema7,
-  ExtendedJSONSchema7 as WritableExtendedJSONSchema7,
-  ExtendedJSONSchema7Reference as WritableExtendedJSONSchema7Reference,
-  JSONSchema7 as WritableJSONSchema7,
-  JSONSchema7Reference as WritableJSONSchema7Reference,
 } from "./definitions";
 import type { ParseOptions } from "./parse-options";
 import type { ParseSchema } from "./parse-schema";
-import type { Readonly, Writable } from "./type-utils";
 
 export type {
   DeserializationPattern,
@@ -30,40 +27,14 @@ export {
 } from "./utils";
 
 /**
- * Unwidened V7 JSON schema (e.g. defined with the `as const` statement)
- */
-export type JSONSchema7 = WritableJSONSchema7 | Readonly<WritableJSONSchema7>;
-
-/**
- * Unwidened extended V7 JSON schema (e.g. defined with the `as const` statement)
- */
-export type ExtendedJSONSchema7<EXTENSION extends JSONSchema7Extension> =
-  | WritableExtendedJSONSchema7<EXTENSION>
-  | Readonly<WritableExtendedJSONSchema7<EXTENSION>>;
-
-/**
- * Unwidened V7 JSON schema reference (e.g. defined with the `as const` statement)
- */
-export type JSONSchema7Reference =
-  | WritableJSONSchema7Reference
-  | Readonly<WritableJSONSchema7Reference>;
-
-/**
- * Unwidened extended V7 JSON schema reference (e.g. defined with the `as const` statement)
- */
-export type ExtendedJSONSchema7Reference<
-  EXTENSION extends JSONSchema7Extension,
-> =
-  | WritableExtendedJSONSchema7Reference<EXTENSION>
-  | Readonly<WritableExtendedJSONSchema7Reference<EXTENSION>>;
-
-/**
- * Unwidened JSON schema (e.g. defined with the `as const` statement)
+ * JSON Schema type constraint
  */
 export type JSONSchema = JSONSchema7;
 
 /**
- * Unwidened extended JSON schema (e.g. defined with the `as const` statement)
+ * Extended JSON Schema type constraint
+ * @param EXTENSION JSONSchema7Extension
+ * @returns Type
  */
 export type ExtendedJSONSchema<EXTENSION extends JSONSchema7Extension> =
   ExtendedJSONSchema7<EXTENSION>;
@@ -75,15 +46,7 @@ export type ExtendedJSONSchema<EXTENSION extends JSONSchema7Extension> =
 export type FromSchema<
   SCHEMA extends JSONSchema,
   OPTIONS extends FromSchemaOptions = FromSchemaDefaultOptions,
-  WRITABLE_SCHEMA extends WritableJSONSchema7 = SCHEMA extends Record<
-    string | number | symbol,
-    unknown
-  >
-    ? Writable<SCHEMA>
-    : SCHEMA,
-> = M.$Resolve<
-  ParseSchema<WRITABLE_SCHEMA, ParseOptions<WRITABLE_SCHEMA, OPTIONS>>
->;
+> = M.$Resolve<ParseSchema<SCHEMA, ParseOptions<SCHEMA, OPTIONS>>>;
 
 /**
  * Given an extended JSON schema defined with the `as const` statement, infers the type of valid instances
@@ -92,7 +55,8 @@ export type FromSchema<
 export type FromExtendedSchema<
   EXTENSION extends JSONSchema7Extension,
   SCHEMA extends ExtendedJSONSchema<EXTENSION>,
-  OPTIONS extends FromExtendedSchemaOptions<EXTENSION> = FromSchemaDefaultOptions,
+  OPTIONS extends
+    FromExtendedSchemaOptions<EXTENSION> = FromSchemaDefaultOptions,
   UNEXTENDED_SCHEMA = UnextendJSONSchema7<EXTENSION, SCHEMA>,
 > = UNEXTENDED_SCHEMA extends JSONSchema
   ? FromSchema<UNEXTENDED_SCHEMA, OPTIONS>

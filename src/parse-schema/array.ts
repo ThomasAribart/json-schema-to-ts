@@ -19,7 +19,7 @@ import type { ParseSchema, ParseSchemaOptions } from "./index";
  *  items: [{ type: "string" }]
  * }
  */
-export type ArrayOrTupleSchema = JSONSchema7 & { type: "array" };
+export type ArrayOrTupleSchema = JSONSchema7 & Readonly<{ type: "array" }>;
 
 /**
  * JSON schemas of arrays
@@ -29,7 +29,8 @@ export type ArrayOrTupleSchema = JSONSchema7 & { type: "array" };
  *  items: { type: "string" }
  * }
  */
-type ArraySchema = JSONSchema7 & { type: "array"; items: JSONSchema7 };
+type ArraySchema = JSONSchema7 &
+  Readonly<{ type: "array"; items: JSONSchema7 }>;
 
 /**
  * JSON schemas of tuples
@@ -39,7 +40,8 @@ type ArraySchema = JSONSchema7 & { type: "array"; items: JSONSchema7 };
  *  items: [{ type: "string" }]
  * }
  */
-type TupleSchema = JSONSchema7 & { type: "array"; items: JSONSchema7[] };
+type TupleSchema = JSONSchema7 &
+  Readonly<{ type: "array"; items: readonly JSONSchema7[] }>;
 
 /**
  * Recursively parses an array or tuple JSON schema to a meta-type.
@@ -55,14 +57,14 @@ export type ParseArrayOrTupleSchema<
 > = ARRAY_OR_TUPLE_SCHEMA extends ArraySchema
   ? M.$Array<ParseSchema<ARRAY_OR_TUPLE_SCHEMA["items"], OPTIONS>>
   : ARRAY_OR_TUPLE_SCHEMA extends TupleSchema
-  ? M.$Union<
-      ApplyMinMaxAndAdditionalItems<
-        ParseTupleItems<ARRAY_OR_TUPLE_SCHEMA["items"], OPTIONS>,
-        ARRAY_OR_TUPLE_SCHEMA,
-        OPTIONS
+    ? M.$Union<
+        ApplyMinMaxAndAdditionalItems<
+          ParseTupleItems<ARRAY_OR_TUPLE_SCHEMA["items"], OPTIONS>,
+          ARRAY_OR_TUPLE_SCHEMA,
+          OPTIONS
+        >
       >
-    >
-  : M.$Array;
+    : M.$Array;
 
 /**
  * Parses the items of a tuple JSON schema to a meta-type.
@@ -71,12 +73,15 @@ export type ParseArrayOrTupleSchema<
  * @returns Meta-type[]
  */
 type ParseTupleItems<
-  ITEM_SCHEMAS extends JSONSchema7[],
+  ITEM_SCHEMAS extends readonly JSONSchema7[],
   OPTIONS extends ParseSchemaOptions,
-> = ITEM_SCHEMAS extends [infer ITEM_SCHEMAS_HEAD, ...infer ITEM_SCHEMAS_TAIL]
+> = ITEM_SCHEMAS extends readonly [
+  infer ITEM_SCHEMAS_HEAD,
+  ...infer ITEM_SCHEMAS_TAIL,
+]
   ? // TODO increase TS version and use "extends" in Array https://devblogs.microsoft.com/typescript/announcing-typescript-4-8/#improved-inference-for-infer-types-in-template-string-types
     ITEM_SCHEMAS_HEAD extends JSONSchema7
-    ? ITEM_SCHEMAS_TAIL extends JSONSchema7[]
+    ? ITEM_SCHEMAS_TAIL extends readonly JSONSchema7[]
       ? [
           ParseSchema<ITEM_SCHEMAS_HEAD, OPTIONS>,
           ...ParseTupleItems<ITEM_SCHEMAS_TAIL, OPTIONS>,
@@ -100,12 +105,14 @@ type ApplyMinMaxAndAdditionalItems<
 > = ApplyAdditionalItems<
   ApplyMinMax<
     PARSED_ITEM_SCHEMAS,
-    ROOT_SCHEMA extends { minItems: number } ? ROOT_SCHEMA["minItems"] : 0,
-    ROOT_SCHEMA extends { maxItems: number }
+    ROOT_SCHEMA extends Readonly<{ minItems: number }>
+      ? ROOT_SCHEMA["minItems"]
+      : 0,
+    ROOT_SCHEMA extends Readonly<{ maxItems: number }>
       ? ROOT_SCHEMA["maxItems"]
       : undefined
   >,
-  ROOT_SCHEMA extends { additionalItems: JSONSchema7 }
+  ROOT_SCHEMA extends Readonly<{ additionalItems: JSONSchema7 }>
     ? ROOT_SCHEMA["additionalItems"]
     : true,
   OPTIONS
@@ -163,12 +170,12 @@ type ApplyMinMax<
       result: MAX extends undefined
         ? RESULT | M.$Tuple<RECURSED_PARSED_ITEM_SCHEMAS>
         : HAS_ENCOUNTERED_MAX extends true
-        ? RESULT | M.$Tuple<RECURSED_PARSED_ITEM_SCHEMAS>
-        : MAX extends RECURSED_PARSED_ITEM_SCHEMAS["length"]
-        ? M.$Tuple<RECURSED_PARSED_ITEM_SCHEMAS>
-        : IsLongerThan<Tail<RECURSED_PARSED_ITEM_SCHEMAS>, MAX> extends true
-        ? never
-        : RESULT | M.$Tuple<RECURSED_PARSED_ITEM_SCHEMAS>;
+          ? RESULT | M.$Tuple<RECURSED_PARSED_ITEM_SCHEMAS>
+          : MAX extends RECURSED_PARSED_ITEM_SCHEMAS["length"]
+            ? M.$Tuple<RECURSED_PARSED_ITEM_SCHEMAS>
+            : IsLongerThan<Tail<RECURSED_PARSED_ITEM_SCHEMAS>, MAX> extends true
+              ? never
+              : RESULT | M.$Tuple<RECURSED_PARSED_ITEM_SCHEMAS>;
       hasEncounteredMin: DoesExtend<
         MIN,
         RECURSED_PARSED_ITEM_SCHEMAS["length"]
@@ -176,8 +183,8 @@ type ApplyMinMax<
       hasEncounteredMax: HAS_ENCOUNTERED_MAX extends true
         ? true
         : MAX extends RECURSED_PARSED_ITEM_SCHEMAS["length"]
-        ? true
-        : IsLongerThan<Tail<RECURSED_PARSED_ITEM_SCHEMAS>, MAX>;
+          ? true
+          : IsLongerThan<Tail<RECURSED_PARSED_ITEM_SCHEMAS>, MAX>;
       completeTuple: INITIAL_PARSED_ITEM_SCHEMAS;
     };
 
@@ -195,11 +202,11 @@ type IsLongerThan<
 > = LENGTH extends undefined
   ? false
   : TUPLE["length"] extends LENGTH
-  ? true
-  : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  TUPLE extends [any, ...infer TUPLE_TAIL]
-  ? IsLongerThan<TUPLE_TAIL, LENGTH>
-  : RESULT;
+    ? true
+    : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      TUPLE extends [any, ...infer TUPLE_TAIL]
+      ? IsLongerThan<TUPLE_TAIL, LENGTH>
+      : RESULT;
 
 /**
  * Append `additionalItems` if needed, and filter some `minItems` & `maxItems` edge cases.
@@ -226,29 +233,29 @@ type ApplyAdditionalItems<
       // Here, only possibility is that `maxItems > minItems` which means non-representable type
       M.Never
   : ADDITIONAL_ITEMS_SCHEMA extends false
-  ? APPLY_MIN_MAX_RESULT extends { hasEncounteredMin: true }
-    ? APPLY_MIN_MAX_RESULT["result"]
-    : // NOTE: Min MUST have been encountered as it is defaulted to 0.
-      // Here, only possibility is that `minItems > items.length` which means non-representable type as `additionalItems` are denied
-      M.Never
-  : ADDITIONAL_ITEMS_SCHEMA extends true
-  ? APPLY_MIN_MAX_RESULT extends { hasEncounteredMin: true }
-    ?
-        | APPLY_MIN_MAX_RESULT["result"]
-        | M.$Tuple<APPLY_MIN_MAX_RESULT["completeTuple"], M.Any>
-    : // NOTE: Min MUST have been encountered as it is defaulted to 0.
-      // Here, only possibility is that `minItems > items.length` so we can just append `M.Any` to complete tuple
-      M.$Tuple<APPLY_MIN_MAX_RESULT["completeTuple"], M.Any>
-  : APPLY_MIN_MAX_RESULT extends { hasEncounteredMin: true }
-  ?
-      | APPLY_MIN_MAX_RESULT["result"]
-      | M.$Tuple<
-          APPLY_MIN_MAX_RESULT["completeTuple"],
-          ParseSchema<ADDITIONAL_ITEMS_SCHEMA, OPTIONS>
-        >
-  : // NOTE: Min MUST have been encountered as it is defaulted to 0.
-    // Here, only possibility is that `minItems > items.length` so we can just append parsed schema to complete tuple
-    M.$Tuple<
-      APPLY_MIN_MAX_RESULT["completeTuple"],
-      ParseSchema<ADDITIONAL_ITEMS_SCHEMA, OPTIONS>
-    >;
+    ? APPLY_MIN_MAX_RESULT extends { hasEncounteredMin: true }
+      ? APPLY_MIN_MAX_RESULT["result"]
+      : // NOTE: Min MUST have been encountered as it is defaulted to 0.
+        // Here, only possibility is that `minItems > items.length` which means non-representable type as `additionalItems` are denied
+        M.Never
+    : ADDITIONAL_ITEMS_SCHEMA extends true
+      ? APPLY_MIN_MAX_RESULT extends { hasEncounteredMin: true }
+        ?
+            | APPLY_MIN_MAX_RESULT["result"]
+            | M.$Tuple<APPLY_MIN_MAX_RESULT["completeTuple"], M.Any>
+        : // NOTE: Min MUST have been encountered as it is defaulted to 0.
+          // Here, only possibility is that `minItems > items.length` so we can just append `M.Any` to complete tuple
+          M.$Tuple<APPLY_MIN_MAX_RESULT["completeTuple"], M.Any>
+      : APPLY_MIN_MAX_RESULT extends { hasEncounteredMin: true }
+        ?
+            | APPLY_MIN_MAX_RESULT["result"]
+            | M.$Tuple<
+                APPLY_MIN_MAX_RESULT["completeTuple"],
+                ParseSchema<ADDITIONAL_ITEMS_SCHEMA, OPTIONS>
+              >
+        : // NOTE: Min MUST have been encountered as it is defaulted to 0.
+          // Here, only possibility is that `minItems > items.length` so we can just append parsed schema to complete tuple
+          M.$Tuple<
+            APPLY_MIN_MAX_RESULT["completeTuple"],
+            ParseSchema<ADDITIONAL_ITEMS_SCHEMA, OPTIONS>
+          >;

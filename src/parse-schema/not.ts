@@ -15,9 +15,7 @@ import type { MergeSubSchema } from "./utils";
  *  }
  * }
  */
-export type NotSchema = JSONSchema7 & {
-  not: JSONSchema7;
-};
+export type NotSchema = JSONSchema7 & Readonly<{ not: JSONSchema7 }>;
 
 /**
  * Any possible meta-type

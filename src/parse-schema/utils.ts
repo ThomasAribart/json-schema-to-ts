@@ -1,17 +1,16 @@
-import type { JSONSchema7 } from "~/definitions";
+import { JSONSchema7 } from "~/definitions";
 
 /**
  * Resets `additionalItems` property from a sub-schema before merging it to a parent schema
  */
-type RemoveInvalidAdditionalItems<SCHEMA extends JSONSchema7> = SCHEMA extends {
-  items: JSONSchema7 | JSONSchema7[];
-}
-  ? SCHEMA extends { additionalItems: JSONSchema7 }
-    ? SCHEMA
-    : SCHEMA & { additionalItems: true }
-  : SCHEMA extends boolean
-  ? SCHEMA
-  : Omit<SCHEMA, "additionalItems">;
+type RemoveInvalidAdditionalItems<SCHEMA extends JSONSchema7> =
+  SCHEMA extends Readonly<{ items: JSONSchema7 | readonly JSONSchema7[] }>
+    ? SCHEMA extends Readonly<{ additionalItems: JSONSchema7 }>
+      ? SCHEMA
+      : SCHEMA & Readonly<{ additionalItems: true }>
+    : SCHEMA extends boolean
+      ? SCHEMA
+      : Omit<SCHEMA, "additionalItems">;
 
 /**
  * Resets parent schema properties when merging a sub-schema into a parent schema
@@ -33,7 +32,8 @@ type ParentSchemaOverrides = {
 export type MergeSubSchema<
   PARENT_SCHEMA extends JSONSchema7,
   SUB_SCHEMA extends JSONSchema7,
-  CLEANED_SUB_SCHEMA extends JSONSchema7 = RemoveInvalidAdditionalItems<SUB_SCHEMA>,
+  CLEANED_SUB_SCHEMA extends
+    JSONSchema7 = RemoveInvalidAdditionalItems<SUB_SCHEMA>,
   DEFAULTED_SUB_SCHEMA extends JSONSchema7 = Omit<
     ParentSchemaOverrides,
     keyof CLEANED_SUB_SCHEMA

@@ -12,6 +12,7 @@ const tupleWithAdditionalItemsSchema = {
 type ReceivedTupleWithAdditionalItems = FromSchema<
   typeof tupleWithAdditionalItemsSchema
 >;
+
 type ExpectedTupleWithAdditionalItems =
   | []
   | [boolean]

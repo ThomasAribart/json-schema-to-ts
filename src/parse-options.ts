@@ -3,9 +3,8 @@ import type {
   FromSchemaDefaultOptions,
   FromSchemaOptions,
   JSONSchema7,
+  JSONSchema7Reference,
 } from "./definitions";
-import type { JSONSchema7Reference } from "./index";
-import type { Writable } from "./type-utils";
 
 /**
  * Index schema references by their $id property and make them writable.
@@ -13,9 +12,9 @@ import type { Writable } from "./type-utils";
  * @returns Record<string, JSONSchema7Reference>
  */
 export type IndexReferencesById<
-  SCHEMA_REFERENCES extends JSONSchema7Reference[],
+  SCHEMA_REFERENCES extends readonly JSONSchema7Reference[],
 > = {
-  [REF_SCHEMA in SCHEMA_REFERENCES[number] as REF_SCHEMA["$id"]]: Writable<REF_SCHEMA>;
+  [REF_SCHEMA in SCHEMA_REFERENCES[number] as REF_SCHEMA["$id"]]: REF_SCHEMA;
 };
 
 /**

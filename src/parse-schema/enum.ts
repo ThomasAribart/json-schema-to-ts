@@ -1,6 +1,7 @@
 import type { M } from "ts-algebra";
 
 import type { JSONSchema7 } from "~/definitions";
+import type { Writable } from "~/type-utils";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 
@@ -11,7 +12,7 @@ import type { ParseSchema, ParseSchemaOptions } from "./index";
  *  enum: ["foo", "bar"]
  * }
  */
-export type EnumSchema = JSONSchema7 & { enum: unknown[] };
+export type EnumSchema = JSONSchema7 & Readonly<{ enum: readonly unknown[] }>;
 
 /**
  * Recursively parses an enum JSON schema to a meta-type.
@@ -36,5 +37,5 @@ export type ParseEnumSchema<
  * @returns Meta-type
  */
 type ParseEnum<ENUM_SCHEMA extends EnumSchema> = M.Enum<
-  ENUM_SCHEMA["enum"][number]
+  Writable<ENUM_SCHEMA["enum"][number]>
 >;

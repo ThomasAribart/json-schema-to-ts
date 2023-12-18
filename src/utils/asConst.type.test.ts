@@ -17,10 +17,8 @@ const assertArray: A.Equals<typeof array, [1, "string", true]> = 1;
 assertArray;
 
 const object = asConst({ some: ["object", 1, "string"] });
-const assertObject: A.Equals<
-  typeof object,
-  { some: ["object", 1, "string"] }
-> = 1;
+const assertObject: A.Equals<typeof object, { some: ["object", 1, "string"] }> =
+  1;
 assertObject;
 
 const nestedObject = asConst({

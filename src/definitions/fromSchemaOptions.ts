@@ -1,4 +1,4 @@
-import type { JSONSchema7Reference } from "~/index";
+import type { JSONSchema7Reference } from "~/definitions";
 
 import type { DeserializationPattern } from "./deserializationPattern";
 import type {
@@ -15,6 +15,7 @@ export type FromSchemaOptions = {
   references?: JSONSchema7Reference[] | false;
   deserialize?: DeserializationPattern[] | false;
 };
+
 /**
  * FromExtendedSchema options constraints
  */

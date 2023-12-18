@@ -15,7 +15,8 @@ import type { MergeSubSchema } from "./utils";
  *  ]
  * }
  */
-export type AnyOfSchema = JSONSchema7 & { anyOf: JSONSchema7[] };
+export type AnyOfSchema = JSONSchema7 &
+  Readonly<{ anyOf: readonly JSONSchema7[] }>;
 
 /**
  * Recursively parses a JSON schema union to a meta-type.
@@ -40,14 +41,17 @@ export type ParseAnyOfSchema<
  * @returns Meta-type
  */
 type RecurseOnAnyOfSchema<
-  SUB_SCHEMAS extends JSONSchema7[],
+  SUB_SCHEMAS extends readonly JSONSchema7[],
   ROOT_ANY_OF_SCHEMA extends AnyOfSchema,
   OPTIONS extends ParseSchemaOptions,
   RESULT = never,
-> = SUB_SCHEMAS extends [infer SUB_SCHEMAS_HEAD, ...infer SUB_SCHEMAS_TAIL]
+> = SUB_SCHEMAS extends readonly [
+  infer SUB_SCHEMAS_HEAD,
+  ...infer SUB_SCHEMAS_TAIL,
+]
   ? // TODO increase TS version and use "extends" in Array https://devblogs.microsoft.com/typescript/announcing-typescript-4-8/#improved-inference-for-infer-types-in-template-string-types
     SUB_SCHEMAS_HEAD extends JSONSchema7
-    ? SUB_SCHEMAS_TAIL extends JSONSchema7[]
+    ? SUB_SCHEMAS_TAIL extends readonly JSONSchema7[]
       ? RecurseOnAnyOfSchema<
           SUB_SCHEMAS_TAIL,
           ROOT_ANY_OF_SCHEMA,
