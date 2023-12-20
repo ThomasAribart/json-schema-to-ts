@@ -94,18 +94,21 @@ type UnextendJSONSchema7<EXTENSION extends JSONSchema7Extension, EXTENDED_SCHEMA
 type FromSchemaOptions = {
     parseNotKeyword?: boolean;
     parseIfThenElseKeywords?: boolean;
+    keepDefaultedPropertiesOptional?: boolean;
     references?: JSONSchema7Reference[] | false;
     deserialize?: DeserializationPattern[] | false;
 };
 type FromExtendedSchemaOptions<EXTENSION extends JSONSchema7Extension> = {
     parseNotKeyword?: boolean;
     parseIfThenElseKeywords?: boolean;
+    keepDefaultedPropertiesOptional?: boolean;
     references?: ExtendedJSONSchema7Reference<EXTENSION>[] | false;
     deserialize?: DeserializationPattern[] | false;
 };
 type FromSchemaDefaultOptions = {
     parseNotKeyword: false;
     parseIfThenElseKeywords: false;
+    keepDefaultedPropertiesOptional: false;
     references: false;
     deserialize: false;
 };
@@ -116,6 +119,7 @@ type IndexReferencesById<SCHEMA_REFERENCES extends readonly JSONSchema7Reference
 type ParseOptions<ROOT_SCHEMA extends JSONSchema7, OPTIONS extends FromSchemaOptions> = {
     parseNotKeyword: OPTIONS["parseNotKeyword"] extends boolean ? OPTIONS["parseNotKeyword"] : FromSchemaDefaultOptions["parseNotKeyword"];
     parseIfThenElseKeywords: OPTIONS["parseIfThenElseKeywords"] extends boolean ? OPTIONS["parseIfThenElseKeywords"] : FromSchemaDefaultOptions["parseIfThenElseKeywords"];
+    keepDefaultedPropertiesOptional: OPTIONS["keepDefaultedPropertiesOptional"] extends boolean ? OPTIONS["keepDefaultedPropertiesOptional"] : FromSchemaDefaultOptions["keepDefaultedPropertiesOptional"];
     rootSchema: ROOT_SCHEMA;
     references: OPTIONS["references"] extends JSONSchema7Reference[] ? IndexReferencesById<OPTIONS["references"]> : {};
     deserialize: OPTIONS["deserialize"] extends DeserializationPattern[] | false ? OPTIONS["deserialize"] : FromSchemaDefaultOptions["deserialize"];
@@ -326,10 +330,16 @@ type ParseObjectSchema<OBJECT_SCHEMA extends ObjectSchema, OPTIONS extends Parse
     properties: Readonly<Record<string, JSONSchema7>>;
 }> ? M.$Object<{
     [KEY in keyof OBJECT_SCHEMA["properties"]]: ParseSchema<OBJECT_SCHEMA["properties"][KEY], OPTIONS>;
-}, GetRequired<OBJECT_SCHEMA>, GetOpenProps<OBJECT_SCHEMA, OPTIONS>> : M.$Object<{}, GetRequired<OBJECT_SCHEMA>, GetOpenProps<OBJECT_SCHEMA, OPTIONS>>;
-type GetRequired<OBJECT_SCHEMA extends ObjectSchema> = OBJECT_SCHEMA extends Readonly<{
+}, GetRequired<OBJECT_SCHEMA, OPTIONS>, GetOpenProps<OBJECT_SCHEMA, OPTIONS>> : M.$Object<{}, GetRequired<OBJECT_SCHEMA, OPTIONS>, GetOpenProps<OBJECT_SCHEMA, OPTIONS>>;
+type GetRequired<OBJECT_SCHEMA extends ObjectSchema, OPTIONS extends ParseSchemaOptions> = (OBJECT_SCHEMA extends Readonly<{
     required: ReadonlyArray<string>;
-}> ? OBJECT_SCHEMA["required"][number] : never;
+}> ? OBJECT_SCHEMA["required"][number] : never) | (OPTIONS["keepDefaultedPropertiesOptional"] extends true ? never : OBJECT_SCHEMA extends Readonly<{
+    properties: Readonly<Record<string, JSONSchema7>>;
+}> ? {
+    [KEY in keyof OBJECT_SCHEMA["properties"] & string]: OBJECT_SCHEMA["properties"][KEY] extends Readonly<{
+        default: unknown;
+    }> ? KEY : never;
+}[keyof OBJECT_SCHEMA["properties"] & string] : never);
 type GetOpenProps<OBJECT_SCHEMA extends ObjectSchema, OPTIONS extends ParseSchemaOptions> = OBJECT_SCHEMA extends Readonly<{
     additionalProperties: JSONSchema7;
 }> ? OBJECT_SCHEMA extends Readonly<{
@@ -362,6 +372,7 @@ type ParseSingleTypeSchema<SINGLE_TYPE_SCHEMA extends SingleTypeSchema, OPTIONS 
 type ParseSchemaOptions = {
     parseNotKeyword: boolean;
     parseIfThenElseKeywords: boolean;
+    keepDefaultedPropertiesOptional: boolean;
     rootSchema: JSONSchema7;
     references: Record<string, JSONSchema7>;
     deserialize: DeserializationPattern[] | false;
