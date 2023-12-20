@@ -29,6 +29,7 @@ type ReceivedOptions = ParseOptions<RootSchema, { references: AllReferences }>;
 type ExpectedOptions = {
   parseNotKeyword: FromSchemaDefaultOptions["parseNotKeyword"];
   parseIfThenElseKeywords: FromSchemaDefaultOptions["parseIfThenElseKeywords"];
+  keepDefaultedPropertiesOptional: FromSchemaDefaultOptions["keepDefaultedPropertiesOptional"];
   deserialize: FromSchemaDefaultOptions["deserialize"];
   rootSchema: RootSchema;
   references: IndexReferencesById<AllReferences>;

@@ -12,6 +12,7 @@ import type {
 export type FromSchemaOptions = {
   parseNotKeyword?: boolean;
   parseIfThenElseKeywords?: boolean;
+  keepDefaultedPropertiesOptional?: boolean;
   references?: JSONSchema7Reference[] | false;
   deserialize?: DeserializationPattern[] | false;
 };
@@ -23,6 +24,7 @@ export type FromExtendedSchemaOptions<EXTENSION extends JSONSchema7Extension> =
   {
     parseNotKeyword?: boolean;
     parseIfThenElseKeywords?: boolean;
+    keepDefaultedPropertiesOptional?: boolean;
     references?: ExtendedJSONSchema7Reference<EXTENSION>[] | false;
     deserialize?: DeserializationPattern[] | false;
   };
@@ -33,6 +35,7 @@ export type FromExtendedSchemaOptions<EXTENSION extends JSONSchema7Extension> =
 export type FromSchemaDefaultOptions = {
   parseNotKeyword: false;
   parseIfThenElseKeywords: false;
+  keepDefaultedPropertiesOptional: false;
   references: false;
   deserialize: false;
 };

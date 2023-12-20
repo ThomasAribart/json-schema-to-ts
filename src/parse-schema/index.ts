@@ -32,6 +32,10 @@ export type ParseSchemaOptions = {
    */
   parseIfThenElseKeywords: boolean;
   /**
+   * Wether to keep object defaulted properties optional or not (false by default)
+   */
+  keepDefaultedPropertiesOptional: boolean;
+  /**
    * The initial schema provided to `ParseSchema`
    */
   rootSchema: JSONSchema7;

@@ -33,6 +33,9 @@ export type ParseOptions<
   parseIfThenElseKeywords: OPTIONS["parseIfThenElseKeywords"] extends boolean
     ? OPTIONS["parseIfThenElseKeywords"]
     : FromSchemaDefaultOptions["parseIfThenElseKeywords"];
+  keepDefaultedPropertiesOptional: OPTIONS["keepDefaultedPropertiesOptional"] extends boolean
+    ? OPTIONS["keepDefaultedPropertiesOptional"]
+    : FromSchemaDefaultOptions["keepDefaultedPropertiesOptional"];
   rootSchema: ROOT_SCHEMA;
   references: OPTIONS["references"] extends JSONSchema7Reference[]
     ? IndexReferencesById<OPTIONS["references"]>
