@@ -77,3 +77,36 @@ type AssertObjectWithTypedAdditionalProperties = A.Equals<
 >;
 const assertObjectWithTypedAdditionalProperties: AssertObjectWithTypedAdditionalProperties = 1;
 assertObjectWithTypedAdditionalProperties;
+
+// Defaulted property
+
+const objectWithDefaultedPropertySchema = {
+  type: "object",
+  properties: {
+    foo: { type: "string", default: "bar" },
+  },
+  additionalProperties: false,
+} as const;
+
+type ReceivedObjectWithDefaultedProperty = FromSchema<
+  typeof objectWithDefaultedPropertySchema
+>;
+type ExpectedObjectWithDefaultedProperty = { foo: string };
+type AssertObjectWithDefaultedProperty = A.Equals<
+  ReceivedObjectWithDefaultedProperty,
+  ExpectedObjectWithDefaultedProperty
+>;
+const assertObjectWithDefaultedProperty: AssertObjectWithDefaultedProperty = 1;
+assertObjectWithDefaultedProperty;
+
+type ReceivedObjectWithDefaultedProperty2 = FromSchema<
+  typeof objectWithDefaultedPropertySchema,
+  { keepDefaultedPropertiesOptional: true }
+>;
+type ExpectedObjectWithDefaultedProperty2 = { foo?: string };
+type AssertObjectWithDefaultedProperty2 = A.Equals<
+  ReceivedObjectWithDefaultedProperty2,
+  ExpectedObjectWithDefaultedProperty2
+>;
+const assertObjectWithDefaultedProperty2: AssertObjectWithDefaultedProperty2 = 1;
+assertObjectWithDefaultedProperty2;

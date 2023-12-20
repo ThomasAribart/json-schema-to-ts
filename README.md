@@ -339,6 +339,27 @@ type Object = FromSchema<typeof objectSchema>;
 // => { [x: string]: unknown; foo: string; bar?: number; }
 ```
 
+Defaulted properties (even optional ones) will be set as required in the resulting type. You can turn off this behavior by setting the `keepDefaultedPropertiesOptional` option to `true`:
+
+```typescript
+const defaultedProp = {
+  type: "object",
+  properties: {
+    foo: { type: "string", default: "bar" },
+  },
+  additionalProperties: false,
+} as const;
+
+type Object = FromSchema<typeof defaultedProp>;
+// => { foo: string; }
+
+type Object = FromSchema<
+  typeof defaultedProp,
+  { keepDefaultedPropertiesOptional: true }
+>;
+// => { foo?: string; }
+```
+
 `FromSchema` partially supports the `additionalProperties` and `patternProperties` keywords:
 
 - `additionalProperties` can be used to deny additional properties.

@@ -39,12 +39,12 @@ export type ParseObjectSchema<
           OPTIONS
         >;
       },
-      GetRequired<OBJECT_SCHEMA>,
+      GetRequired<OBJECT_SCHEMA, OPTIONS>,
       GetOpenProps<OBJECT_SCHEMA, OPTIONS>
     >
   : M.$Object<
       {},
-      GetRequired<OBJECT_SCHEMA>,
+      GetRequired<OBJECT_SCHEMA, OPTIONS>,
       GetOpenProps<OBJECT_SCHEMA, OPTIONS>
     >;
 
@@ -53,10 +53,27 @@ export type ParseObjectSchema<
  * @param OBJECT_SCHEMA JSONSchema (object type)
  * @returns String
  */
-type GetRequired<OBJECT_SCHEMA extends ObjectSchema> =
-  OBJECT_SCHEMA extends Readonly<{ required: ReadonlyArray<string> }>
-    ? OBJECT_SCHEMA["required"][number]
-    : never;
+type GetRequired<
+  OBJECT_SCHEMA extends ObjectSchema,
+  OPTIONS extends ParseSchemaOptions,
+> =
+  | (OBJECT_SCHEMA extends Readonly<{ required: ReadonlyArray<string> }>
+      ? OBJECT_SCHEMA["required"][number]
+      : never)
+  | (OPTIONS["keepDefaultedPropertiesOptional"] extends true
+      ? never
+      : OBJECT_SCHEMA extends Readonly<{
+            properties: Readonly<Record<string, JSONSchema7>>;
+          }>
+        ? {
+            [KEY in keyof OBJECT_SCHEMA["properties"] &
+              string]: OBJECT_SCHEMA["properties"][KEY] extends Readonly<{
+              default: unknown;
+            }>
+              ? KEY
+              : never;
+          }[keyof OBJECT_SCHEMA["properties"] & string]
+        : never);
 
 /**
  * Extracts and parses the additional and pattern properties (if any exists) of an object JSON schema
