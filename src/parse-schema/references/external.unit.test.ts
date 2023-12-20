@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 import type { A } from "ts-toolbelt";
 
 import type { FromSchema } from "~/index";
