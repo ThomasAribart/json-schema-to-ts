@@ -154,11 +154,11 @@ describe("References", () => {
       type: "object",
       properties: {
         name: { $ref: "defs.json#/definitions/str" },
-        age: { $ref: "#/$defs/int" },
+        age: { $ref: "#/definitions/int" },
       },
       required: ["name"],
       additionalProperties: false,
-      $defs: {
+      definitions: {
         int: { type: "number" },
       },
     } as const;

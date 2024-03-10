@@ -5,12 +5,12 @@ import type { FromSchema } from "~/index";
 const userSchema = {
   type: "object",
   properties: {
-    name: { $ref: "#/$defs/name" },
-    age: { $ref: "#/$defs/age" },
+    name: { $ref: "#/definitions/name" },
+    age: { $ref: "#/definitions/age" },
   },
   required: ["name", "age"],
   additionalProperties: false,
-  $defs: {
+  definitions: {
     name: { type: "string" },
     age: { type: "integer" },
   },
