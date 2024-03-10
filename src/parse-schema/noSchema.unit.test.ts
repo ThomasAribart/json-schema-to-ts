@@ -1,11 +1,11 @@
-import type { JSONSchema7 } from "~/definitions";
+import type { JSONSchema } from "~/definitions";
 import type { FromSchema } from "~/index";
 
 import { ajv } from "./ajv.util.test";
 
 describe("No schema", () => {
   describe("Empty", () => {
-    const emptySchema = {} as JSONSchema7;
+    const emptySchema = {} as JSONSchema;
     type Any = FromSchema<typeof emptySchema>;
     let anyInstance: Any;
 

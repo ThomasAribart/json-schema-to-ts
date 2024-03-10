@@ -1,6 +1,6 @@
 import type { M } from "ts-algebra";
 
-import type { JSONSchema7 } from "~/definitions";
+import type { JSONSchema } from "~/definitions";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 import type { MergeSubSchema } from "./utils";
@@ -25,10 +25,10 @@ import type { MergeSubSchema } from "./utils";
  *  }
  * }
  */
-export type IfThenElseSchema = JSONSchema7 & {
-  if: JSONSchema7;
-  then?: JSONSchema7;
-  else?: JSONSchema7;
+export type IfThenElseSchema = JSONSchema & {
+  if: JSONSchema;
+  then?: JSONSchema;
+  else?: JSONSchema;
 };
 
 /**
@@ -42,15 +42,15 @@ export type IfThenElseSchema = JSONSchema7 & {
 export type ParseIfThenElseSchema<
   IF_THEN_ELSE_SCHEMA extends IfThenElseSchema,
   OPTIONS extends ParseSchemaOptions,
-  REST_SCHEMA extends JSONSchema7 = Omit<
+  REST_SCHEMA extends JSONSchema = Omit<
     IF_THEN_ELSE_SCHEMA,
     "if" | "then" | "else"
   >,
-  IF_SCHEMA extends JSONSchema7 = MergeSubSchema<
+  IF_SCHEMA extends JSONSchema = MergeSubSchema<
     REST_SCHEMA,
     IF_THEN_ELSE_SCHEMA["if"]
   >,
-  PARSED_THEN_SCHEMA = IF_THEN_ELSE_SCHEMA extends { then: JSONSchema7 }
+  PARSED_THEN_SCHEMA = IF_THEN_ELSE_SCHEMA extends { then: JSONSchema }
     ? M.$Intersect<
         ParseSchema<IF_SCHEMA, OPTIONS>,
         ParseSchema<
@@ -59,7 +59,7 @@ export type ParseIfThenElseSchema<
         >
       >
     : ParseSchema<IF_SCHEMA, OPTIONS>,
-  PARSED_ELSE_SCHEMA = IF_THEN_ELSE_SCHEMA extends { else: JSONSchema7 }
+  PARSED_ELSE_SCHEMA = IF_THEN_ELSE_SCHEMA extends { else: JSONSchema }
     ? M.$Intersect<
         M.$Exclude<
           ParseSchema<REST_SCHEMA, OPTIONS>,

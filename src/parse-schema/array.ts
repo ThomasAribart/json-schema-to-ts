@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 import type { M } from "ts-algebra";
 
-import type { JSONSchema7 } from "~/definitions";
+import type { JSONSchema } from "~/definitions";
 import type { And, DoesExtend, Not, Tail } from "~/type-utils";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
@@ -19,7 +19,7 @@ import type { ParseSchema, ParseSchemaOptions } from "./index";
  *  items: [{ type: "string" }]
  * }
  */
-export type ArrayOrTupleSchema = JSONSchema7 & Readonly<{ type: "array" }>;
+export type ArrayOrTupleSchema = JSONSchema & Readonly<{ type: "array" }>;
 
 /**
  * JSON schemas of arrays
@@ -29,8 +29,8 @@ export type ArrayOrTupleSchema = JSONSchema7 & Readonly<{ type: "array" }>;
  *  items: { type: "string" }
  * }
  */
-type ArraySchema = JSONSchema7 &
-  Readonly<{ type: "array"; items: JSONSchema7 }>;
+export type ArraySchema = Omit<JSONSchema, "items"> &
+  Readonly<{ type: "array"; items: JSONSchema }>;
 
 /**
  * JSON schemas of tuples
@@ -40,8 +40,8 @@ type ArraySchema = JSONSchema7 &
  *  items: [{ type: "string" }]
  * }
  */
-type TupleSchema = JSONSchema7 &
-  Readonly<{ type: "array"; items: readonly JSONSchema7[] }>;
+export type TupleSchema = JSONSchema &
+  Readonly<{ type: "array"; items: readonly JSONSchema[] }>;
 
 /**
  * Recursively parses an array or tuple JSON schema to a meta-type.
@@ -73,15 +73,15 @@ export type ParseArrayOrTupleSchema<
  * @returns Meta-type[]
  */
 type ParseTupleItems<
-  ITEM_SCHEMAS extends readonly JSONSchema7[],
+  ITEM_SCHEMAS extends readonly JSONSchema[],
   OPTIONS extends ParseSchemaOptions,
 > = ITEM_SCHEMAS extends readonly [
   infer ITEM_SCHEMAS_HEAD,
   ...infer ITEM_SCHEMAS_TAIL,
 ]
   ? // TODO increase TS version and use "extends" in Array https://devblogs.microsoft.com/typescript/announcing-typescript-4-8/#improved-inference-for-infer-types-in-template-string-types
-    ITEM_SCHEMAS_HEAD extends JSONSchema7
-    ? ITEM_SCHEMAS_TAIL extends readonly JSONSchema7[]
+    ITEM_SCHEMAS_HEAD extends JSONSchema
+    ? ITEM_SCHEMAS_TAIL extends readonly JSONSchema[]
       ? [
           ParseSchema<ITEM_SCHEMAS_HEAD, OPTIONS>,
           ...ParseTupleItems<ITEM_SCHEMAS_TAIL, OPTIONS>,
@@ -112,7 +112,7 @@ type ApplyMinMaxAndAdditionalItems<
       ? ROOT_SCHEMA["maxItems"]
       : undefined
   >,
-  ROOT_SCHEMA extends Readonly<{ additionalItems: JSONSchema7 }>
+  ROOT_SCHEMA extends Readonly<{ additionalItems: JSONSchema }>
     ? ROOT_SCHEMA["additionalItems"]
     : true,
   OPTIONS
@@ -224,7 +224,7 @@ type ApplyAdditionalItems<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     completeTuple: any[];
   },
-  ADDITIONAL_ITEMS_SCHEMA extends JSONSchema7,
+  ADDITIONAL_ITEMS_SCHEMA extends JSONSchema,
   OPTIONS extends ParseSchemaOptions,
 > = APPLY_MIN_MAX_RESULT extends { hasEncounteredMax: true }
   ? APPLY_MIN_MAX_RESULT extends { hasEncounteredMin: true }

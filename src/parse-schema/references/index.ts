@@ -1,4 +1,4 @@
-import type { JSONSchema7 } from "~/definitions";
+import type { JSONSchema } from "~/definitions";
 import type { Split } from "~/type-utils/split";
 
 import type { ParseSchemaOptions } from "../index";
@@ -8,7 +8,7 @@ import type { ParseInternalReferenceSchema } from "./internal";
 /**
  * JSON schemas referencing other schemas
  */
-export type ReferencingSchema = JSONSchema7 & {
+export type ReferencingSchema = JSONSchema & {
   $ref: string;
 };
 

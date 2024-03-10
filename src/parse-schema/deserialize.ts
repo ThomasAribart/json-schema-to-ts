@@ -1,6 +1,6 @@
 import type { M } from "ts-algebra";
 
-import type { DeserializationPattern, JSONSchema7 } from "~/definitions";
+import type { DeserializationPattern, JSONSchema } from "~/definitions";
 
 import type { ParseSchemaOptions } from "./index";
 
@@ -11,7 +11,7 @@ import type { ParseSchemaOptions } from "./index";
  * @returns Meta-type
  */
 export type DeserializeSchema<
-  SCHEMA extends JSONSchema7,
+  SCHEMA extends JSONSchema,
   OPTIONS extends Omit<ParseSchemaOptions, "deserialize"> & {
     deserialize: DeserializationPattern[];
   },
@@ -24,7 +24,7 @@ export type DeserializeSchema<
  * @returns Meta-type
  */
 type RecurseOnDeserializationPatterns<
-  SCHEMA extends JSONSchema7,
+  SCHEMA extends JSONSchema,
   DESERIALIZATION_PATTERNS extends DeserializationPattern[],
   RESULT = M.Any,
 > = DESERIALIZATION_PATTERNS extends [

@@ -13,7 +13,18 @@ jobs:
       matrix:
         node: [16, 18]
         typescript:
-          ["default", "~4.6.4", "~4.7.4", "~4.8.3", "~4.9.5", "~5.0.4"]
+          [
+            "default",
+            "~4.6.4",
+            "~4.7.4",
+            "~4.8.3",
+            "~4.9.5",
+            "~5.0.4",
+            "~5.1.6",
+            "~5.2.2",
+            "~5.3.3",
+            "~5.4.2",
+          ]
     name: Node ${{ matrix.node }} / TS ${{ matrix.typescript }}
     steps:
       - uses: actions/checkout@v3

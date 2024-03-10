@@ -1,6 +1,6 @@
 import type { M } from "ts-algebra";
 
-import type { JSONSchema7 } from "~/definitions";
+import type { JSONSchema } from "~/definitions";
 import type { DeepGet, Split, Tail } from "~/type-utils";
 
 import type { ParseSchema, ParseSchemaOptions } from "../index";
@@ -15,11 +15,11 @@ import type { MergeSubSchema } from "../utils";
  * @returns Meta-type
  */
 export type ParseReference<
-  SCHEMA extends JSONSchema7,
+  SCHEMA extends JSONSchema,
   OPTIONS extends ParseSchemaOptions,
-  REFERENCE_SOURCE extends JSONSchema7,
+  REFERENCE_SOURCE extends JSONSchema,
   PATH_IN_SOURCE extends string | undefined,
-  MATCHING_REFERENCE extends JSONSchema7 = PATH_IN_SOURCE extends string
+  MATCHING_REFERENCE extends JSONSchema = PATH_IN_SOURCE extends string
     ? // Tail is needed to remove initial "" from split path
       DeepGet<REFERENCE_SOURCE, Tail<Split<PATH_IN_SOURCE, "/">>, false>
     : REFERENCE_SOURCE,
