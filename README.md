@@ -100,6 +100,19 @@ type Dog = FromSchema<typeof dogSchema>
 // => Still work 🙌
 ```
 
+You can also use this with JSDocs by wrapping your schema in `/** @type {const} @satisfies {import('json-schema-to-ts').JSONSchema} */ (...)` like:
+
+```
+const dogSchema = /** @type {const} @satisfies {import('json-schema-to-ts').JSONSchema} */ ({
+  // Type-checked and autocompleted 🙌
+  type: "object"
+  ...
+})
+
+/** @type {import('json-schema-to-ts').FromSchema<typeof dogSchema>} */
+const dog = { ... }
+```
+
 ## Why use `json-schema-to-ts`?
 
 If you're looking for runtime validation with added types, libraries like [yup](https://github.com/jquense/yup), [zod](https://github.com/vriad/zod) or [runtypes](https://github.com/pelotom/runtypes) may suit your needs while being easier to use!
