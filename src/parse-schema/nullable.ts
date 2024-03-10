@@ -1,6 +1,6 @@
 import type { M } from "ts-algebra";
 
-import type { JSONSchema7 } from "~/definitions";
+import type { JSONSchema } from "~/definitions";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 
@@ -12,7 +12,7 @@ import type { ParseSchema, ParseSchemaOptions } from "./index";
  *  nullable: true
  * }
  */
-export type NullableSchema = JSONSchema7 & Readonly<{ nullable: boolean }>;
+export type NullableSchema = JSONSchema & Readonly<{ nullable: boolean }>;
 
 /**
  * Parses a nullable JSON schema to a meta-type.

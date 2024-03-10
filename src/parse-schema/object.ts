@@ -1,6 +1,6 @@
 import type { M } from "ts-algebra";
 
-import type { JSONSchema7 } from "~/definitions";
+import type { JSONSchema } from "~/definitions";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 
@@ -16,7 +16,7 @@ import type { ParseSchema, ParseSchemaOptions } from "./index";
  *  }
  * }
  */
-export type ObjectSchema = JSONSchema7 & Readonly<{ type: "object" }>;
+export type ObjectSchema = JSONSchema & Readonly<{ type: "object" }>;
 
 /**
  * Parses an object JSON schema to a meta-type.
@@ -30,7 +30,7 @@ export type ParseObjectSchema<
   OBJECT_SCHEMA extends ObjectSchema,
   OPTIONS extends ParseSchemaOptions,
 > = OBJECT_SCHEMA extends Readonly<{
-  properties: Readonly<Record<string, JSONSchema7>>;
+  properties: Readonly<Record<string, JSONSchema>>;
 }>
   ? M.$Object<
       {
@@ -63,7 +63,7 @@ type GetRequired<
   | (OPTIONS["keepDefaultedPropertiesOptional"] extends true
       ? never
       : OBJECT_SCHEMA extends Readonly<{
-            properties: Readonly<Record<string, JSONSchema7>>;
+            properties: Readonly<Record<string, JSONSchema>>;
           }>
         ? {
             [KEY in keyof OBJECT_SCHEMA["properties"] &
@@ -84,9 +84,9 @@ type GetRequired<
 type GetOpenProps<
   OBJECT_SCHEMA extends ObjectSchema,
   OPTIONS extends ParseSchemaOptions,
-> = OBJECT_SCHEMA extends Readonly<{ additionalProperties: JSONSchema7 }>
+> = OBJECT_SCHEMA extends Readonly<{ additionalProperties: JSONSchema }>
   ? OBJECT_SCHEMA extends Readonly<{
-      patternProperties: Record<string, JSONSchema7>;
+      patternProperties: Record<string, JSONSchema>;
     }>
     ? AdditionalAndPatternProps<
         OBJECT_SCHEMA["additionalProperties"],
@@ -95,7 +95,7 @@ type GetOpenProps<
       >
     : ParseSchema<OBJECT_SCHEMA["additionalProperties"], OPTIONS>
   : OBJECT_SCHEMA extends Readonly<{
-        patternProperties: Record<string, JSONSchema7>;
+        patternProperties: Record<string, JSONSchema>;
       }>
     ? PatternProps<OBJECT_SCHEMA["patternProperties"], OPTIONS>
     : M.Any;
@@ -107,7 +107,7 @@ type GetOpenProps<
  * @returns String
  */
 type PatternProps<
-  PATTERN_PROPERTY_SCHEMAS extends Readonly<Record<string, JSONSchema7>>,
+  PATTERN_PROPERTY_SCHEMAS extends Readonly<Record<string, JSONSchema>>,
   OPTIONS extends ParseSchemaOptions,
 > = M.$Union<
   {
@@ -126,8 +126,8 @@ type PatternProps<
  * @returns String
  */
 type AdditionalAndPatternProps<
-  ADDITIONAL_PROPERTIES_SCHEMA extends JSONSchema7,
-  PATTERN_PROPERTY_SCHEMAS extends Readonly<Record<string, JSONSchema7>>,
+  ADDITIONAL_PROPERTIES_SCHEMA extends JSONSchema,
+  PATTERN_PROPERTY_SCHEMAS extends Readonly<Record<string, JSONSchema>>,
   OPTIONS extends ParseSchemaOptions,
 > = ADDITIONAL_PROPERTIES_SCHEMA extends boolean
   ? PatternProps<PATTERN_PROPERTY_SCHEMAS, OPTIONS>

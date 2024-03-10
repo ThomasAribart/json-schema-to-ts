@@ -1,6 +1,6 @@
 import type { M } from "ts-algebra";
 
-import type { DeserializationPattern, JSONSchema7 } from "~/definitions";
+import type { DeserializationPattern, JSONSchema } from "~/definitions";
 import type { And, DoesExtend } from "~/type-utils";
 
 import type { AllOfSchema, ParseAllOfSchema } from "./allOf";
@@ -38,11 +38,11 @@ export type ParseSchemaOptions = {
   /**
    * The initial schema provided to `ParseSchema`
    */
-  rootSchema: JSONSchema7;
+  rootSchema: JSONSchema;
   /**
    * To refer external schemas by ids
    */
-  references: Record<string, JSONSchema7>;
+  references: Record<string, JSONSchema>;
   /**
    * To override inferred types if some pattern is matched
    */
@@ -56,9 +56,9 @@ export type ParseSchemaOptions = {
  * @returns Meta-type
  */
 export type ParseSchema<
-  SCHEMA extends JSONSchema7,
+  SCHEMA extends JSONSchema,
   OPTIONS extends ParseSchemaOptions,
-  RESULT = JSONSchema7 extends SCHEMA
+  RESULT = JSONSchema extends SCHEMA
     ? M.Any
     : SCHEMA extends true | string
       ? M.Any

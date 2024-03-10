@@ -1,6 +1,6 @@
 import type { M } from "ts-algebra";
 
-import type { JSONSchema7 } from "~/definitions";
+import type { JSONSchema } from "~/definitions";
 import type { Join, Pop, Split } from "~/type-utils";
 
 import type { ParseSchemaOptions } from "../index";
@@ -21,7 +21,7 @@ export type ParseExternalReferenceSchema<
   EXTERNAL_REFERENCE_ID extends string,
   SUB_PATH extends string | undefined,
 > = OPTIONS["references"] extends {
-  [KEY in EXTERNAL_REFERENCE_ID]: JSONSchema7;
+  [KEY in EXTERNAL_REFERENCE_ID]: JSONSchema;
 }
   ? ParseReference<
       Omit<REF_SCHEMA, "$ref">,
@@ -59,7 +59,7 @@ type ParseDirectory<REFERENCE extends string> = Join<
  *  type: "string",
  * }
  */
-type IdSchema = JSONSchema7 & { $id: string };
+type IdSchema = JSONSchema & { $id: string };
 
 /**
  * Parse a JSON schema referencing an external JSON schema (through its `$ref` property - no directory) to a meta-type.
@@ -71,7 +71,7 @@ type IdSchema = JSONSchema7 & { $id: string };
  * @returns Meta-type
  */
 type ParseExternalReferenceWithoutDirectorySchema<
-  SUB_SCHEMA extends JSONSchema7,
+  SUB_SCHEMA extends JSONSchema,
   OPTIONS extends ParseSchemaOptions & { rootSchema: IdSchema },
   EXTERNAL_REFERENCE_ID extends string,
   SUB_PATH extends string | undefined,

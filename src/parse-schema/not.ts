@@ -1,6 +1,6 @@
 import type { M } from "ts-algebra";
 
-import type { JSONSchema7 } from "~/definitions";
+import type { JSONSchema } from "~/definitions";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 import type { MergeSubSchema } from "./utils";
@@ -15,7 +15,7 @@ import type { MergeSubSchema } from "./utils";
  *  }
  * }
  */
-export type NotSchema = JSONSchema7 & Readonly<{ not: JSONSchema7 }>;
+export type NotSchema = JSONSchema & Readonly<{ not: JSONSchema }>;
 
 /**
  * Any possible meta-type

@@ -1,7 +1,6 @@
-import type { JSONSchema7TypeName } from "json-schema";
 import type { M } from "ts-algebra";
 
-import type { JSONSchema7 } from "~/definitions";
+import type { JSONSchema, JSONSchemaType } from "~/definitions";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 
@@ -12,8 +11,8 @@ import type { ParseSchema, ParseSchemaOptions } from "./index";
  *  type: ["number", "string"]
  * }
  */
-export type MultipleTypesSchema = JSONSchema7 &
-  Readonly<{ type: readonly JSONSchema7TypeName[] }>;
+export type MultipleTypesSchema = JSONSchema &
+  Readonly<{ type: readonly JSONSchemaType[] }>;
 
 /**
  * Recursively parses a multiple type JSON schema to a meta-type.
@@ -32,20 +31,20 @@ export type ParseMultipleTypesSchema<
 
 /**
  * Recursively parses a multiple type JSON schema to the union of its types (merged with root schema).
- * @param TYPES JSONSchema7Type[]
+ * @param TYPES JSONSchemaType[]
  * @param ROOT_MULTI_TYPE_SCHEMA Root JSONSchema (multiple types)
  * @param OPTIONS Parsing options
  * @returns Meta-type
  */
 type RecurseOnMixedSchema<
-  TYPES extends readonly JSONSchema7TypeName[],
+  TYPES extends readonly JSONSchemaType[],
   ROOT_MULTI_TYPE_SCHEMA extends MultipleTypesSchema,
   OPTIONS extends ParseSchemaOptions,
   RESULT = never,
 > = TYPES extends readonly [infer TYPES_HEAD, ...infer TYPES_TAIL]
   ? // TODO increase TS version and use "extends" in Array https://devblogs.microsoft.com/typescript/announcing-typescript-4-8/#improved-inference-for-infer-types-in-template-string-types
-    TYPES_HEAD extends JSONSchema7TypeName
-    ? TYPES_TAIL extends readonly JSONSchema7TypeName[]
+    TYPES_HEAD extends JSONSchemaType
+    ? TYPES_TAIL extends readonly JSONSchemaType[]
       ? RecurseOnMixedSchema<
           TYPES_TAIL,
           ROOT_MULTI_TYPE_SCHEMA,

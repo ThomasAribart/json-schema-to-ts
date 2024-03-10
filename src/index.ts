@@ -1,23 +1,25 @@
 import type { M } from "ts-algebra";
 
 import type {
-  ExtendedJSONSchema7,
+  ExtendedJSONSchema,
   FromExtendedSchemaOptions,
   FromSchemaDefaultOptions,
   FromSchemaOptions,
-  JSONSchema7,
-  JSONSchema7Extension,
-  UnextendJSONSchema7,
+  JSONSchema,
+  JSONSchemaExtension,
+  UnextendJSONSchema,
 } from "./definitions";
 import type { ParseOptions } from "./parse-options";
 import type { ParseSchema } from "./parse-schema";
 
 export type {
+  ExtendedJSONSchema,
   DeserializationPattern,
   FromSchemaOptions,
   FromExtendedSchemaOptions,
   FromSchemaDefaultOptions,
-  JSONSchema7Extension,
+  JSONSchemaExtension,
+  JSONSchema,
 } from "./definitions";
 export type { $Compiler, Compiler, $Validator, Validator } from "./utils";
 export {
@@ -25,19 +27,6 @@ export {
   wrapValidatorAsTypeGuard,
   asConst,
 } from "./utils";
-
-/**
- * JSON Schema type constraint
- */
-export type JSONSchema = JSONSchema7;
-
-/**
- * Extended JSON Schema type constraint
- * @param EXTENSION JSONSchema7Extension
- * @returns Type
- */
-export type ExtendedJSONSchema<EXTENSION extends JSONSchema7Extension> =
-  ExtendedJSONSchema7<EXTENSION>;
 
 /**
  * Given a JSON schema defined with the `as const` statement, infers the type of valid instances
@@ -53,11 +42,11 @@ export type FromSchema<
  * @param SCHEMA JSON schema
  */
 export type FromExtendedSchema<
-  EXTENSION extends JSONSchema7Extension,
+  EXTENSION extends JSONSchemaExtension,
   SCHEMA extends ExtendedJSONSchema<EXTENSION>,
   OPTIONS extends
     FromExtendedSchemaOptions<EXTENSION> = FromSchemaDefaultOptions,
-  UNEXTENDED_SCHEMA = UnextendJSONSchema7<EXTENSION, SCHEMA>,
+  UNEXTENDED_SCHEMA = UnextendJSONSchema<EXTENSION, SCHEMA>,
 > = UNEXTENDED_SCHEMA extends JSONSchema
   ? FromSchema<UNEXTENDED_SCHEMA, OPTIONS>
   : never;

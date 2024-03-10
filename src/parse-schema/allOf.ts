@@ -1,6 +1,6 @@
 import type { M } from "ts-algebra";
 
-import type { JSONSchema7 } from "~/definitions";
+import type { JSONSchema } from "~/definitions";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 import type { MergeSubSchema } from "./utils";
@@ -15,8 +15,8 @@ import type { MergeSubSchema } from "./utils";
  *  ]
  * }
  */
-export type AllOfSchema = JSONSchema7 &
-  Readonly<{ allOf: readonly JSONSchema7[] }>;
+export type AllOfSchema = JSONSchema &
+  Readonly<{ allOf: readonly JSONSchema[] }>;
 
 /**
  * Recursively parses a JSON schema intersection to a meta-type.
@@ -44,7 +44,7 @@ export type ParseAllOfSchema<
  * @returns Meta-type
  */
 type RecurseOnAllOfSchema<
-  SUB_SCHEMAS extends readonly JSONSchema7[],
+  SUB_SCHEMAS extends readonly JSONSchema[],
   ROOT_ALL_OF_SCHEMA extends AllOfSchema,
   OPTIONS extends ParseSchemaOptions,
   PARSED_ROOT_ALL_OF_SCHEMA,
@@ -53,8 +53,8 @@ type RecurseOnAllOfSchema<
   ...infer SUB_SCHEMAS_TAIL,
 ]
   ? // TODO increase TS version and use "extends" in Array https://devblogs.microsoft.com/typescript/announcing-typescript-4-8/#improved-inference-for-infer-types-in-template-string-types
-    SUB_SCHEMAS_HEAD extends JSONSchema7
-    ? SUB_SCHEMAS_TAIL extends readonly JSONSchema7[]
+    SUB_SCHEMAS_HEAD extends JSONSchema
+    ? SUB_SCHEMAS_TAIL extends readonly JSONSchema[]
       ? RecurseOnAllOfSchema<
           SUB_SCHEMAS_TAIL,
           ROOT_ALL_OF_SCHEMA,

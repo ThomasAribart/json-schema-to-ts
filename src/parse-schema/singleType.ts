@@ -1,7 +1,6 @@
-import type { JSONSchema7TypeName } from "json-schema";
 import type { M } from "ts-algebra";
 
-import type { JSONSchema7 } from "~/definitions";
+import type { JSONSchema, JSONSchemaType } from "~/definitions";
 
 import type { ArrayOrTupleSchema, ParseArrayOrTupleSchema } from "./array";
 import type { ParseSchemaOptions } from "./index";
@@ -14,8 +13,7 @@ import type { ObjectSchema, ParseObjectSchema } from "./object";
  *  type: "string"
  * }
  */
-export type SingleTypeSchema = JSONSchema7 &
-  Readonly<{ type: JSONSchema7TypeName }>;
+export type SingleTypeSchema = JSONSchema & Readonly<{ type: JSONSchemaType }>;
 
 /**
  * Recursively parses a single type JSON schema to a meta-type.

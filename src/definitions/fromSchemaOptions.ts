@@ -1,10 +1,10 @@
-import type { JSONSchema7Reference } from "~/definitions";
+import type { JSONSchemaReference } from "~/definitions";
 
 import type { DeserializationPattern } from "./deserializationPattern";
 import type {
-  ExtendedJSONSchema7Reference,
-  JSONSchema7Extension,
-} from "./extendedJsonSchema7";
+  ExtendedJSONSchemaReference,
+  JSONSchemaExtension,
+} from "./extendedJsonSchema";
 
 /**
  * FromSchema options constraints
@@ -13,21 +13,20 @@ export type FromSchemaOptions = {
   parseNotKeyword?: boolean;
   parseIfThenElseKeywords?: boolean;
   keepDefaultedPropertiesOptional?: boolean;
-  references?: JSONSchema7Reference[] | false;
+  references?: JSONSchemaReference[] | false;
   deserialize?: DeserializationPattern[] | false;
 };
 
 /**
  * FromExtendedSchema options constraints
  */
-export type FromExtendedSchemaOptions<EXTENSION extends JSONSchema7Extension> =
-  {
-    parseNotKeyword?: boolean;
-    parseIfThenElseKeywords?: boolean;
-    keepDefaultedPropertiesOptional?: boolean;
-    references?: ExtendedJSONSchema7Reference<EXTENSION>[] | false;
-    deserialize?: DeserializationPattern[] | false;
-  };
+export type FromExtendedSchemaOptions<EXTENSION extends JSONSchemaExtension> = {
+  parseNotKeyword?: boolean;
+  parseIfThenElseKeywords?: boolean;
+  keepDefaultedPropertiesOptional?: boolean;
+  references?: ExtendedJSONSchemaReference<EXTENSION>[] | false;
+  deserialize?: DeserializationPattern[] | false;
+};
 
 /**
  * FromSchema default options
