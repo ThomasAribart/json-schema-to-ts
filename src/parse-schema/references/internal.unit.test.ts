@@ -7,12 +7,12 @@ describe("Definitions", () => {
     const personSchema = {
       type: "object",
       properties: {
-        firstName: { $ref: "#/$defs/name" },
-        lastName: { $ref: "#/$defs/name" },
+        firstName: { $ref: "#/definitions/name" },
+        lastName: { $ref: "#/definitions/name" },
       },
       required: ["firstName", "lastName"],
       additionalProperties: false,
-      $defs: {
+      definitions: {
         name: {
           type: "string",
         },
@@ -74,14 +74,14 @@ describe("Definitions", () => {
       type: "object",
       properties: {
         judy: {
-          $ref: "#/$defs/person",
+          $ref: "#/definitions/person",
           required: ["lastName"],
           additionalProperties: true,
         },
       },
       required: ["judy"],
       additionalProperties: false,
-      $defs: {
+      definitions: {
         person: {
           type: "object",
           properties: {
@@ -128,17 +128,17 @@ describe("Definitions", () => {
     const judySchema = {
       type: "object",
       properties: {
-        judy: { $ref: "#/$defs/person" },
+        judy: { $ref: "#/definitions/person" },
       },
       required: ["judy"],
       additionalProperties: false,
-      $defs: {
+      definitions: {
         name: { type: "string" },
         person: {
           type: "object",
           properties: {
-            firstName: { $ref: "#/$defs/name" },
-            lastName: { $ref: "#/$defs/name" },
+            firstName: { $ref: "#/definitions/name" },
+            lastName: { $ref: "#/definitions/name" },
           },
           additionalProperties: false,
         },
