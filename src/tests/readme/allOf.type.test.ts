@@ -33,3 +33,41 @@ type ExpectedAddress = {
 type AssertAddress = A.Equals<ReceivedAddress, ExpectedAddress>;
 const assertAddress: AssertAddress = 1;
 assertAddress;
+
+// https://www.jsonschemavalidator.net/s/OWVtPurE
+const addressSchemaWithUnevaluatedProperties = {
+  type: "object",
+  allOf: [
+    {
+      properties: {
+        address: { type: "string" },
+        city: { type: "string" },
+        state: { type: "string" },
+      },
+      required: ["address", "city", "state"],
+    },
+    {
+      properties: {
+        type: { enum: ["residential", "business"] },
+      },
+    },
+  ],
+  unevaluatedProperties: false,
+} as const;
+
+type ReceivedAddressWithUnevaluatedProperties = FromSchema<
+  typeof addressSchemaWithUnevaluatedProperties
+>;
+type ExpectedAddressWithUnevaluatedProperties = {
+  address: string;
+  city: string;
+  state: string;
+  type?: "residential" | "business";
+};
+
+type AssertAddressWithUnevaluatedProperties = A.Equals<
+  ReceivedAddressWithUnevaluatedProperties,
+  ExpectedAddressWithUnevaluatedProperties
+>;
+const assertAddressWithUnevaluatedProperties: AssertAddressWithUnevaluatedProperties = 1;
+assertAddressWithUnevaluatedProperties;
