@@ -97,6 +97,54 @@ describe("Object schemas", () => {
     });
   });
 
+  describe("Unevaluated properties", () => {
+    const setSchema = {
+      type: "object",
+      unevaluatedProperties: { type: "boolean" },
+    } as const;
+
+    type Set = FromSchema<typeof setSchema>;
+    let setInstance: Set;
+
+    it("accepts object with boolean values", () => {
+      setInstance = { a: true, b: false };
+      expect(ajv.validate(setSchema, setInstance)).toBe(true);
+    });
+
+    it("rejects object with other values", () => {
+      // We do not handle this case for the moment
+      // @ts-NOT-expect-error
+      setInstance = { a: 42 };
+      expect(ajv.validate(setSchema, setInstance)).toBe(false);
+    });
+
+    it("prioritizes additionalProperties and/or patternProterties if one is specified", () => {
+      const setSchema2 = {
+        type: "object",
+        additionalProperties: { type: "boolean" },
+        unevaluatedProperties: { const: false },
+      } as const;
+
+      type Set2 = FromSchema<typeof setSchema2>;
+      const setInstance2: Set2 = { foo: true };
+
+      expect(ajv.validate(setSchema2, setInstance2)).toBe(true);
+
+      const setSchema3 = {
+        type: "object",
+        patternProperties: {
+          "^f": { type: "boolean" },
+        },
+        unevaluatedProperties: { const: false },
+      } as const;
+
+      type Set3 = FromSchema<typeof setSchema3>;
+      const setInstance3: Set3 = { foo: true };
+
+      expect(ajv.validate(setSchema3, setInstance3)).toBe(true);
+    });
+  });
+
   describe("Properties", () => {
     const catSchema = {
       type: "object",

@@ -78,6 +78,64 @@ type AssertObjectWithTypedAdditionalProperties = A.Equals<
 const assertObjectWithTypedAdditionalProperties: AssertObjectWithTypedAdditionalProperties = 1;
 assertObjectWithTypedAdditionalProperties;
 
+// Mixed schema
+
+const mixedObjectSchema = {
+  type: "object",
+  properties: {
+    foo: { enum: ["bar", "baz"] },
+  },
+  additionalProperties: { type: "string" },
+} as const;
+
+type ReceivedMixedObject = FromSchema<typeof mixedObjectSchema>;
+type ExpectedMixedObject = { [x: string]: unknown; foo?: "bar" | "baz" };
+
+type AssertMixedObject = A.Equals<ReceivedMixedObject, ExpectedMixedObject>;
+const assertMixedObject: AssertMixedObject = 1;
+assertMixedObject;
+
+// Unevaluated properties schema
+
+const closedObjectSchema = {
+  type: "object",
+  allOf: [
+    {
+      properties: {
+        foo: { type: "string" },
+      },
+      required: ["foo"],
+    },
+    {
+      properties: {
+        bar: { type: "number" },
+      },
+    },
+  ],
+  unevaluatedProperties: false,
+} as const;
+
+type ReceivedClosedObject = FromSchema<typeof closedObjectSchema>;
+type ExpectedClosedObject = { foo: string; bar?: number };
+
+type AssertClosedObject = A.Equals<ReceivedClosedObject, ExpectedClosedObject>;
+const assertClosedObject: AssertClosedObject = 1;
+assertClosedObject;
+
+const openObjectSchema = {
+  type: "object",
+  unevaluatedProperties: {
+    type: "boolean",
+  },
+} as const;
+
+type ReceivedOpenObject = FromSchema<typeof openObjectSchema>;
+type ExpectedOpenObject = { [x: string]: unknown };
+
+type AssertOpenObject = A.Equals<ReceivedOpenObject, ExpectedOpenObject>;
+const assertOpenObject: AssertOpenObject = 1;
+assertOpenObject;
+
 // Defaulted property
 
 const objectWithDefaultedPropertySchema = {

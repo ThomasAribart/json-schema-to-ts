@@ -373,14 +373,37 @@ type Object = FromSchema<
 // => { foo?: string; }
 ```
 
-`FromSchema` partially supports the `additionalProperties` and `patternProperties` keywords:
+`FromSchema` partially supports the `additionalProperties`, `patternProperties` and `unevaluatedProperties` keywords:
 
-- `additionalProperties` can be used to deny additional properties.
+- `additionalProperties` and `unevaluatedProperties` can be used to deny additional properties.
 
 ```typescript
 const closedObjectSchema = {
   ...objectSchema,
   additionalProperties: false,
+} as const;
+
+type Object = FromSchema<typeof closedObjectSchema>;
+// => { foo: string; bar?: number; }
+```
+
+```typescript
+const closedObjectSchema = {
+  type: "object",
+  allOf: [
+    {
+      properties: {
+        foo: { type: "string" },
+      },
+      required: ["foo"],
+    },
+    {
+      properties: {
+        bar: { type: "number" },
+      },
+    },
+  ],
+  unevaluatedProperties: false,
 } as const;
 
 type Object = FromSchema<typeof closedObjectSchema>;
@@ -405,7 +428,36 @@ type Object = FromSchema<typeof openObjectSchema>;
 // => { [x: string]: string | number | boolean }
 ```
 
-- However, when used in combination with the `properties` keyword, extra properties will always be typed as `unknown` to avoid conflicts.
+However:
+
+- When used in combination with the `properties` keyword, extra properties will always be typed as `unknown` to avoid conflicts.
+
+```typescript
+const mixedObjectSchema = {
+  type: "object",
+  properties: {
+    foo: { enum: ["bar", "baz"] },
+  },
+  additionalProperties: { type: "string" },
+} as const;
+
+type Object = FromSchema<typeof mixedObjectSchema>;
+// => { [x: string]: unknown; foo?: "bar" | "baz"; }
+```
+
+- Due to its context-dependent nature, `unevaluatedProperties` does not type extra-properties when used on its own. Use `additionalProperties` instead.
+
+```typescript
+const openObjectSchema = {
+  type: "object",
+  unevaluatedProperties: {
+    type: "boolean",
+  },
+} as const;
+
+type Object = FromSchema<typeof openObjectSchema>;
+// => { [x: string]: unknown }
+```
 
 ## Combining schemas
 

@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.18.3",
-    "ts-algebra": "^1.2.2"
+    "ts-algebra": "^2.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.6",
@@ -41,7 +41,7 @@
     "@typescript-eslint/eslint-plugin": "^6.13.2",
     "@typescript-eslint/parser": "^6.13.2",
     "@zerollup/ts-transform-paths": "^1.7.18",
-    "ajv": "^8.10.0",
+    "ajv": "^8.13.0",
     "babel-plugin-module-resolver": "^4.1.0",
     "dependency-cruiser": "^11.18.0",
     "eslint": "^8.27.0",

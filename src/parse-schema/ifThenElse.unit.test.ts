@@ -1,3 +1,5 @@
+import type { A } from "ts-toolbelt";
+
 import type { FromSchema } from "~/index";
 
 import { ajv } from "./ajv.util.test";
@@ -152,6 +154,80 @@ describe("If/Then/Else schemas", () => {
       // @ts-expect-error
       petInstance = { type: "duck" };
       expect(ajv.validate(petSchema, petInstance)).toBe(false);
+    });
+  });
+
+  describe("Closed to closed object (unevaluated properties)", () => {
+    // Example from https://json-schema.org/understanding-json-schema/reference/object#unevaluatedproperties
+    const addressSchema = {
+      type: "object",
+      properties: {
+        street_address: { type: "string" },
+        city: { type: "string" },
+        state: { type: "string" },
+        type: { enum: ["residential", "business"] },
+      },
+      required: ["street_address", "city", "state", "type"],
+      if: {
+        type: "object",
+        properties: {
+          type: { const: "business" },
+        },
+        required: ["type"],
+      },
+      then: {
+        properties: {
+          department: { type: "string" },
+        },
+      },
+      unevaluatedProperties: false,
+    } as const;
+
+    type Address = FromSchema<
+      typeof addressSchema,
+      { parseIfThenElseKeywords: true }
+    >;
+    let address: Address;
+
+    type ExpectedAddress =
+      | {
+          street_address: string;
+          city: string;
+          state: string;
+          type: "business";
+          department?: string | undefined;
+        }
+      | {
+          street_address: string;
+          city: string;
+          state: string;
+          type: "residential";
+        };
+    type AssertAddress = A.Equals<Address, ExpectedAddress>;
+    const assertAddress: AssertAddress = 1;
+    assertAddress;
+
+    it("accepts valid objects", () => {
+      address = {
+        street_address: "1600 Pennsylvania Avenue NW",
+        city: "Washington",
+        state: "DC",
+        type: "business",
+        department: "HR",
+      };
+      expect(ajv.validate(addressSchema, address)).toBe(true);
+    });
+
+    it("rejects unevaluated properties", () => {
+      address = {
+        street_address: "1600 Pennsylvania Avenue NW",
+        city: "Washington",
+        state: "DC",
+        type: "residential",
+        // @ts-expect-error
+        department: "HR",
+      };
+      expect(ajv.validate(addressSchema, address)).toBe(false);
     });
   });
 

@@ -13,13 +13,18 @@ type RemoveInvalidAdditionalItems<SCHEMA extends JSONSchema> =
       : Omit<SCHEMA, "additionalItems">;
 
 /**
- * Resets parent schema properties when merging a sub-schema into a parent schema
+ * Resets `additionalProperties` and `properties` from a sub-schema before merging it to a parent schema
  */
-type ParentSchemaOverrides = {
-  properties: {};
-  additionalProperties: true;
-  required: [];
-};
+type RemoveInvalidAdditionalProperties<SCHEMA extends JSONSchema> =
+  SCHEMA extends Readonly<{ additionalProperties: JSONSchema }>
+    ? SCHEMA extends Readonly<{
+        properties: Readonly<Record<string, JSONSchema>>;
+      }>
+      ? SCHEMA
+      : SCHEMA & Readonly<{ properties: {} }>
+    : SCHEMA extends boolean
+      ? SCHEMA
+      : Omit<SCHEMA, "additionalProperties">;
 
 /**
  * Merges a sub-schema into a parent schema.
@@ -32,11 +37,16 @@ type ParentSchemaOverrides = {
 export type MergeSubSchema<
   PARENT_SCHEMA extends JSONSchema,
   SUB_SCHEMA extends JSONSchema,
-  CLEANED_SUB_SCHEMA extends
-    JSONSchema = RemoveInvalidAdditionalItems<SUB_SCHEMA>,
-  DEFAULTED_SUB_SCHEMA extends JSONSchema = Omit<
-    ParentSchemaOverrides,
-    keyof CLEANED_SUB_SCHEMA
-  > &
-    CLEANED_SUB_SCHEMA,
-> = Omit<PARENT_SCHEMA, keyof DEFAULTED_SUB_SCHEMA> & DEFAULTED_SUB_SCHEMA;
+  CLEANED_SUB_SCHEMA extends JSONSchema = RemoveInvalidAdditionalProperties<
+    RemoveInvalidAdditionalItems<SUB_SCHEMA>
+  >,
+> = Omit<
+  PARENT_SCHEMA,
+  | keyof CLEANED_SUB_SCHEMA
+  | "additionalProperties"
+  | "patternProperties"
+  | "unevaluatedProperties"
+  | "required"
+  | "additionalItems"
+> &
+  CLEANED_SUB_SCHEMA;
