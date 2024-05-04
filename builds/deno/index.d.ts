@@ -1,4 +1,4 @@
-import { M } from 'https://cdn.skypack.dev/ts-algebra@^1.2.2?dts';
+import { M } from 'https://cdn.skypack.dev/ts-algebra@^2.0.0?dts';
 
 type DeserializationPattern = Readonly<{
     pattern: unknown;
@@ -37,6 +37,7 @@ type JSONSchema = boolean | Readonly<{
     properties?: Readonly<Record<string, JSONSchema>>;
     patternProperties?: Readonly<Record<string, JSONSchema>>;
     additionalProperties?: JSONSchema;
+    unevaluatedProperties?: JSONSchema;
     dependencies?: Readonly<Record<string, JSONSchema | readonly string[]>>;
     propertyNames?: JSONSchema;
     if?: JSONSchema;
@@ -204,12 +205,14 @@ type RemoveInvalidAdditionalItems<SCHEMA extends JSONSchema> = SCHEMA extends Re
 }> ? SCHEMA : SCHEMA & Readonly<{
     additionalItems: true;
 }> : SCHEMA extends boolean ? SCHEMA : Omit<SCHEMA, "additionalItems">;
-type ParentSchemaOverrides = {
+type RemoveInvalidAdditionalProperties<SCHEMA extends JSONSchema> = SCHEMA extends Readonly<{
+    additionalProperties: JSONSchema;
+}> ? SCHEMA extends Readonly<{
+    properties: Readonly<Record<string, JSONSchema>>;
+}> ? SCHEMA : SCHEMA & Readonly<{
     properties: {};
-    additionalProperties: true;
-    required: [];
-};
-type MergeSubSchema<PARENT_SCHEMA extends JSONSchema, SUB_SCHEMA extends JSONSchema, CLEANED_SUB_SCHEMA extends JSONSchema = RemoveInvalidAdditionalItems<SUB_SCHEMA>, DEFAULTED_SUB_SCHEMA extends JSONSchema = Omit<ParentSchemaOverrides, keyof CLEANED_SUB_SCHEMA> & CLEANED_SUB_SCHEMA> = Omit<PARENT_SCHEMA, keyof DEFAULTED_SUB_SCHEMA> & DEFAULTED_SUB_SCHEMA;
+}> : SCHEMA extends boolean ? SCHEMA : Omit<SCHEMA, "additionalProperties">;
+type MergeSubSchema<PARENT_SCHEMA extends JSONSchema, SUB_SCHEMA extends JSONSchema, CLEANED_SUB_SCHEMA extends JSONSchema = RemoveInvalidAdditionalProperties<RemoveInvalidAdditionalItems<SUB_SCHEMA>>> = Omit<PARENT_SCHEMA, keyof CLEANED_SUB_SCHEMA | "additionalProperties" | "patternProperties" | "unevaluatedProperties" | "required" | "additionalItems"> & CLEANED_SUB_SCHEMA;
 
 type AllOfSchema = JSONSchema & Readonly<{
     allOf: readonly JSONSchema[];
@@ -375,7 +378,7 @@ type ParseObjectSchema<OBJECT_SCHEMA extends ObjectSchema, OPTIONS extends Parse
     properties: Readonly<Record<string, JSONSchema>>;
 }> ? M.$Object<{
     [KEY in keyof OBJECT_SCHEMA["properties"]]: ParseSchema<OBJECT_SCHEMA["properties"][KEY], OPTIONS>;
-}, GetRequired<OBJECT_SCHEMA, OPTIONS>, GetOpenProps<OBJECT_SCHEMA, OPTIONS>> : M.$Object<{}, GetRequired<OBJECT_SCHEMA, OPTIONS>, GetOpenProps<OBJECT_SCHEMA, OPTIONS>>;
+}, GetRequired<OBJECT_SCHEMA, OPTIONS>, GetOpenProps<OBJECT_SCHEMA, OPTIONS>, GetClosedOnResolve<OBJECT_SCHEMA>> : M.$Object<{}, GetRequired<OBJECT_SCHEMA, OPTIONS>, GetOpenProps<OBJECT_SCHEMA, OPTIONS>, GetClosedOnResolve<OBJECT_SCHEMA>>;
 type GetRequired<OBJECT_SCHEMA extends ObjectSchema, OPTIONS extends ParseSchemaOptions> = (OBJECT_SCHEMA extends Readonly<{
     required: ReadonlyArray<string>;
 }> ? OBJECT_SCHEMA["required"][number] : never) | (OPTIONS["keepDefaultedPropertiesOptional"] extends true ? never : OBJECT_SCHEMA extends Readonly<{
@@ -392,6 +395,9 @@ type GetOpenProps<OBJECT_SCHEMA extends ObjectSchema, OPTIONS extends ParseSchem
 }> ? AdditionalAndPatternProps<OBJECT_SCHEMA["additionalProperties"], OBJECT_SCHEMA["patternProperties"], OPTIONS> : ParseSchema<OBJECT_SCHEMA["additionalProperties"], OPTIONS> : OBJECT_SCHEMA extends Readonly<{
     patternProperties: Record<string, JSONSchema>;
 }> ? PatternProps<OBJECT_SCHEMA["patternProperties"], OPTIONS> : M.Any;
+type GetClosedOnResolve<OBJECT_SCHEMA extends ObjectSchema> = OBJECT_SCHEMA extends Readonly<{
+    unevaluatedProperties: false;
+}> ? true : false;
 type PatternProps<PATTERN_PROPERTY_SCHEMAS extends Readonly<Record<string, JSONSchema>>, OPTIONS extends ParseSchemaOptions> = M.$Union<{
     [KEY in keyof PATTERN_PROPERTY_SCHEMAS]: ParseSchema<PATTERN_PROPERTY_SCHEMAS[KEY], OPTIONS>;
 }[keyof PATTERN_PROPERTY_SCHEMAS]>;
