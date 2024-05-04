@@ -1,3 +1,5 @@
+import type { A } from "ts-toolbelt";
+
 import type { FromSchema } from "~/index";
 
 import { ajv } from "./ajv.util.test";
@@ -475,6 +477,65 @@ describe("AllOf schemas", () => {
         // @ts-expect-error
         objectInstance = { bool: true, str: "str" };
         expect(ajv.validate(objectSchema, objectInstance)).toBe(false);
+      });
+    });
+
+    describe("Open to open object (w. unevaluated properties)", () => {
+      // Example from https://json-schema.org/understanding-json-schema/reference/object#unevaluatedproperties
+      const addressSchema = {
+        type: "object",
+        allOf: [
+          {
+            type: "object",
+            properties: {
+              street_address: { type: "string" },
+              city: { type: "string" },
+              state: { type: "string" },
+            },
+            required: ["street_address", "city", "state"],
+          },
+        ],
+        properties: {
+          type: { enum: ["residential", "business"] },
+        },
+        required: ["type"],
+        unevaluatedProperties: false,
+      } as const;
+
+      type Address = FromSchema<typeof addressSchema>;
+      let address: Address;
+
+      type ExpectedAddress = {
+        street_address: string;
+        city: string;
+        state: string;
+        type: "residential" | "business";
+      };
+
+      type AssertAddress = A.Equals<Address, ExpectedAddress>;
+      const assertAddress: AssertAddress = 1;
+      assertAddress;
+
+      it("accepts valid objects", () => {
+        address = {
+          street_address: "1600 Pennsylvania Avenue NW",
+          city: "Washington",
+          state: "DC",
+          type: "business",
+        };
+        expect(ajv.validate(addressSchema, address)).toBe(true);
+      });
+
+      it("rejects unevaluated properties", () => {
+        address = {
+          street_address: "1600 Pennsylvania Avenue NW",
+          city: "Washington",
+          state: "DC",
+          type: "business",
+          // @ts-expect-error
+          "something that doesn't belong": "hi!",
+        };
+        expect(ajv.validate(addressSchema, address)).toBe(false);
       });
     });
   });

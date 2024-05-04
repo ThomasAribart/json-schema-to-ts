@@ -82,6 +82,7 @@ export type JSONSchema =
       properties?: Readonly<Record<string, JSONSchema>>;
       patternProperties?: Readonly<Record<string, JSONSchema>>;
       additionalProperties?: JSONSchema;
+      unevaluatedProperties?: JSONSchema;
       dependencies?: Readonly<Record<string, JSONSchema | readonly string[]>>;
       propertyNames?: JSONSchema;
 

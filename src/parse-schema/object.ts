@@ -40,12 +40,14 @@ export type ParseObjectSchema<
         >;
       },
       GetRequired<OBJECT_SCHEMA, OPTIONS>,
-      GetOpenProps<OBJECT_SCHEMA, OPTIONS>
+      GetOpenProps<OBJECT_SCHEMA, OPTIONS>,
+      GetClosedOnResolve<OBJECT_SCHEMA>
     >
   : M.$Object<
       {},
       GetRequired<OBJECT_SCHEMA, OPTIONS>,
-      GetOpenProps<OBJECT_SCHEMA, OPTIONS>
+      GetOpenProps<OBJECT_SCHEMA, OPTIONS>,
+      GetClosedOnResolve<OBJECT_SCHEMA>
     >;
 
 /**
@@ -99,6 +101,17 @@ type GetOpenProps<
       }>
     ? PatternProps<OBJECT_SCHEMA["patternProperties"], OPTIONS>
     : M.Any;
+
+/**
+ * Extracts and parses the unevaluated properties (if any exists) of an object JSON schema
+ * @param OBJECT_SCHEMA JSONSchema (object type)
+ * @param OPTIONS Parsing options
+ * @returns String
+ */
+type GetClosedOnResolve<OBJECT_SCHEMA extends ObjectSchema> =
+  OBJECT_SCHEMA extends Readonly<{ unevaluatedProperties: false }>
+    ? true
+    : false;
 
 /**
  * Extracts and parses the pattern properties of an object JSON schema
