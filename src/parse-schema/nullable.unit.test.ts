@@ -151,10 +151,9 @@ describe("Nullable schemas", () => {
     });
 
     it("rejects null on non-nullable property", () => {
-      // TOIMPROVE: Fix this: Use of allOf breaks the ifThenElse if exclusion somehow (works fine without allOf)
+      // @ts-expect-error
       objectInst = {
         preventNullable: "true",
-        // @ts-NOT-expect-error
         potentiallyNullable: null,
       };
       expect(ajv.validate(objectWithNullablePropSchema, objectInst)).toBe(
