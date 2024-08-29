@@ -1,4 +1,5 @@
 name: 🎯 Test PR
+
 on:
   pull_request:
     types: [opened, reopened, synchronize]
@@ -8,13 +9,13 @@ env:
 
 jobs:
   build-and-test:
+    name: 🎯 Run tests (Node ${{ matrix.node }} / TS ${{ matrix.typescript }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [16, 18]
+        node: [16, 18, 20]
         typescript:
           [
-            "default",
             "~4.6.4",
             "~4.7.4",
             "~4.8.3",
@@ -24,20 +25,21 @@ jobs:
             "~5.2.2",
             "~5.3.3",
             "~5.4.2",
+            "latest",
           ]
-    name: Node ${{ matrix.node }} / TS ${{ matrix.typescript }}
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v3
+      - name: ♻️ Checkout
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          # We need to fetch all branches and commits so that Nx affected has a base to compare against.
           fetch-depth: 0
 
-      - name: Install node_modules
+      - name: 🚚 Install node_modules
         uses: ./.github/actions/install-node-modules
         with:
           node-version: ${{ matrix.node }}
           typescript-version: ${{ matrix.typescript }}
 
-      - name: Run tests
+      - name: 🎯 Run tests
         run: yarn test
