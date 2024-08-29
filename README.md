@@ -1,8 +1,8 @@
 <img src="assets/header-round-medium.png" width="100%" align="center" />
 
-<p align="right">
-  <i>If you use this repo, star it ✨</i>
-</p>
+💖 _Huge thanks to the [sponsors](https://github.com/sponsors/ThomasAribart) who help me maintain this repo:_
+
+<table align="center"><tbody><tr><td align="center"><a href="https://github.com/theodo"><img src="https://github.com/theodo.png" width="80px" alt="Theodo" /><br/><span>Theodo</span></a></td><!-- sponsors --><!-- sponsors --><td align="center"><a href="https://github.com/sponsors/ThomasAribart"><img src="assets/plus-sign.png" width="55px" alt="Plus sign" /></br>Your Brand</br>Here</a></td></tr></tbody></table>
 
 # Stop typing twice 🙅‍♂️
 
