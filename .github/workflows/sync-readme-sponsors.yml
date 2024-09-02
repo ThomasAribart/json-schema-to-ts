@@ -9,11 +9,14 @@ permissions:
   contents: write
 
 jobs:
-  deploy:
+  sync-readme-sponsors:
+    name: 💖 Sync README sponsors
     runs-on: ubuntu-latest
     steps:
       - name: ♻️ Checkout
         uses: actions/checkout@v3
+        with:
+          ref: main
 
       - name: 💖 Sync README sponsors
         uses: JamesIves/github-sponsors-readme-action@v1
