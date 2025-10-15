@@ -463,6 +463,24 @@ type Object = FromSchema<typeof openObjectSchema>;
 // => { [x: string]: unknown }
 ```
 
+- `FromSchema` comes with an `omitAdditionalProperties` option which will cause objects to be always typed as closed (without index signature type):
+
+```typescript
+const openObjectSchema = {
+  type: "object",
+  additionalProperties: true,
+  properties: {
+    foo: { type: "string" },
+  },
+} as const;
+
+type Object = FromSchema<
+  typeof tupleSchema,
+  { omitAdditionalProperties: true }
+>;
+// => { foo?: string }
+```
+
 ## Combining schemas
 
 ### AnyOf

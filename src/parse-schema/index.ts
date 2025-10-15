@@ -47,6 +47,10 @@ export type ParseSchemaOptions = {
    * To override inferred types if some pattern is matched
    */
   deserialize: DeserializationPattern[] | false;
+  /**
+   * Ignore additionalProperties value and always infer closed objects
+   */
+  omitAdditionalProperties: boolean;
 };
 
 /**

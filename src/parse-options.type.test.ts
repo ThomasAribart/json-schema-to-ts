@@ -33,6 +33,7 @@ type ExpectedOptions = {
   deserialize: FromSchemaDefaultOptions["deserialize"];
   rootSchema: RootSchema;
   references: IndexReferencesById<AllReferences>;
+  omitAdditionalProperties: FromSchemaDefaultOptions["omitAdditionalProperties"];
 };
 
 const assertOptions: A.Equals<ReceivedOptions, ExpectedOptions> = 1;

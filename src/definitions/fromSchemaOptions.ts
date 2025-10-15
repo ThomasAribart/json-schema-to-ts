@@ -15,6 +15,7 @@ export type FromSchemaOptions = {
   keepDefaultedPropertiesOptional?: boolean;
   references?: JSONSchemaReference[] | false;
   deserialize?: DeserializationPattern[] | false;
+  omitAdditionalProperties?: boolean;
 };
 
 /**
@@ -26,6 +27,7 @@ export type FromExtendedSchemaOptions<EXTENSION extends JSONSchemaExtension> = {
   keepDefaultedPropertiesOptional?: boolean;
   references?: ExtendedJSONSchemaReference<EXTENSION>[] | false;
   deserialize?: DeserializationPattern[] | false;
+  omitAdditionalProperties?: boolean;
 };
 
 /**
@@ -37,4 +39,5 @@ export type FromSchemaDefaultOptions = {
   keepDefaultedPropertiesOptional: false;
   references: false;
   deserialize: false;
+  omitAdditionalProperties: false;
 };

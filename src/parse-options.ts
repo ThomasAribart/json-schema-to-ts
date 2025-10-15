@@ -43,4 +43,7 @@ export type ParseOptions<
   deserialize: OPTIONS["deserialize"] extends DeserializationPattern[] | false
     ? OPTIONS["deserialize"]
     : FromSchemaDefaultOptions["deserialize"];
+  omitAdditionalProperties: OPTIONS["omitAdditionalProperties"] extends boolean
+    ? OPTIONS["omitAdditionalProperties"]
+    : FromSchemaDefaultOptions["omitAdditionalProperties"];
 };

@@ -168,3 +168,29 @@ type AssertObjectWithDefaultedProperty2 = A.Equals<
 >;
 const assertObjectWithDefaultedProperty2: AssertObjectWithDefaultedProperty2 = 1;
 assertObjectWithDefaultedProperty2;
+
+// With omitAdditionalProperties option
+
+const openObjectSchema2 = {
+  type: "object",
+  additionalProperties: true,
+  properties: {
+    foo: { type: "string" },
+  },
+} as const;
+
+type ReceivedOpenObjectWithOmitAdditionalPropertiesOption = FromSchema<
+  typeof openObjectSchema2,
+  { omitAdditionalProperties: true }
+>;
+type ExpectedOpenObjectWithOmitAdditionalPropertiesOption = {
+  foo?: string;
+};
+
+type AssertOpenObjectWithOmitAdditionalPropertiesOption = A.Equals<
+  ReceivedOpenObjectWithOmitAdditionalPropertiesOption,
+  ExpectedOpenObjectWithOmitAdditionalPropertiesOption
+>;
+
+const assertOpenObjectWithOmitAdditionalPropertiesOption: AssertOpenObjectWithOmitAdditionalPropertiesOption = 1;
+assertOpenObjectWithOmitAdditionalPropertiesOption;

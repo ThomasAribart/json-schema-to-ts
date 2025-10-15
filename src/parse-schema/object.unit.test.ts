@@ -1,3 +1,5 @@
+import { expectTypeOf } from "expect-type";
+
 import type { FromSchema } from "~/index";
 
 import { ajv } from "./ajv.util.test";
@@ -44,6 +46,17 @@ describe("Object schemas", () => {
       // @ts-expect-error
       setInstance = { a: 42 };
       expect(ajv.validate(setSchema, setInstance)).toBe(false);
+    });
+
+    describe("with omitAdditionalProperties option", () => {
+      it("rejects additional properties", () => {
+        type Set2 = FromSchema<
+          typeof setSchema,
+          { omitAdditionalProperties: true }
+        >;
+
+        expectTypeOf<Set2>().toEqualTypeOf<{}>();
+      });
     });
   });
 
@@ -94,6 +107,17 @@ describe("Object schemas", () => {
       // @ts-expect-error
       objInstance = { B: true, S: "str", I: 42, N: null };
       expect(ajv.validate(boolStrOrNumObjSchema, objInstance)).toBe(false);
+    });
+
+    describe("with omitAdditionalProperties option", () => {
+      it("rejects object with boolean value", () => {
+        type Set = FromSchema<
+          typeof boolStrOrNumObjSchema,
+          { omitAdditionalProperties: true }
+        >;
+
+        expectTypeOf<Set>().toEqualTypeOf<{}>();
+      });
     });
   });
 
@@ -286,7 +310,7 @@ describe("Object schemas", () => {
       expect(ajv.validate(addressSchema, addressInstance)).toBe(true);
     });
 
-    it("accepts object with missing required properties", () => {
+    it("rejects object with missing required properties", () => {
       // @ts-expect-error
       addressInstance = {
         number: 13,
@@ -294,6 +318,25 @@ describe("Object schemas", () => {
         streetType: "Avenue",
       };
       expect(ajv.validate(addressSchema, addressInstance)).toBe(false);
+    });
+
+    describe("with omitAdditionalProperties option", () => {
+      it("rejects object with additional properties", () => {
+        type Address2 = FromSchema<
+          typeof addressSchema,
+          { omitAdditionalProperties: true }
+        >;
+
+        const addressInstance2: Address2 = {
+          number: 13,
+          streetName: "Champs Elysées",
+          streetType: "Avenue",
+          direction: "NW",
+          // @ts-expect-error
+          additionalProperty: ["any", "value"],
+        };
+        expect(ajv.validate(addressSchema, addressInstance2)).toBe(true);
+      });
     });
   });
 
@@ -344,6 +387,24 @@ describe("Object schemas", () => {
         direction: 42,
       };
       expect(ajv.validate(addressSchema, addressInstance)).toBe(false);
+    });
+
+    describe("with omitAdditionalProperties option", () => {
+      it("rejects object with valid additional properties", () => {
+        type Address2 = FromSchema<
+          typeof addressSchema,
+          { omitAdditionalProperties: true }
+        >;
+
+        const addressInstance2: Address2 = {
+          number: 13,
+          streetName: "Champs Elysées",
+          streetType: "Avenue",
+          // @ts-expect-error
+          additionalProperty: "additionalProperty",
+        };
+        expect(ajv.validate(addressSchema, addressInstance2)).toBe(true);
+      });
     });
   });
 

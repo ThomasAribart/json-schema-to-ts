@@ -41,13 +41,13 @@ export type ParseObjectSchema<
       },
       GetRequired<OBJECT_SCHEMA, OPTIONS>,
       GetOpenProps<OBJECT_SCHEMA, OPTIONS>,
-      GetClosedOnResolve<OBJECT_SCHEMA>
+      GetClosedOnResolve<OBJECT_SCHEMA, OPTIONS>
     >
   : M.$Object<
       {},
       GetRequired<OBJECT_SCHEMA, OPTIONS>,
       GetOpenProps<OBJECT_SCHEMA, OPTIONS>,
-      GetClosedOnResolve<OBJECT_SCHEMA>
+      GetClosedOnResolve<OBJECT_SCHEMA, OPTIONS>
     >;
 
 /**
@@ -108,8 +108,12 @@ type GetOpenProps<
  * @param OPTIONS Parsing options
  * @returns String
  */
-type GetClosedOnResolve<OBJECT_SCHEMA extends ObjectSchema> =
-  OBJECT_SCHEMA extends Readonly<{ unevaluatedProperties: false }>
+type GetClosedOnResolve<
+  OBJECT_SCHEMA extends ObjectSchema,
+  OPTIONS extends ParseSchemaOptions,
+> = OPTIONS["omitAdditionalProperties"] extends true
+  ? true
+  : OBJECT_SCHEMA extends Readonly<{ unevaluatedProperties: false }>
     ? true
     : false;
 
