@@ -39,6 +39,10 @@ export type JSONSchema =
        */
       $schema?: string | undefined;
       $comment?: string | undefined;
+      /**
+       * @see https://json-schema.org/draft/2020-12/json-schema-core.html#section-8.2.4
+       */
+      $defs?: Readonly<Record<string, JSONSchema>>;
 
       /**
        * @see https://tools.ietf.org/html/draft-handrews-json-schema-validation-01#section-6.1
@@ -114,6 +118,7 @@ export type JSONSchema =
 
       /**
        * @see https://tools.ietf.org/html/draft-handrews-json-schema-validation-01#section-9
+       * @deprecated Use $defs instead (https://json-schema.org/draft/2020-12/json-schema-core#appendix-G-2.6.1.2)
        */
       definitions?: Readonly<Record<string, JSONSchema>>;
 
