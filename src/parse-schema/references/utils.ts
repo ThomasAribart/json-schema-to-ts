@@ -23,7 +23,10 @@ export type ParseReference<
     ? // Tail is needed to remove initial "" from split path
       DeepGet<REFERENCE_SOURCE, Tail<Split<PATH_IN_SOURCE, "/">>, false>
     : REFERENCE_SOURCE,
-> = M.$Intersect<
-  ParseSchema<MATCHING_REFERENCE, OPTIONS>,
-  ParseSchema<MergeSubSchema<MATCHING_REFERENCE, SCHEMA>, OPTIONS>
->;
+> = keyof SCHEMA extends "$ref" | "definitions"
+  ? // Fast path: schema only has $ref (+ definitions), no additional keywords to merge
+    ParseSchema<MATCHING_REFERENCE, OPTIONS>
+  : M.$Intersect<
+      ParseSchema<MATCHING_REFERENCE, OPTIONS>,
+      ParseSchema<MergeSubSchema<MATCHING_REFERENCE, SCHEMA>, OPTIONS>
+    >;

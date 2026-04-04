@@ -17,7 +17,7 @@ describe("FromSchema: $ref-only fast path", () => {
     } as const;
 
     type Result = FromSchema<typeof schema>;
-    attest.instantiations([5787, "instantiations"]);
+    attest.instantiations([2546, "instantiations"]);
     attest<Result>({} as { value: string });
   });
 
@@ -39,7 +39,7 @@ describe("FromSchema: $ref-only fast path", () => {
     } as const;
 
     type Result = FromSchema<typeof schema>;
-    attest.instantiations([7768, "instantiations"]);
+    attest.instantiations([3037, "instantiations"]);
     attest<Result>({} as { a: { b: string } });
   });
 });
@@ -60,7 +60,7 @@ describe("FromSchema: anyOf/oneOf + $ref", () => {
     } as const;
 
     type Result = FromSchema<typeof schema>;
-    attest.instantiations([9026, "instantiations"]);
+    attest.instantiations([5016, "instantiations"]);
     attest<Result>({} as { name: string; admin?: string | null });
   });
 
@@ -91,7 +91,7 @@ describe("FromSchema: anyOf/oneOf + $ref", () => {
     } as const;
 
     type Result = FromSchema<typeof schema>;
-    attest.instantiations([13829, "instantiations"]);
+    attest.instantiations([7014, "instantiations"]);
     const a: Result = { a: { v: "x" } };
     const b: Result = { b: { v: "y" } };
     attest<typeof a>(a);
@@ -126,7 +126,7 @@ describe("FromSchema: $ref + sibling keywords (slow path)", () => {
     } as const;
 
     type Result = FromSchema<typeof schema>;
-    attest.instantiations([7249, "instantiations"]);
+    attest.instantiations([5256, "instantiations"]);
     attest<Result>({} as { person: { firstName: string; lastName: string } });
   });
 });
@@ -191,7 +191,7 @@ describe("FromSchema: exponential blowup reproduction", () => {
     } as const;
 
     type Result = FromSchema<typeof schema>;
-    attest.instantiations([1457245, "instantiations"]);
+    attest.instantiations([11283, "instantiations"]);
     attest<Result>(
       {} as {
         name: string;
