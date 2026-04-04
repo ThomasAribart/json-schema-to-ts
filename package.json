@@ -9,7 +9,7 @@
   "module": "lib/esm/index.js",
   "types": "lib/types/index.d.ts",
   "scripts": {
-    "test": "yarn test-type && yarn test-format && yarn test-unit && yarn test-unused-exports && yarn test-lint",
+    "test": "yarn test-type && yarn test-format && yarn test-unit && yarn test-unused-exports && yarn test-lint && yarn test-bench",
     "test-type": "tsc --noEmit",
     "test-format": "yarn prettier . --check",
     "test-unit": "jest --verbose --runInBand --collectCoverage --logHeapUsage --passWithNoTests",
