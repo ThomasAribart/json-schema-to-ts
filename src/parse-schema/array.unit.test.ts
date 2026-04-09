@@ -101,6 +101,66 @@ describe("Array schemas", () => {
     });
   });
 
+  describe("Bounded Arrays", () => {
+    describe("Fixed-length array (minItems === maxItems)", () => {
+      const fixedArraySchema = {
+        type: "array",
+        items: { type: "string" },
+        minItems: 2,
+        maxItems: 2,
+      } as const;
+
+      type FixedArray = FromSchema<typeof fixedArraySchema>;
+      let fixedArrayInstance: FixedArray;
+
+      it("accepts array with exact length", () => {
+        fixedArrayInstance = ["foo", "bar"];
+        expect(ajv.validate(fixedArraySchema, fixedArrayInstance)).toBe(true);
+      });
+
+      it("rejects array with fewer items", () => {
+        // @ts-expect-error
+        fixedArrayInstance = ["foo"];
+        expect(ajv.validate(fixedArraySchema, fixedArrayInstance)).toBe(false);
+      });
+
+      it("rejects array with more items", () => {
+        // @ts-expect-error
+        fixedArrayInstance = ["foo", "bar", "baz"];
+        expect(ajv.validate(fixedArraySchema, fixedArrayInstance)).toBe(false);
+      });
+
+      it("rejects empty array", () => {
+        // @ts-expect-error
+        fixedArrayInstance = [];
+        expect(ajv.validate(fixedArraySchema, fixedArrayInstance)).toBe(false);
+      });
+    });
+
+    describe("Empty array (minItems === maxItems === 0)", () => {
+      const emptyArraySchema = {
+        type: "array",
+        items: { type: "string" },
+        minItems: 0,
+        maxItems: 0,
+      } as const;
+
+      type EmptyArray = FromSchema<typeof emptyArraySchema>;
+      let emptyArrayInstance: EmptyArray;
+
+      it("accepts empty array", () => {
+        emptyArrayInstance = [];
+        expect(ajv.validate(emptyArraySchema, emptyArrayInstance)).toBe(true);
+      });
+
+      it("rejects non-empty array", () => {
+        // @ts-expect-error
+        emptyArrayInstance = ["foo"];
+        expect(ajv.validate(emptyArraySchema, emptyArrayInstance)).toBe(false);
+      });
+    });
+  });
+
   describe("Tuples", () => {
     const recipeSchema = {
       type: "array",
