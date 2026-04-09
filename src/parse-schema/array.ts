@@ -2,7 +2,7 @@
 import type { M } from "ts-algebra";
 
 import type { JSONSchema } from "~/definitions";
-import type { And, DoesExtend, Not, Tail } from "~/type-utils";
+import type { And, DoesExtend, Not, Repeat, Tail } from "~/type-utils";
 
 import type { ParseSchema, ParseSchemaOptions } from "./index";
 
@@ -55,7 +55,7 @@ export type ParseArrayOrTupleSchema<
   ARRAY_OR_TUPLE_SCHEMA extends ArrayOrTupleSchema,
   OPTIONS extends ParseSchemaOptions,
 > = ARRAY_OR_TUPLE_SCHEMA extends ArraySchema
-  ? M.$Array<ParseSchema<ARRAY_OR_TUPLE_SCHEMA["items"], OPTIONS>>
+  ? ParseArraySchema<ARRAY_OR_TUPLE_SCHEMA, OPTIONS>
   : ARRAY_OR_TUPLE_SCHEMA extends TupleSchema
     ? M.$Union<
         ApplyMinMaxAndAdditionalItems<
@@ -65,6 +65,25 @@ export type ParseArrayOrTupleSchema<
         >
       >
     : M.$Array;
+
+/**
+ * Parses an array schema. When `minItems` equals `maxItems`, generates a
+ * fixed-length tuple type. Otherwise, falls back to `M.$Array`.
+ * @param ARRAY_SCHEMA JSONSchema (array type with single items schema)
+ * @param OPTIONS Parsing options
+ * @returns Meta-type
+ */
+type ParseArraySchema<
+  ARRAY_SCHEMA extends ArraySchema,
+  OPTIONS extends ParseSchemaOptions,
+> = ARRAY_SCHEMA extends Readonly<{
+  minItems: infer MIN extends number;
+  maxItems: infer MAX extends number;
+}>
+  ? MIN extends MAX
+    ? M.$Tuple<Repeat<ParseSchema<ARRAY_SCHEMA["items"], OPTIONS>, MAX>>
+    : M.$Array<ParseSchema<ARRAY_SCHEMA["items"], OPTIONS>>
+  : M.$Array<ParseSchema<ARRAY_SCHEMA["items"], OPTIONS>>;
 
 /**
  * Parses the items of a tuple JSON schema to a meta-type.
